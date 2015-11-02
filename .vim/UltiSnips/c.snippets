@@ -1,0 +1,26 @@
+snippet def
+#define ${1}
+endsnippet
+
+snippet main
+int main(int argc, char *argv[]){
+	${VISUAL}${1}
+	return 0;
+}
+endsnippet
+
+snippet for
+for(${1:i}= 0; $1 < ${2:count}; ${3:$1++}){
+	${VISUAL}${0}
+}
+endsnippet
+
+snippet fun
+${1:void} ${2:function_name}(${3}) {
+	${VISUAL}${0}
+}
+endsnippet
+
+snippet fund
+${1:void} ${2:function_name}(${3});
+endsnippet
