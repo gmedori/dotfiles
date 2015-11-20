@@ -9,12 +9,12 @@ source ~/.git_prompt.sh
 print_pre_prompt () 
 { 
 	PS1R=$PWD
-	if [[ $PS1L/ = "$HOME"/* ]]; then PS1L=\~${PS1L#$HOME}; fi
-	PS1L=$USER@$HOSTNAME
-	printf "\033[1;32;40m%s%$(($COLUMNS-${#PS1L}))s" "$PS1L" "$PS1R"
+	if [[ $PS1R/ = "$HOME"/* ]]; then PS1R=\~${PS1R#$HOME}; fi
+	PS1L=""
+	printf "\033[1;36m%s%$(($COLUMNS-${#PS1L}))s" "$PS1L" "$PS1R"
 }
 PROMPT_COMMAND=print_pre_prompt
-PS1="\u\$(__git_ps1) $ \033[0;37m"
+PS1="\u ○\033[1;33m\$(__git_ps1)\033[1;36m $ \033[0;37m"
 
 #################################
 #	CUSTOM ALIASES
@@ -38,3 +38,11 @@ alias tma='tmux attach -t'
 alias tmn='tmux new -s'
 
 #Git
+alias gs='git status -s'
+alias gl='git pull'
+alias gp='git push'
+alias gf='git fetch'
+alias ga='git add --all && gs'
+alias gc='git commit'
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*

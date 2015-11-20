@@ -28,10 +28,10 @@ nmap } }zz
 nmap { {zz
 
 "quick pairs
-imap <leader>' ''<ESC>i
-imap <leader>" ""<ESC>i
-imap <leader>( ()<ESC>i
-imap <leader>[ []<ESC>i
+"imap <leader>' ''<ESC>i
+"imap <leader>" ""<ESC>i
+"imap <leader>( ()<ESC>i
+"imap <leader>[ []<ESC>i
 imap {<CR> {<CR>}<ESC>O
 
 " replace string contents with recently copied text
