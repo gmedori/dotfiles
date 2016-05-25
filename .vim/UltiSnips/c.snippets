@@ -3,9 +3,11 @@ snippet def
 endsnippet
 
 snippet main
+#include <stdlib.h>
+
 int main(int argc, char *argv[]){
 	${VISUAL}${1}
-	return 0;
+	exit(0);
 }
 endsnippet
 
@@ -21,10 +23,6 @@ ${1:void} ${2:function_name}(${3}) {
 }
 endsnippet
 
-snippet fund
-${1:void} ${2:function_name}(${3});
-endsnippet
-
 snippet while
 while(${1}){
 	${VISUAL}${0}
@@ -37,4 +35,12 @@ endsnippet
 
 snippet pv
 printf("${1} = %${2}\n", $1);${0}
+endsnippet
+
+snippet inc
+#include <${1}>${0}
+endsnippet
+
+snippet incl
+#include "${1}"${0}
 endsnippet

@@ -6,15 +6,7 @@ set -o vi
 
 # Setting Up PS1
 source ~/.git_prompt.sh
-print_pre_prompt () 
-{ 
-	PS1R=$PWD
-	if [[ $PS1R/ = "$HOME"/* ]]; then PS1R=\~${PS1R#$HOME}; fi
-	PS1L=""
-	printf "\033[1;36m%s%$(($COLUMNS-${#PS1L}))s" "$PS1L" "$PS1R"
-}
-PROMPT_COMMAND=print_pre_prompt
-PS1="\u ○\033[1;33m\$(__git_ps1)\033[1;36m $ \033[0;37m"
+PS1="\\[\e[1;36m\\]\W ○\\[\e[1;33m\\]\$(__git_ps1)\\[\e[1;36m\\] $ \\[\e[0;37m\\]"
 
 #################################
 #	CUSTOM ALIASES
@@ -26,6 +18,7 @@ alias ebash='vim ~/.bash_profile'
 alias etmux='vim ~/.tmux.conf'
 alias egit='vim ~/.git'
 alias rld='source ~/.bash_profile'
+alias wiki='vim ~/vimwiki/index.wiki'
 
 #General
 alias ls='ls -G'
@@ -44,5 +37,17 @@ alias gp='git push'
 alias gf='git fetch'
 alias ga='git add --all && gs'
 alias gc='git commit'
+alias gg='git log --graph --oneline --decorate'
+
+#Development
+alias mk='make clean all'
 
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+
+eval "$(rbenv init -)"
+
+# The next line updates PATH for the Google Cloud SDK.
+source '/Users/Freya/Downloads/google-cloud-sdk/path.bash.inc'
+
+# The next line enables shell command completion for gcloud.
+source '/Users/Freya/Downloads/google-cloud-sdk/completion.bash.inc'

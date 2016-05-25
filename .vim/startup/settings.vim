@@ -1,7 +1,6 @@
 "============== General Settings ===============
 set dict=/usr/share/dict/words
 set cursorline
-set showcmd
 set ruler
 set incsearch
 set wildmenu
@@ -33,9 +32,6 @@ set nocompatible
 
 set splitbelow
 set splitright
-
-" Hack to make sql in php hilighting suck less
-let sql_type_default = 'sqlanywhere'
 
 set enc=utf-8
 set fillchars=vert:¦
@@ -83,3 +79,9 @@ let g:indent_guides_guide_size = 1
 "
 let g:gitgutter_sign_modified = '≈ '
 let g:gitgutter_sign_removed = '⌐ '
+
+set showcmd
+
+set hlsearch
+
+set nrformats+=alpha
