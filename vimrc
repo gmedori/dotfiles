@@ -10,6 +10,8 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
+Plugin 'xolox/vim-misc'
+Plugin 'xolox/vim-notes'
 Plugin 'dag/vim-fish'
 Plugin 'vimwiki/vimwiki'
 Plugin 'gabrielelana/vim-markdown'
@@ -51,6 +53,12 @@ filetype indent on
 "============== Script configs ===============
 let NERDTreeMinimalUI=1
 let NERDTreeDirArrows=1
+
+"============== Vim Wiki configs ===============
+let wiki = {}
+let wiki.path = '~/vimwiki/'
+let wiki.nested_syntaxes = {'python': 'python', 'c': 'c', 'sml': 'sml'}
+let g:vimwiki_list = [wiki]
 
 "============== Vim Notes Setup ===============
 let g:notes_directories = ['~/notes/']

@@ -85,3 +85,5 @@ set showcmd
 set hlsearch
 
 set nrformats+=alpha
+
+set nofoldenable

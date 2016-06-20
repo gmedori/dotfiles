@@ -40,6 +40,13 @@ alias mk 'make clean all'
 #Remap ctrl-j
 bind -k f7 down-or-search
 
+#################################
+#	PATH
+#################################
+set GRADLE_HOME /usr/local/gradle-2.13
+set SML_HOME /usr/local/smlnj
+set PATH $GRADLE_HOME/bin $SML_HOME/bin $PATH
+
 #[[ -s "$HOME/.rvm/scripts/rvm" ]]; and source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 #
 #eval "(rbenv init -)"
