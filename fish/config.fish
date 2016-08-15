@@ -1,4 +1,4 @@
-setenv EDITOR "vim"
+setenv EDITOR "nvim"
 
 fish_vi_mode
 
