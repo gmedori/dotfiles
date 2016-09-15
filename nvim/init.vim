@@ -21,9 +21,6 @@ Plug 'scrooloose/nerdtree'
 Plug 'itchyny/lightline.vim'
 Plug 'edkolev/tmuxline.vim'
 
-" For super useful self-defined autocompletion
-Plug 'SirVer/ultisnips'
-
 " For pretty colors
 Plug 'morhetz/gruvbox'
 
@@ -36,25 +33,38 @@ Plug 'dag/vim-fish'
 " For linting stuff
 Plug 'neomake/neomake'
 
+" For writing latex, because it's better in nvim
+Plug 'lervag/vimtex'
+
+" For snippets. Because snippets.
+Plug 'Shougo/neosnippet'
+
 call plug#end()
 
-"============== Ultisnips Setup ==============
-let g:UltiSnipsExpandTrigger="<TAB>"
-let g:UltiSnipsJumpForwardTrigger="<TAB>"
-let g:UltiSnipsJumpBackwardTrigger="<S-TAB>"
-let g:UltiSnipsEditSplit="vertical"
+"============== Deoplete Setup ==============
+let g:deoplete#enable_at_startup = 1
+
+"============== Neosnippet Setup ==============
+let g:neosnippet#snippets_directory = '~/.config/nvim/snippets'
+let g:neosnippet#disable_runtime_snippets = { '_' : 1, }
+
+imap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 
 "============== Latex Stuff ===============
 let g:tex_flavor='latex'
+let g:tex_conceal=""
 
 "============== Vim Wiki configs ===============
 let wiki = {}
-let wiki.path = '$HOME/wiki/vimwiki'
-let wiki.template_path = '$HOME/wiki/vimwiki/templates'
+let wiki.path = '$HOME/code/wiki/vimwiki'
+let wiki.template_path = '$HOME/code/wiki/vimwiki/templates'
 let wiki.template_default = 'default'
 let wiki.template_ext = '.html'
-let wiki.nested_syntaxes = {'python': 'python', 'c': 'c', 'sml': 'sml'}
+let wiki.nested_syntaxes = {'python': 'python', 'c': 'c', 'sml': 'sml', 'markdown': 'markdown', 'bash': 'bash', 'text': 'text'}
 let g:vimwiki_list = [wiki]
+let g:vimwiki_valid_html_tags = 'p,blockquote,span'
+"let g:vimwiki_conceallevel=0
 
 "============== Lightline Configs ===============
 let g:lightline = {
@@ -68,7 +78,6 @@ let g:lightline = {
 "============== Gruvbox Configs ===============
 colorscheme gruvbox
 set background=dark
-let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 
 "============== DevIcons Configs ===============
 function! MyFiletype()
@@ -182,3 +191,5 @@ set encoding=utf-8
 " Center the damn cursor
 let &scrolloff=999
 
+" Enable true color support
+set termguicolors

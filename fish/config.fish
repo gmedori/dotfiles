@@ -1,6 +1,6 @@
 setenv EDITOR "nvim"
 
-fish_vi_mode
+fish_vi_key_bindings
 
 #################################
 #	CUSTOM ALIASES
@@ -8,13 +8,13 @@ fish_vi_mode
 
 #Editing configs
 alias vim 'nvim'
-alias evim 'vim ~/.config/nvim/init.vim'
-alias ebash 'vim ~/.bash_profile'
-alias efish 'vim ~/.config/fish/config.fish'
-alias etmux 'vim ~/.tmux.conf'
-alias egit 'vim ~/.git'
+alias evim 'nvim ~/.config/nvim/init.vim'
+alias ebash 'nvim ~/.bash_profile'
+alias efish 'nvim ~/.config/fish/config.fish'
+alias etmux 'nvim ~/.tmux.conf'
+alias egit 'nvim ~/.git'
 alias rld 'source ~/.config/fish/config.fish'
-alias wiki 'vim ~/vimwiki/index.wiki'
+alias wiki 'nvim +VimwikiIndex'
 
 #General
 alias ls 'ls -G'
@@ -27,14 +27,17 @@ alias tma 'tmux attach -t'
 alias tmn 'tmux new -s'
 
 #Git
-alias gs 'git status -s'
-alias gl 'git pull'
-alias gp 'git push'
-alias gf 'git fetch'
-alias ga 'git add --all; and gs'
-alias gc 'git commit'
-alias gg 'git log --graph --oneline --decorate'
-alias gd 'git diff'
+alias gs  'git status -s'
+alias gl  'git pull'
+alias gp  'git push'
+alias gf  'git fetch'
+alias ga  'git add --all; and gs'
+alias gc  'git commit'
+alias gg  'git log --graph --oneline --decorate'
+alias gd  'git diff'
+alias go  'git checkout'
+alias gb  'git branch'
+alias gob 'git checkout -b'
 
 #Development
 alias mk 'make clean all'
