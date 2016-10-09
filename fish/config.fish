@@ -35,15 +35,19 @@ alias ga  'git add --all; and gs'
 alias gc  'git commit'
 alias gg  'git log --graph --oneline --decorate'
 alias gd  'git diff'
-alias go  'git checkout'
+alias gk  'git checkout'
 alias gb  'git branch'
-alias gob 'git checkout -b'
+alias gkb 'git checkout -b'
 
 #Development
 alias mk 'make clean all'
 
 #Remap ctrl-j
 bind -k f7 down-or-search
+
+function fish_mode_prompt; end
+
+set fish_color_search_match --background=8A8A8A
 
 function fish_prompt --description 'Write out the prompt'
 	set -l last_status $status
@@ -53,7 +57,15 @@ function fish_prompt --description 'Write out the prompt'
 	end
 
 	# PWD
-	set_color 00E2FF
+	switch $fish_bind_mode
+		case insert
+			set_color 00E2FF
+		case default
+			set_color FFFA75
+		case visual
+			set_color FF955C
+	end
+
 	echo -n (basename $PWD)
 	set_color 63FF00
 

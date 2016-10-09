@@ -39,6 +39,12 @@ Plug 'lervag/vimtex'
 " For snippets. Because snippets.
 Plug 'Shougo/neosnippet'
 
+" For making things look pretty and formatted
+Plug 'godlygeek/tabular'
+
+" For seeing all the different buffers, because fuck tabs (I think)
+Plug 'bling/vim-bufferline'
+
 call plug#end()
 
 "============== Deoplete Setup ==============
@@ -68,12 +74,18 @@ let g:vimwiki_valid_html_tags = 'p,blockquote,span'
 
 "============== Lightline Configs ===============
 let g:lightline = {
-      \ 'colorscheme': 'gruvbox',
-      \ 'component_function': {
-      \   'filetype': 'MyFiletype',
-      \   'fileformat': 'MyFileformat',
-      \ }
-      \ }
+			\ 'active': {
+			\	'left': [ [ 'mode', 'paste' ], [ 'filename' ], [ 'bufferline' ] ],
+			\ },
+			\ 'component': {
+			\   'bufferline': '%{bufferline#refresh_status()}%{g:bufferline_status_info.before . g:bufferline_status_info.current . g:bufferline_status_info.after}'
+			\ },
+			\ 'colorscheme': 'gruvbox',
+			\ 'component_function': {
+			\   'filetype': 'MyFiletype',
+			\   'fileformat': 'MyFileformat',
+			\ }
+			\ }
 
 "============== Gruvbox Configs ===============
 colorscheme gruvbox
@@ -193,3 +205,6 @@ let &scrolloff=999
 
 " Enable true color support
 set termguicolors
+
+" Recursive search for files
+set path+=**
