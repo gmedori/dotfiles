@@ -153,6 +153,7 @@ map <C-=> <C-W>=
 autocmd Filetype tex,latex nmap <Leader>p :!pdflatex %<CR><CR>
 autocmd Filetype tex,latex nmap <Leader><S-P> :!pdflatex %<CR>
 autocmd Filetype tex,latex nmap <Leader>o :!open %<.pdf<CR><CR>
+autocmd Filetype tex,latex nmap <Leader>mk :!make clean pdf<CR>
 
 nnoremap <Space> :nohlsearch<CR>
 
