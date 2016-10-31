@@ -20,6 +20,7 @@ alias wiki 'nvim +VimwikiIndex'
 alias ls 'ls -G'
 alias l 'ls -Flh'
 alias la 'ls -AFlh'
+alias cdc 'cd ~/code'
 
 #Tmux
 alias tml 'tmux list-sessions'
@@ -49,6 +50,24 @@ function fish_mode_prompt; end
 
 set fish_color_search_match --background=8A8A8A
 
+function fish_right_prompt --description 'Write out the right prompt'
+
+	if not set -q __fish_prompt_normal
+		set -g __fish_prompt_normal (set_color normal)
+	end
+
+	# PWD
+	set directory (echo $PWD | sed -e "s|^$HOME|~|")
+	echo -n "[ $directory ]"
+
+	set_color 63FF00
+
+	printf '%s ' (__fish_git_prompt)
+
+
+	set_color normal
+end
+
 function fish_prompt --description 'Write out the prompt'
 	set -l last_status $status
 
@@ -56,7 +75,6 @@ function fish_prompt --description 'Write out the prompt'
 		set -g __fish_prompt_normal (set_color normal)
 	end
 
-	# PWD
 	switch $fish_bind_mode
 		case insert
 			set_color 00E2FF
@@ -66,12 +84,7 @@ function fish_prompt --description 'Write out the prompt'
 			set_color FF955C
 	end
 
-	echo -n (basename $PWD)
-	set_color 63FF00
-
-	printf '%s ' (__fish_git_prompt)
-
-	set_color normal
+	echo -n '' (whoami) ''
 
 	if not test $last_status -eq 0
 		set_color FF1C00
