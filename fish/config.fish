@@ -40,11 +40,11 @@ alias gk  'git checkout'
 alias gb  'git branch'
 alias gkb 'git checkout -b'
 
+#Task Warrior
+alias os 'task add project:os'
+
 #Development
 alias mk 'make clean all'
-
-#Remap ctrl-j
-bind -k f7 down-or-search
 
 function fish_mode_prompt; end
 
@@ -94,5 +94,12 @@ function fish_prompt --description 'Write out the prompt'
 
 	set_color normal
 end
+
+function vimf --description 'Fuzzy file opener for vim'
+	if fzf > $TMPDIR/fzf.result
+		vim (cat $TMPDIR/fzf.result)
+	end
+end
+
 eval (thefuck --alias | tr '\n' ';')
 rvm default

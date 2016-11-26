@@ -17,9 +17,8 @@ Plug 'vimwiki/vimwiki'
 " For navigating my project structure in the way that I'm used to with IDEs
 Plug 'scrooloose/nerdtree'
 
-" Because it's pretty
-Plug 'itchyny/lightline.vim'
-Plug 'edkolev/tmuxline.vim'
+" For making pretty status bars
+Plug 'vim-airline/vim-airline'
 
 " For pretty colors
 Plug 'morhetz/gruvbox'
@@ -42,8 +41,17 @@ Plug 'Shougo/neosnippet'
 " For making things look pretty and formatted
 Plug 'godlygeek/tabular'
 
-" For seeing all the different buffers, because fuck tabs (I think)
-Plug 'bling/vim-bufferline'
+" For no more accidental empty files
+Plug 'EinfachToll/DidYouMean'
+
+" For knowing wtf I'm doing with everything
+Plug 'rizzatti/dash.vim'
+
+" For fuzzy file finding!
+Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
+
+" For git stuff from within vim
+Plug 'tpope/vim-fugitive'
 
 call plug#end()
 
@@ -72,21 +80,6 @@ let g:vimwiki_list = [wiki]
 let g:vimwiki_valid_html_tags = 'p,blockquote,span'
 "let g:vimwiki_conceallevel=0
 
-"============== Lightline Configs ===============
-let g:lightline = {
-			\ 'active': {
-			\	'left': [ [ 'mode', 'paste' ], [ 'filename' ], [ 'bufferline' ] ],
-			\ },
-			\ 'component': {
-			\   'bufferline': '%{bufferline#refresh_status()}%{g:bufferline_status_info.before . g:bufferline_status_info.current . g:bufferline_status_info.after}'
-			\ },
-			\ 'colorscheme': 'gruvbox',
-			\ 'component_function': {
-			\   'filetype': 'MyFiletype',
-			\   'fileformat': 'MyFileformat',
-			\ }
-			\ }
-
 "============== Gruvbox Configs ===============
 colorscheme gruvbox
 set background=dark
@@ -99,6 +92,12 @@ endfunction
 function! MyFileformat()
   return winwidth(0) > 70 ? (&fileformat . ' ' . WebDevIconsGetFileFormatSymbol()) : ''
 endfunction
+
+"============== Vim-Airline Configs ===============
+let g:airline_left_sep=''
+let g:airline_right_sep=''
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#fnamemod = ':t'
 
 "============== Neomake Configs ===============
 autocmd! BufWritePost,BufEnter * Neomake
