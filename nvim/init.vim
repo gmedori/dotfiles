@@ -53,6 +53,9 @@ Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
 " For git stuff from within vim
 Plug 'tpope/vim-fugitive'
 
+" For KOTLIN
+Plug 'udalov/kotlin-vim'
+
 call plug#end()
 
 "============== Deoplete Setup ==============
@@ -156,6 +159,9 @@ autocmd Filetype tex,latex nmap <Leader>mk :!make clean pdf<CR>
 
 nnoremap <Space> :nohlsearch<CR>
 
+"fugitive shortcuts
+nmap <Leader>gs :Gstatus<CR>
+
 "=======================================
 "============== Settings ===============
 "=======================================
@@ -208,3 +214,6 @@ set termguicolors
 
 " Recursive search for files
 set path+=**
+
+" See commands as you're inputting them
+set showcmd
