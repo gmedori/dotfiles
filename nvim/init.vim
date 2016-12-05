@@ -9,7 +9,7 @@ endif
 call plug#begin()
 
 " For automatically inserting pairs of quotes, brackets, etc.
-Plug 'jiangmiao/auto-pairs'
+" Plug 'jiangmiao/auto-pairs'
 
 " For keeping my work (and life) organized
 Plug 'vimwiki/vimwiki'
@@ -22,6 +22,9 @@ Plug 'vim-airline/vim-airline'
 
 " For pretty colors
 Plug 'morhetz/gruvbox'
+
+" For more pretty colors
+Plug 'jonathanfilip/vim-lucius'
 
 " For pretty glyphs
 Plug 'ryanoasis/vim-devicons'
@@ -55,6 +58,9 @@ Plug 'tpope/vim-fugitive'
 
 " For KOTLIN
 Plug 'udalov/kotlin-vim'
+
+" For pretty tmux colors
+Plug 'edkolev/tmuxline.vim'
 
 call plug#end()
 
