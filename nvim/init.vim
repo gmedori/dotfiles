@@ -9,7 +9,7 @@ endif
 call plug#begin()
 
 " For automatically inserting pairs of quotes, brackets, etc.
-" Plug 'jiangmiao/auto-pairs'
+Plug 'jiangmiao/auto-pairs'
 
 " For keeping my work (and life) organized
 Plug 'vimwiki/vimwiki'
