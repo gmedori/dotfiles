@@ -60,7 +60,16 @@ Plug 'tpope/vim-fugitive'
 Plug 'udalov/kotlin-vim'
 
 " For pretty tmux colors
-Plug 'edkolev/tmuxline.vim'
+" Plug 'edkolev/tmuxline.vim'
+
+" For making sure typescript don't look like shit
+Plug 'leafgarland/typescript-vim'
+
+" For a bunch of pretty colorschemes
+Plug 'chriskempson/base16-vim'
+
+" For moar color
+Plug 'KeitaNakamura/neodark.vim'
 
 call plug#end()
 
@@ -89,9 +98,8 @@ let g:vimwiki_list = [wiki]
 let g:vimwiki_valid_html_tags = 'p,blockquote,span'
 "let g:vimwiki_conceallevel=0
 
-"============== Gruvbox Configs ===============
-colorscheme gruvbox
-set background=dark
+"============== Colorscheme Configs ===============
+colorscheme neodark
 
 "============== DevIcons Configs ===============
 function! MyFiletype()
