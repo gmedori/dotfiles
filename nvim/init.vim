@@ -71,6 +71,12 @@ Plug 'chriskempson/base16-vim'
 " For moar color
 Plug 'KeitaNakamura/neodark.vim'
 
+" For coding in Swift
+Plug 'keith/swift.vim'
+
+" For easy viewing git status in vim
+Plug 'airblade/vim-gitgutter'
+
 call plug#end()
 
 "============== Deoplete Setup ==============
