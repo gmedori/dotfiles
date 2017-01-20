@@ -214,7 +214,7 @@ set number
 set list listchars=tab:› ,trail:-,extends:>,precedes:<,eol:¬
 
 " TAB MADNESS
-set tabstop=4 softtabstop=4 shiftwidth=4 noexpandtab
+set tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 
 " Creates the dropdown menu for autocompletion
 set completeopt=menu
