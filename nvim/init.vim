@@ -77,10 +77,19 @@ Plug 'keith/swift.vim'
 " For easy viewing git status in vim
 Plug 'airblade/vim-gitgutter'
 
+" For writing Markdown
+Plug 'gabrielelana/vim-markdown'
+
+" For moar moar color
+Plug 'tyrannicaltoucan/vim-deep-space'
+
+" For not shitty html
+Plug 'mattn/emmet-vim'
+
 call plug#end()
 
-"============== Deoplete Setup ==============
-let g:deoplete#enable_at_startup = 1
+"============== Vim Markdown Setup ==============
+let g:markdown_mapping_switch_status = '<Leader>s'
 
 "============== Neosnippet Setup ==============
 let g:neosnippet#snippets_directory = '~/.config/nvim/snippets'
@@ -100,12 +109,20 @@ let wiki.template_path = '$HOME/code/wiki/vimwiki/templates'
 let wiki.template_default = 'default'
 let wiki.template_ext = '.html'
 let wiki.nested_syntaxes = {'python': 'python', 'c': 'c', 'sml': 'sml', 'markdown': 'markdown', 'bash': 'bash', 'text': 'text'}
-let g:vimwiki_list = [wiki]
+
+let privateWiki = {}
+let privateWiki.path = '$HOME/code/private-wiki/vimwiki'
+let privateWiki.template_path = '$HOME/code/wiki/vimwiki/templates'
+let privateWiki.template_default = 'default'
+let privateWiki.template_ext = '.html'
+let privateWiki.nested_syntaxes = {'c':'c'}
+
+let g:vimwiki_list = [wiki, privateWiki]
 let g:vimwiki_valid_html_tags = 'p,blockquote,span'
-"let g:vimwiki_conceallevel=0
 
 "============== Colorscheme Configs ===============
-colorscheme neodark
+colorscheme gruvbox
+set background=dark
 
 "============== DevIcons Configs ===============
 function! MyFiletype()
