@@ -62,7 +62,8 @@ function fish_right_prompt --description 'Write out the right prompt'
 	set directory (echo $PWD | sed -e "s|^$HOME|~|")
 	echo -n "[ $directory ]"
 
-	set_color 63FF00
+    #set_color 63FF00
+    set_color green
 
 	printf '%s ' (__fish_git_prompt)
 
@@ -79,17 +80,21 @@ function fish_prompt --description 'Write out the prompt'
 
 	switch $fish_bind_mode
 		case insert
-			set_color 00E2FF
+            #set_color 00E2FF
+            set_color cyan
 		case default
-			set_color FFFA75
+            #set_color FFFA75
+            set_color yellow
 		case visual
-			set_color FF955C
+            #set_color FF955C
+            set_color magenta
 	end
 
 	echo -n '' (whoami) ''
 
 	if not test $last_status -eq 0
-		set_color FF1C00
+        #set_color FF1C00
+        set_color red
 	end
 
 	echo -n '><> '

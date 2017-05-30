@@ -78,7 +78,7 @@ Plug 'keith/swift.vim'
 Plug 'airblade/vim-gitgutter'
 
 " For writing Markdown
-Plug 'gabrielelana/vim-markdown'
+" Plug 'gabrielelana/vim-markdown'
 
 " For moar moar color
 Plug 'tyrannicaltoucan/vim-deep-space'
@@ -89,7 +89,7 @@ Plug 'mattn/emmet-vim'
 call plug#end()
 
 "============== Vim Markdown Setup ==============
-let g:markdown_mapping_switch_status = '<Leader>s'
+" let g:markdown_mapping_switch_status = '<Leader>s'
 
 "============== Neosnippet Setup ==============
 let g:neosnippet#snippets_directory = '~/.config/nvim/snippets'
@@ -105,10 +105,12 @@ let g:tex_conceal=""
 "============== Vim Wiki configs ===============
 let wiki = {}
 let wiki.path = '$HOME/code/wiki/vimwiki'
+let wiki.syntax = 'markdown'
+let wiki.ext = '.md'
 let wiki.template_path = '$HOME/code/wiki/vimwiki/templates'
 let wiki.template_default = 'default'
 let wiki.template_ext = '.html'
-let wiki.nested_syntaxes = {'python': 'python', 'c': 'c', 'sml': 'sml', 'markdown': 'markdown', 'bash': 'bash', 'text': 'text'}
+let wiki.nested_syntaxes = {'python': 'python', 'c': 'c', 'sml': 'sml', 'bash': 'bash', 'text': 'text'}
 
 let privateWiki = {}
 let privateWiki.path = '$HOME/code/private-wiki/vimwiki'
@@ -187,6 +189,10 @@ nmap <Leader>== gg=G''
 
 "Equalize splits
 map <C-=> <C-W>=
+
+"Move between buffers easily
+nmap <Leader><right> :bn<CR>
+nmap <Leader><left> :bp<CR>
 
 "compile and view latex files.
 autocmd Filetype tex,latex nmap <Leader>p :!pdflatex %<CR><CR>
