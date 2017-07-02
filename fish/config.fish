@@ -29,8 +29,8 @@ alias ls 'ls -G'
 alias l 'ls -Flh'
 alias la 'ls -AFlh'
 alias cdc 'cd ~/code'
-aliad cdg 'cd ~/code/go/src'
-aliad cds 'cd ~/scratchpad'
+alias cdg 'cd ~/code/go/src'
+alias cds 'cd ~/scratchpad'
 
 #Tmux
 alias tml 'tmux list-sessions'
