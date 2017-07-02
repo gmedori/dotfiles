@@ -110,7 +110,4 @@ end
 
 eval (thefuck --alias | tr '\n' ';')
 
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/mjolnir/Downloads/google-cloud-sdk/path.fish.inc' ]; if type source > /dev/null; source '/Users/mjolnir/Downloads/google-cloud-sdk/path.fish.inc'; else; . '/Users/mjolnir/Downloads/google-cloud-sdk/path.fish.inc'; end; end
-
 rvm default
