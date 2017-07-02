@@ -11,9 +11,6 @@ call plug#begin()
 " For automatically inserting pairs of quotes, brackets, etc.
 Plug 'jiangmiao/auto-pairs'
 
-" For keeping my work (and life) organized
-Plug 'vimwiki/vimwiki'
-
 " For navigating my project structure in the way that I'm used to with IDEs
 Plug 'scrooloose/nerdtree'
 
@@ -47,49 +44,32 @@ Plug 'godlygeek/tabular'
 " For no more accidental empty files
 Plug 'EinfachToll/DidYouMean'
 
-" For knowing wtf I'm doing with everything
-Plug 'rizzatti/dash.vim'
-
 " For fuzzy file finding!
 Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
 
 " For git stuff from within vim
 Plug 'tpope/vim-fugitive'
 
-" For KOTLIN
-Plug 'udalov/kotlin-vim'
-
-" For pretty tmux colors
-" Plug 'edkolev/tmuxline.vim'
-
-" For making sure typescript don't look like shit
-Plug 'leafgarland/typescript-vim'
-
-" For a bunch of pretty colorschemes
-Plug 'chriskempson/base16-vim'
-
 " For moar color
 Plug 'KeitaNakamura/neodark.vim'
-
-" For coding in Swift
-Plug 'keith/swift.vim'
 
 " For easy viewing git status in vim
 Plug 'airblade/vim-gitgutter'
 
-" For writing Markdown
-" Plug 'gabrielelana/vim-markdown'
-
 " For moar moar color
 Plug 'tyrannicaltoucan/vim-deep-space'
 
-" For not shitty html
-Plug 'mattn/emmet-vim'
+" For strong Golang support
+Plug 'fatih/vim-go'
+
+" For a fancy start screen
+Plug 'mhinz/vim-startify'
 
 call plug#end()
 
-"============== Vim Markdown Setup ==============
-" let g:markdown_mapping_switch_status = '<Leader>s'
+
+"============== Vim-Go Setup ==============
+let g:go_fmt_command = "goimports"
 
 "============== Neosnippet Setup ==============
 let g:neosnippet#snippets_directory = '~/.config/nvim/snippets'
@@ -102,28 +82,8 @@ smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expan
 let g:tex_flavor='latex'
 let g:tex_conceal=""
 
-"============== Vim Wiki configs ===============
-let wiki = {}
-let wiki.path = '$HOME/code/wiki/vimwiki'
-let wiki.syntax = 'markdown'
-let wiki.ext = '.md'
-let wiki.template_path = '$HOME/code/wiki/vimwiki/templates'
-let wiki.template_default = 'default'
-let wiki.template_ext = '.html'
-let wiki.nested_syntaxes = {'python': 'python', 'c': 'c', 'sml': 'sml', 'bash': 'bash', 'text': 'text'}
-
-let privateWiki = {}
-let privateWiki.path = '$HOME/code/private-wiki/vimwiki'
-let privateWiki.template_path = '$HOME/code/wiki/vimwiki/templates'
-let privateWiki.template_default = 'default'
-let privateWiki.template_ext = '.html'
-let privateWiki.nested_syntaxes = {'c':'c'}
-
-let g:vimwiki_list = [wiki, privateWiki]
-let g:vimwiki_valid_html_tags = 'p,blockquote,span'
-
 "============== Colorscheme Configs ===============
-colorscheme gruvbox
+colorscheme deep-space
 set background=dark
 
 "============== DevIcons Configs ===============

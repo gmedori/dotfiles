@@ -3,6 +3,13 @@ setenv EDITOR "nvim"
 fish_vi_key_bindings
 
 #################################
+#	ENVIRONMENT VARIABLES
+#################################
+
+setenv GOPATH /Users/mjolnir/code/go
+setenv PATH $PATH $GOPATH/bin
+
+#################################
 #	CUSTOM ALIASES
 #################################
 
@@ -22,6 +29,8 @@ alias ls 'ls -G'
 alias l 'ls -Flh'
 alias la 'ls -AFlh'
 alias cdc 'cd ~/code'
+aliad cdg 'cd ~/code/go/src'
+aliad cds 'cd ~/scratchpad'
 
 #Tmux
 alias tml 'tmux list-sessions'
