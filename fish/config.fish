@@ -63,16 +63,15 @@ set fish_color_search_match --background=8A8A8A
 
 function fish_right_prompt --description 'Write out the right prompt'
 
+    set_color green
+
+	printf '%s ' (__fish_git_prompt)
+
     set_color yellow
 
 	# PWD
 	set directory (echo $PWD | sed -e "s|^$HOME|~|")
 	echo -n "[ $directory ]"
-
-    set_color green
-
-	printf '%s ' (__fish_git_prompt)
-
 
 	set_color normal
 end
