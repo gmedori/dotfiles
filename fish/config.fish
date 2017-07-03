@@ -63,15 +63,12 @@ set fish_color_search_match --background=8A8A8A
 
 function fish_right_prompt --description 'Write out the right prompt'
 
-	if not set -q __fish_prompt_normal
-		set -g __fish_prompt_normal (set_color normal)
-	end
+    set_color yellow
 
 	# PWD
 	set directory (echo $PWD | sed -e "s|^$HOME|~|")
 	echo -n "[ $directory ]"
 
-    #set_color 63FF00
     set_color green
 
 	printf '%s ' (__fish_git_prompt)
@@ -89,13 +86,10 @@ function fish_prompt --description 'Write out the prompt'
 
 	switch $fish_bind_mode
 		case insert
-            #set_color 00E2FF
             set_color cyan
 		case default
-            #set_color FFFA75
             set_color yellow
 		case visual
-            #set_color FF955C
             set_color magenta
 	end
 
