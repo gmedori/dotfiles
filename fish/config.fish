@@ -57,6 +57,29 @@ alias os 'task add project:os'
 #Development
 alias mk 'make clean all'
 
+#################################
+#	COLORS
+#################################
+
+set fish_color_normal white
+set fish_color_command blue
+set fish_color_param cyan
+set fish_color_quote yellow
+set fish_color_redirection blue
+set fish_color_end cyan
+set fish_color_error red
+set fish_color_comment magenta
+set fish_color_match green
+set fish_color_search_match green
+set fish_color_operator green
+set fish_color_escape yellow
+set fish_color_autosuggestion A0A0A0
+set fish_color_cancel white
+
+#################################
+#	FUNCTIONS
+#################################
+
 function fish_mode_prompt; end
 
 set fish_color_search_match --background=8A8A8A
