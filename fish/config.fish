@@ -62,8 +62,8 @@ alias mk 'make clean all'
 #################################
 
 set fish_color_normal white
-set fish_color_command blue
-set fish_color_param cyan
+set fish_color_command white
+set fish_color_param brwhite
 set fish_color_quote yellow
 set fish_color_redirection blue
 set fish_color_end cyan
@@ -86,10 +86,11 @@ set fish_color_search_match --background=8A8A8A
 
 function fish_right_prompt --description 'Write out the right prompt'
 
-    set_color green
+    set_color red --bold
 
 	printf '%s ' (__fish_git_prompt)
 
+	set_color normal
     set_color yellow
 
 	# PWD
@@ -108,7 +109,7 @@ function fish_prompt --description 'Write out the prompt'
 
 	switch $fish_bind_mode
 		case insert
-            set_color cyan
+            set_color green
 		case default
             set_color yellow
 		case visual

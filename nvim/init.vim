@@ -65,6 +65,12 @@ Plug 'fatih/vim-go'
 " For a fancy start screen
 Plug 'mhinz/vim-startify'
 
+" For a simpler color theme
+Plug 'rakr/vim-two-firewatch'
+
+" For da bad wolf
+Plug 'sjl/badwolf'
+
 call plug#end()
 
 
@@ -83,8 +89,8 @@ let g:tex_flavor='latex'
 let g:tex_conceal=""
 
 "============== Colorscheme Configs ===============
-colorscheme deep-space
-set background=dark
+set background = "dark"
+colorscheme badwolf
 
 "============== DevIcons Configs ===============
 function! MyFiletype()
@@ -111,6 +117,15 @@ let g:neomake_error_sign = {
 	\ 'text': 'X',
 	\ 'texthl': 'GruvboxRedBold'
 	\ }
+
+"============== Color Inspector ===============
+nmap <C-F> :call <SID>SymbStack()<CR>
+function! <SID>SymbStack()
+    if !exists("*synstack")
+    return
+  endif
+  echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+endfunction
 
 "=======================================
 "============== Mappings ===============
@@ -168,7 +183,6 @@ nmap <Leader>gs :Gstatus<CR>
 "=======================================
 "============== Settings ===============
 "=======================================
-
 
 " Makes cursor line visible
 set cursorline
