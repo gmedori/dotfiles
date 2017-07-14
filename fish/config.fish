@@ -63,7 +63,7 @@ alias mk 'make clean all'
 
 set fish_color_normal white
 set fish_color_command white
-set fish_color_param brwhite
+set fish_color_param cyan
 set fish_color_quote yellow
 set fish_color_redirection blue
 set fish_color_end cyan
