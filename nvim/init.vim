@@ -71,8 +71,14 @@ Plug 'rakr/vim-two-firewatch'
 " For da bad wolf
 Plug 'sjl/badwolf'
 
+" For autocompletion
+Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+Plug 'zchee/deoplete-go', { 'do': 'make'}
+
 call plug#end()
 
+"============== Deoplete Setup ==============
+let g:deoplete#enable_at_startup = 1
 
 "============== Vim-Go Setup ==============
 let g:go_fmt_command = "goimports"
