@@ -14,23 +14,24 @@ setenv PATH $PATH $GOPATH/bin
 #################################
 
 #Editing configs
-abbr vim 'nvim'
-abbr evim 'nvim ~/.config/nvim/init.vim'
+abbr vim   'nvim'
+abbr evim  'nvim ~/.config/nvim/init.vim'
 abbr ebash 'nvim ~/.bash_profile'
 abbr efish 'nvim ~/.config/fish/config.fish'
 abbr etmux 'nvim ~/.tmux.conf'
-abbr egit 'nvim ~/.git'
-abbr rld 'source ~/.config/fish/config.fish'
-abbr wiki 'nvim +VimwikiIndex'
+abbr egit  'nvim ~/.git'
+abbr rld   'source ~/.config/fish/config.fish'
+abbr wiki  'nvim +VimwikiIndex'
 abbr pwiki 'nvim $HOME/code/private-wiki/vimwiki/index.wiki'
 
 #General
-abbr ls 'ls -G'
-abbr l 'ls -Flh'
-abbr la 'ls -AFlh'
-abbr cdc 'cd ~/code'
-abbr cdg 'cd ~/code/go/src'
-abbr cds 'cd ~/scratchpad'
+alias ls  'ls -G'
+alias l   'ls -Flh'
+alias la  'ls -AFlh'
+abbr  cdc 'cd ~/code'
+abbr  cdg 'cd ~/code/go/src'
+abbr  cds 'cd ~/scratchpad'
+abbr  cl  'clear'
 
 #Tmux
 abbr tml 'tmux list-sessions'
@@ -42,20 +43,16 @@ abbr gs  'git status -s'
 abbr gl  'git pull'
 abbr gp  'git push'
 abbr gf  'git fetch'
-abbr ga  'git add --all; and gs'
+abbr ga  'git add'
+abbr gaa 'git add --all; and git status -s'
+abbr gr  'git reset'
 abbr gc  'git commit'
 abbr gg  'git log --graph --oneline --decorate'
-abbr glg  'git log --graph --oneline --decorate --all'
+abbr glg 'git log --graph --oneline --decorate --all'
 abbr gd  'git diff'
 abbr gk  'git checkout'
 abbr gb  'git branch'
 abbr gkb 'git checkout -b'
-
-#Task Warrior
-abbr os 'task add project:os'
-
-#Development
-abbr mk 'make clean all'
 
 #################################
 #	COLORS
