@@ -14,48 +14,48 @@ setenv PATH $PATH $GOPATH/bin
 #################################
 
 #Editing configs
-alias vim 'nvim'
-alias evim 'nvim ~/.config/nvim/init.vim'
-alias ebash 'nvim ~/.bash_profile'
-alias efish 'nvim ~/.config/fish/config.fish'
-alias etmux 'nvim ~/.tmux.conf'
-alias egit 'nvim ~/.git'
-alias rld 'source ~/.config/fish/config.fish'
-alias wiki 'nvim +VimwikiIndex'
-alias pwiki 'nvim $HOME/code/private-wiki/vimwiki/index.wiki'
+abbr vim 'nvim'
+abbr evim 'nvim ~/.config/nvim/init.vim'
+abbr ebash 'nvim ~/.bash_profile'
+abbr efish 'nvim ~/.config/fish/config.fish'
+abbr etmux 'nvim ~/.tmux.conf'
+abbr egit 'nvim ~/.git'
+abbr rld 'source ~/.config/fish/config.fish'
+abbr wiki 'nvim +VimwikiIndex'
+abbr pwiki 'nvim $HOME/code/private-wiki/vimwiki/index.wiki'
 
 #General
-alias ls 'ls -G'
-alias l 'ls -Flh'
-alias la 'ls -AFlh'
-alias cdc 'cd ~/code'
-alias cdg 'cd ~/code/go/src'
-alias cds 'cd ~/scratchpad'
+abbr ls 'ls -G'
+abbr l 'ls -Flh'
+abbr la 'ls -AFlh'
+abbr cdc 'cd ~/code'
+abbr cdg 'cd ~/code/go/src'
+abbr cds 'cd ~/scratchpad'
 
 #Tmux
-alias tml 'tmux list-sessions'
-alias tma 'tmux attach -t'
-alias tmn 'tmux new -s'
+abbr tml 'tmux list-sessions'
+abbr tma 'tmux attach -t'
+abbr tmn 'tmux new -s'
 
 #Git
-alias gs  'git status -s'
-alias gl  'git pull'
-alias gp  'git push'
-alias gf  'git fetch'
-alias ga  'git add --all; and gs'
-alias gc  'git commit'
-alias gg  'git log --graph --oneline --decorate'
-alias glg  'git log --graph --oneline --decorate --all'
-alias gd  'git diff'
-alias gk  'git checkout'
-alias gb  'git branch'
-alias gkb 'git checkout -b'
+abbr gs  'git status -s'
+abbr gl  'git pull'
+abbr gp  'git push'
+abbr gf  'git fetch'
+abbr ga  'git add --all; and gs'
+abbr gc  'git commit'
+abbr gg  'git log --graph --oneline --decorate'
+abbr glg  'git log --graph --oneline --decorate --all'
+abbr gd  'git diff'
+abbr gk  'git checkout'
+abbr gb  'git branch'
+abbr gkb 'git checkout -b'
 
 #Task Warrior
-alias os 'task add project:os'
+abbr os 'task add project:os'
 
 #Development
-alias mk 'make clean all'
+abbr mk 'make clean all'
 
 #################################
 #	COLORS
