@@ -6,8 +6,13 @@ fish_vi_key_bindings
 #	ENVIRONMENT VARIABLES
 #################################
 
+<<<<<<< Updated upstream
 set -gx GOPATH /Users/mjolnir/code/go
 set -gx PATH $PATH $GOPATH/bin
+=======
+set -x GOPATH $HOME/code/go
+set -x PATH $PATH $GOPATH/bin
+>>>>>>> Stashed changes
 
 #################################
 #	CUSTOM ALIASES
@@ -33,6 +38,10 @@ abbr  cdc 'cd ~/code'
 abbr  cdg 'cd ~/code/go/src'
 abbr  cds 'cd ~/scratchpad'
 abbr  cl  'clear'
+
+#Work AWS
+alias ssh_dev "ssh agent ssh centos@192.168.1.203"
+alias ssh_git "ssh -v -A -t -i \"/Users/gustavo/Jiko/certs/bastion_server.pem\" -R 20101:localhost:22 ec2-user@52.54.62.115 ssh -t -R 20201:localhost:20101 centos@192.168.1.203 '\"\"sshfs -p 20201 -o ro gustavo@localhost:/Users/gustavo/Jiko/certs /home/centos/.certs\";fish\"'"
 
 #Tmux
 abbr tml 'tmux list-sessions'
@@ -133,6 +142,9 @@ function vimf --description 'Fuzzy file opener for vim'
 end
 
 eval (thefuck --alias | tr '\n' ';')
+
+# The next line updates PATH for the Google Cloud SDK.
+# if [ -f '/Users/gustavo/Downloads/google-cloud-sdk/path.fish.inc' ]; if type source > /dev/null; source '/Users/gustavo/Downloads/google-cloud-sdk/path.fish.inc'; else; . '/Users/gustavo/Downloads/google-cloud-sdk/path.fish.inc'; end; end
 
 rvm default
 

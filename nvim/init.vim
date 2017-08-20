@@ -3,7 +3,7 @@ let mapleader = ','
 
 " Tell vim to use a 'normal' shell for executing commands.
 if &shell =~# 'fish$'
-	set shell=sh
+    set shell=sh
 endif
 
 call plug#begin()
@@ -80,7 +80,10 @@ call plug#end()
 "============== Deoplete Setup ==============
 let g:deoplete#enable_at_startup = 1
 
-"============== Vim-Go Setup ==============
+"============== Deoplete Setup ==============
+let g:deoplete#enable_at_startup = 1
+
+"=============-Go Setup ==============
 let g:go_fmt_command = "goimports"
 
 "============== Neosnippet Setup ==============
@@ -95,7 +98,7 @@ let g:tex_flavor='latex'
 let g:tex_conceal=""
 
 "============== Colorscheme Configs ===============
-set background = "dark"
+set background=dark
 colorscheme badwolf
 
 "============== DevIcons Configs ===============
@@ -115,14 +118,6 @@ let g:airline#extensions#tabline#fnamemod = ':t'
 
 "============== Neomake Configs ===============
 autocmd! BufWritePost,BufEnter * Neomake
-let g:neomake_warning_sign = {
-	\ 'text': '!',
-	\ 'texthl': 'GruvboxYellowBold'
-	\ }
-let g:neomake_error_sign = {
-	\ 'text': 'X',
-	\ 'texthl': 'GruvboxRedBold'
-	\ }
 
 "============== Color Inspector ===============
 nmap <C-F> :call <SID>SymbStack()<CR>
@@ -186,9 +181,16 @@ nnoremap <Space> :nohlsearch<CR>
 "fugitive shortcuts
 nmap <Leader>gs :Gstatus<CR>
 
+" QuickFix and Location window shortcuts
+no <Leader>ll :lopen<CR>
+no <Leader>qq :copen<CR>
+
 "=======================================
 "============== Settings ===============
 "=======================================
+
+" Enables mouse in vim
+set mouse=a
 
 " Makes cursor line visible
 set cursorline
@@ -214,7 +216,7 @@ set relativenumber
 set number
 
 " Visualize whitespace
-set list listchars=tab:› ,trail:-,extends:>,precedes:<,eol:¬
+set list listchars=tab:› ,trail:·,extends:>,precedes:<
 
 " TAB MADNESS
 set tabstop=4 softtabstop=4 shiftwidth=4 expandtab
@@ -230,7 +232,7 @@ set splitright
 set encoding=utf-8
 
 " Center the damn cursor
-let &scrolloff=999
+" let &scrolloff=999
 
 " Enable true color support
 set termguicolors
