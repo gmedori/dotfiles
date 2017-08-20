@@ -6,15 +6,15 @@ fish_vi_key_bindings
 #	ENVIRONMENT VARIABLES
 #################################
 
-setenv GOPATH /Users/mjolnir/code/go
-setenv PATH $PATH $GOPATH/bin
+set -gx GOPATH /Users/mjolnir/code/go
+set -gx PATH $PATH $GOPATH/bin
 
 #################################
 #	CUSTOM ALIASES
 #################################
 
 #Editing configs
-abbr vim   'nvim'
+alias vim  'nvim'
 abbr evim  'nvim ~/.config/nvim/init.vim'
 abbr ebash 'nvim ~/.bash_profile'
 abbr efish 'nvim ~/.config/fish/config.fish'
@@ -28,6 +28,7 @@ abbr pwiki 'nvim $HOME/code/private-wiki/vimwiki/index.wiki'
 alias ls  'ls -G'
 alias l   'ls -Flh'
 alias la  'ls -AFlh'
+
 abbr  cdc 'cd ~/code'
 abbr  cdg 'cd ~/code/go/src'
 abbr  cds 'cd ~/scratchpad'
@@ -134,3 +135,6 @@ end
 eval (thefuck --alias | tr '\n' ';')
 
 rvm default
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/mjolnir/gcloud/path.fish.inc' ]; if type source > /dev/null; source '/Users/mjolnir/gcloud/path.fish.inc'; else; . '/Users/mjolnir/gcloud/path.fish.inc'; end; end
