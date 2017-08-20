@@ -6,13 +6,8 @@ fish_vi_key_bindings
 #	ENVIRONMENT VARIABLES
 #################################
 
-<<<<<<< Updated upstream
-set -gx GOPATH /Users/mjolnir/code/go
+set -gx GOPATH $HOME/code/go
 set -gx PATH $PATH $GOPATH/bin
-=======
-set -x GOPATH $HOME/code/go
-set -x PATH $PATH $GOPATH/bin
->>>>>>> Stashed changes
 
 #################################
 #	CUSTOM ALIASES
