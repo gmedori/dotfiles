@@ -59,6 +59,9 @@ abbr gk  'git checkout'
 abbr gb  'git branch'
 abbr gkb 'git checkout -b'
 
+#Other Tools
+abbr kb 'kubectl'
+
 #################################
 #	COLORS
 #################################
