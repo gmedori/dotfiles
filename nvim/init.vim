@@ -1,6 +1,8 @@
 " Comma should be mapleader
 let mapleader = ','
 
+let $PAGER = ''
+
 " Tell vim to use a 'normal' shell for executing commands.
 if &shell =~# 'fish$'
     set shell=sh
@@ -75,6 +77,9 @@ Plug 'sjl/badwolf'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
 
+" For unshitty markdown editing
+Plug 'plasticboy/vim-markdown'
+
 call plug#end()
 
 "============== Deoplete Setup ==============
@@ -85,6 +90,9 @@ let g:deoplete#enable_at_startup = 1
 
 "=============-Go Setup ==============
 let g:go_fmt_command = "goimports"
+
+"============== Vim-Markdown Setup ==============
+let g:vim_markdown_new_list_item_indent = 2
 
 "============== Neosnippet Setup ==============
 let g:neosnippet#snippets_directory = '~/.config/nvim/snippets'
@@ -117,7 +125,7 @@ let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#fnamemod = ':t'
 
 "============== Neomake Configs ===============
-autocmd! BufWritePost,BufEnter * Neomake
+call neomake#configure#automake('rnw')
 
 "============== Color Inspector ===============
 nmap <C-F> :call <SID>SymbStack()<CR>
@@ -242,3 +250,6 @@ set path+=**
 
 " See commands as you're inputting them
 set showcmd
+
+" Folding is stupid.
+set nofoldenable
