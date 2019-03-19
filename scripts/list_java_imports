@@ -1,0 +1,20 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use autodie;
+
+use File::Slurp;
+use List::Uniq ':all';
+
+use feature 'say';
+
+my @java_files = qx(find . -name '*.java');
+chomp @java_files;
+
+my @contents = map { read_file("$_") } @java_files;
+my @import_statements = grep { /^import/ } @contents;
+chomp @import_statements;
+
+my @uniq_imports = uniq(@import_statements);
+
+say join("\n", sort @uniq_imports)
