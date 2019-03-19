@@ -1,6 +1,8 @@
 " Comma should be mapleader
 let mapleader = ','
 
+let $PAGER = ''
+
 " Tell vim to use a 'normal' shell for executing commands.
 if &shell =~# 'fish$'
     set shell=sh
@@ -106,6 +108,9 @@ let g:deoplete#enable_at_startup = 1
 "=============-Go Setup ==============
 let g:go_fmt_command = "goimports"
 
+"============== Vim-Markdown Setup ==============
+let g:vim_markdown_new_list_item_indent = 2
+
 "============== Neosnippet Setup ==============
 let g:neosnippet#snippets_directory = '~/.config/nvim/snippets'
 let g:neosnippet#disable_runtime_snippets = { '_' : 1, }
@@ -150,7 +155,7 @@ let g:airline_right_sep=''
 " let g:airline#extensions#tabline#fnamemod = ':t'
 
 "============== Neomake Configs ===============
-autocmd! BufWritePost,BufEnter * Neomake
+call neomake#configure#automake('rnw')
 
 "============== Color Inspector ===============
 nmap <C-F> :call <SID>SymbStack()<CR>
@@ -287,3 +292,7 @@ set tw=120
 
 " Use ripgrep for grep
 set grepprg=rg\ --vimgrep\ --no-heading\ --smart-case
+
+" Folding is stupid.
+set nofoldenable
+
