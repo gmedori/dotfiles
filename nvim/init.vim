@@ -24,7 +24,7 @@ Plug 'morhetz/gruvbox'
 Plug 'jonathanfilip/vim-lucius'
 
 " For pretty glyphs
-Plug 'ryanoasis/vim-devicons'
+" Plug 'ryanoasis/vim-devicons'
 
 " For editing fish files
 Plug 'dag/vim-fish'
@@ -75,6 +75,26 @@ Plug 'sjl/badwolf'
 Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'zchee/deoplete-go', { 'do': 'make'}
 
+" For better markdown highlighting
+Plug 'plasticboy/vim-markdown'
+" Plug 'tpope/vim-markdown'
+
+" For writing CQL scripts
+Plug 'elubow/cql-vim'
+
+" For staying organized
+Plug 'vimwiki/vimwiki', { 'branch' : 'dev' }
+
+" For VimDeck syntax highlighting
+Plug 'vim-scripts/SyntaxRange'
+Plug 'vim-scripts/ingo-library'
+
+" For Writing Applescript
+Plug 'mityu/vim-applescript'
+
+" For viewing perldocs
+Plug 'hotchpotch/perldoc-vim'
+
 call plug#end()
 
 "============== Deoplete Setup ==============
@@ -92,6 +112,19 @@ let g:neosnippet#disable_runtime_snippets = { '_' : 1, }
 
 imap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
 smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+
+"============== Vimwiki Setup ==============
+let wiki = {}
+let wiki.path = '$HOME/code/wiki/vimwiki'
+let wiki.syntax = 'markdown'
+let wiki.ext = '.md'
+let wiki.template_path = '$HOME/code/wiki/vimwiki/templates'
+let wiki.template_default = 'default'
+let wiki.template_ext = '.html'
+let wiki.nested_syntaxes = {'python': 'python', 'c': 'c', 'sml': 'sml', 'bash': 'bash', 'text': 'text'}
+
+let g:vimwiki_list = [wiki]
+let g:vimwiki_valid_html_tags = 'p,blockquote,span'
 
 "============== Latex Stuff ===============
 let g:tex_flavor='latex'
@@ -113,8 +146,8 @@ endfunction
 "============== Vim-Airline Configs ===============
 let g:airline_left_sep=''
 let g:airline_right_sep=''
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#fnamemod = ':t'
+" let g:airline#extensions#tabline#enabled = 1
+" let g:airline#extensions#tabline#fnamemod = ':t'
 
 "============== Neomake Configs ===============
 autocmd! BufWritePost,BufEnter * Neomake
@@ -127,6 +160,9 @@ function! <SID>SymbStack()
   endif
   echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 endfunction
+
+"============== Ripgrep Find ===============
+command! -bang -nargs=* Find call fzf#vim#grep('rg --column --line-number --no-heading --fixed-strings --ignore-case --no-ignore --hidden --follow --glob "!.git/*" --color "always" '.shellescape(<q-args>), 1, <bang>0)
 
 "=======================================
 "============== Mappings ===============
@@ -185,6 +221,9 @@ nmap <Leader>gs :Gstatus<CR>
 no <Leader>ll :lopen<CR>
 no <Leader>qq :copen<CR>
 
+" Search and replace under text
+nnoremap <Leader>s :%s/\<<C-r><C-w>\>/
+
 "=======================================
 "============== Settings ===============
 "=======================================
@@ -242,3 +281,9 @@ set path+=**
 
 " See commands as you're inputting them
 set showcmd
+
+" Wider text width
+set tw=120
+
+" Use ripgrep for grep
+set grepprg=rg\ --vimgrep\ --no-heading\ --smart-case

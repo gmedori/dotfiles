@@ -1,2 +1,2 @@
-set tw=79
+set tw=120
 set nowrap
