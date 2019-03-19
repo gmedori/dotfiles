@@ -9,6 +9,8 @@ fish_vi_key_bindings
 set -gx GOPATH $HOME/code/go
 set -gx PATH $PATH $GOPATH/bin
 
+set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+
 #################################
 #	CUSTOM ALIASES
 #################################
@@ -20,9 +22,8 @@ abbr ebash 'nvim ~/.bash_profile'
 abbr efish 'nvim ~/.config/fish/config.fish'
 abbr etmux 'nvim ~/.tmux.conf'
 abbr egit  'nvim ~/.git'
+abbr essh  'nvim ~/.ssh/config'
 abbr rld   'source ~/.config/fish/config.fish'
-abbr wiki  'nvim +VimwikiIndex'
-abbr pwiki 'nvim $HOME/code/private-wiki/vimwiki/index.wiki'
 
 #General
 alias ls  'ls -G'
@@ -34,14 +35,14 @@ abbr  cdg 'cd ~/code/go/src'
 abbr  cds 'cd ~/scratchpad'
 abbr  cl  'clear'
 
-#Work AWS
-alias ssh_dev "ssh agent ssh centos@192.168.1.203"
-alias ssh_git "ssh -v -A -t -i \"/Users/gustavo/Jiko/certs/bastion_server.pem\" -R 20101:localhost:22 ec2-user@52.54.62.115 ssh -t -R 20201:localhost:20101 centos@192.168.1.203 '\"\"sshfs -p 20201 -o ro gustavo@localhost:/Users/gustavo/Jiko/certs /home/centos/.certs\";fish\"'"
+#FZF
+alias fzf 'fzf --height=15 --reverse -m --bind ctrl-a:toggle-all'
 
 #Tmux
-abbr tml 'tmux list-sessions'
-abbr tma 'tmux attach -t'
-abbr tmn 'tmux new -s'
+abbr tml  'tmux list-sessions'
+abbr tma  'tmux attach -t'
+abbr tmn  'tmux new -s'
+abbr tmnp 'tmux new -s (basename (pwd))'
 
 #Git
 abbr gs  'git status -s'
@@ -50,7 +51,6 @@ abbr gp  'git push'
 abbr gf  'git fetch'
 abbr ga  'git add'
 abbr gaa 'git add --all; and git status -s'
-abbr gr  'git reset'
 abbr gc  'git commit'
 abbr gg  'git log --graph --oneline --decorate'
 abbr glg 'git log --graph --oneline --decorate --all'
@@ -58,6 +58,14 @@ abbr gd  'git diff'
 abbr gk  'git checkout'
 abbr gb  'git branch'
 abbr gkb 'git checkout -b'
+abbr gdd 'git diff develop'
+abbr gdm 'git diff master'
+
+#Docker
+abbr jshell 'docker run -it openjdk jshell'
+
+#Gradle
+abbr grf 'gr clean build jacocoTestReport'
 
 #Other Tools
 abbr kb 'kubectl'
@@ -121,7 +129,9 @@ function fish_prompt --description 'Write out the prompt'
             set_color magenta
 	end
 
-	echo -n '' (whoami) ''
+    echo -n ' ['
+    echo -n (date '+%H:%M:%S')
+	echo -n ']' (whoami) ''
 
 	if not test $last_status -eq 0
         #set_color FF1C00
@@ -139,12 +149,5 @@ function vimf --description 'Fuzzy file opener for vim'
 	end
 end
 
-eval (thefuck --alias | tr '\n' ';')
-
-# The next line updates PATH for the Google Cloud SDK.
-# if [ -f '/Users/gustavo/Downloads/google-cloud-sdk/path.fish.inc' ]; if type source > /dev/null; source '/Users/gustavo/Downloads/google-cloud-sdk/path.fish.inc'; else; . '/Users/gustavo/Downloads/google-cloud-sdk/path.fish.inc'; end; end
-
-rvm default
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/mjolnir/gcloud/path.fish.inc' ]; if type source > /dev/null; source '/Users/mjolnir/gcloud/path.fish.inc'; else; . '/Users/mjolnir/gcloud/path.fish.inc'; end; end
+thefuck --alias | source
+cat ~/perl5/perlbrew/etc/perlbrew.fish | source
