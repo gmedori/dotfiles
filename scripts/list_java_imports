@@ -8,7 +8,23 @@ use List::Uniq ':all';
 
 use feature 'say';
 
-my @java_files = qx(find . -name '*.java');
+my $path;
+if ($#ARGV == -1) {
+    $path = ".";
+} elsif ($#ARGV == 0) {
+    $path = $ARGV[0];
+} else {
+    say STDERR "usage: list_java_imports [file|dir]";
+    exit 1;
+}
+
+my @java_files;
+
+if (-d $path) {
+    @java_files = qx(find $path -name '*.java');
+} else {
+    @java_files = ($path)
+}
 chomp @java_files;
 
 my @contents = map { read_file("$_") } @java_files;
