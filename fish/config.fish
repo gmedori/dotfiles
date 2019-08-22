@@ -8,8 +8,13 @@ fish_vi_key_bindings
 
 set -gx GOPATH $HOME/code/go
 set -gx PATH $PATH $GOPATH/bin
+set -gx PATH $PATH $HOME/utility-scripts
 
 set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+
+set -gx HOMEBREW_GITHUB_API_TOKEN 2a0fa730f314728ded05e8d546706626f3bea9f7
+
+set -gx JAVA_HOME (/usr/libexec/java_home)
 
 #################################
 #	CUSTOM ALIASES
@@ -45,21 +50,33 @@ abbr tmn  'tmux new -s'
 abbr tmnp 'tmux new -s (basename (pwd))'
 
 #Git
-abbr gs  'git status -s'
-abbr gl  'git pull'
-abbr gp  'git push'
-abbr gf  'git fetch'
-abbr ga  'git add'
-abbr gaa 'git add --all; and git status -s'
-abbr gc  'git commit'
-abbr gg  'git log --graph --oneline --decorate'
-abbr glg 'git log --graph --oneline --decorate --all'
-abbr gd  'git diff'
-abbr gk  'git checkout'
-abbr gb  'git branch'
-abbr gkb 'git checkout -b'
-abbr gdd 'git diff develop'
-abbr gdm 'git diff master'
+abbr gs   'git status -s'
+abbr gl   'git pull'
+abbr glm  'git pull upstream master'
+abbr glr  'git pull upstream release'
+abbr gld  'git pull upstream develop'
+abbr gp   'git push'
+abbr gf   'git fetch'
+abbr ga   'git add'
+abbr gaa  'git add --all; and git status -s'
+abbr gc   'git commit'
+abbr gfc  'git commit -eF (git rev-parse --show-toplevel)/.git/COMMIT_EDITMSG'
+abbr gg   'git log --graph --oneline --decorate'
+abbr glg  'git log --graph --oneline --decorate --all'
+abbr gd   'git diff'
+abbr gk   'git checkout'
+abbr gb   'git branch'
+abbr gkb  'git checkout -b'
+abbr gkm  'git checkout master'
+abbr gkr  'git checkout release'
+abbr gkf  'git checkout -b feature/'
+abbr gdd  'git diff develop'
+abbr gdm  'git diff master'
+abbr gsh  'git stash push -m '
+abbr gsp  'git stash pop'
+abbr gpub 'git push -u origin (git branch | rg "\\\\*" | cut -d " " -f 2)'
+
+alias currentBranch "git branch | rg '\\*' | cut -d ' ' -f 2"
 
 #Docker
 abbr jshell 'docker run -it openjdk jshell'
@@ -69,6 +86,7 @@ abbr grf 'gr clean build jacocoTestReport'
 
 #Other Tools
 abbr kb 'kubectl'
+abbr java_home '/usr/libexec/java_home'
 
 #################################
 #	COLORS

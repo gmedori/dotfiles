@@ -62,7 +62,7 @@ Plug 'airblade/vim-gitgutter'
 Plug 'tyrannicaltoucan/vim-deep-space'
 
 " For strong Golang support
-Plug 'fatih/vim-go'
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 
 " For a fancy start screen
 Plug 'mhinz/vim-startify'
@@ -107,6 +107,7 @@ let g:deoplete#enable_at_startup = 1
 
 "=============-Go Setup ==============
 let g:go_fmt_command = "goimports"
+let g:go_metalinter_command = "gometalinter"
 
 "============== Vim-Markdown Setup ==============
 let g:vim_markdown_new_list_item_indent = 2
