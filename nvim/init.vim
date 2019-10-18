@@ -91,9 +91,6 @@ Plug 'vimwiki/vimwiki', { 'branch' : 'dev' }
 Plug 'vim-scripts/SyntaxRange'
 Plug 'vim-scripts/ingo-library'
 
-" For Writing Applescript
-Plug 'mityu/vim-applescript'
-
 " For viewing perldocs
 Plug 'hotchpotch/perldoc-vim'
 

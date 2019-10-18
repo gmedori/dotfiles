@@ -30,7 +30,7 @@ my @te_output = qx(echo '$apple_script' | osascript);
 my @items = ();
 foreach( @te_output ) {
     my $line = $_;
-    if ($line =~ /$query/) {
+    if ($line =~ /$query/i) {
         my $entry = {};
         chomp($line);
         $entry->{title} = $line;
