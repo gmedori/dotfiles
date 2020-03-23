@@ -153,3 +153,4 @@ thefuck --alias | source
 cat ~/perl5/perlbrew/etc/perlbrew.fish | source
 
 set PATH $HOME/dotfiles/scripts/ $PATH
+set PATH $HOME/perl5/perlbrew/bin $PATH
