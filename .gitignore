@@ -3,3 +3,5 @@ fishd*
 plugged
 resurrect
 .DS_Store
+*.lock*
+fish_variables

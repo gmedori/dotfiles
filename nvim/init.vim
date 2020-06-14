@@ -52,6 +52,9 @@ Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
 " For git stuff from within vim
 Plug 'tpope/vim-fugitive'
 
+" For changing surrounding characters
+Plug 'tpope/vim-surround'
+
 " For moar color
 Plug 'KeitaNakamura/neodark.vim'
 
@@ -73,10 +76,6 @@ Plug 'rakr/vim-two-firewatch'
 " For da bad wolf
 Plug 'sjl/badwolf'
 
-" For autocompletion
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
-Plug 'zchee/deoplete-go', { 'do': 'make'}
-
 " For better markdown highlighting
 Plug 'plasticboy/vim-markdown'
 " Plug 'tpope/vim-markdown'
@@ -94,17 +93,18 @@ Plug 'vim-scripts/ingo-library'
 " For viewing perldocs
 Plug 'hotchpotch/perldoc-vim'
 
+" For decent autocomplete
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
+" For Brewfile editing
+Plug 'bfontaine/Brewfile.vim'
+
 call plug#end()
 
-"============== Deoplete Setup ==============
-let g:deoplete#enable_at_startup = 1
-
-"============== Deoplete Setup ==============
-let g:deoplete#enable_at_startup = 1
-
 "=============-Go Setup ==============
-let g:go_fmt_command = "goimports"
-let g:go_metalinter_command = "gometalinter"
+let g:go_fmt_command = "goimports"    " Run goimports along gofmt on each save
+let g:go_auto_type_info = 1           " Automatically get signature/type info for object under cursor
+
 
 "============== Vim-Markdown Setup ==============
 let g:vim_markdown_new_list_item_indent = 2
@@ -294,3 +294,4 @@ set grepprg=rg\ --vimgrep\ --no-heading\ --smart-case
 " Folding is stupid.
 set nofoldenable
 
+source $HOME/.config/nvim/coc-config.vim

@@ -14,8 +14,6 @@ set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.
 
 set -gx HOMEBREW_GITHUB_API_TOKEN 2a0fa730f314728ded05e8d546706626f3bea9f7
 
-set -gx JAVA_HOME (/usr/libexec/java_home)
-
 #################################
 #	CUSTOM ALIASES
 #################################
@@ -167,7 +165,6 @@ function vimf --description 'Fuzzy file opener for vim'
 	end
 end
 
-thefuck --alias | source
 cat ~/perl5/perlbrew/etc/perlbrew.fish | source
 
 set PATH $HOME/dotfiles/scripts/ $PATH
