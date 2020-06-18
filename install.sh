@@ -1,6 +1,11 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+OLDDIR="$(pwd)"
+
+cd $DIR
+
+git submodule update --init --recursive
 
 brew bundle --file=$DIR/Brewfile
 
@@ -15,3 +20,5 @@ perlbrew switch $PERL_VERSION
 curl -L https://cpanmin.us | perl - App::cpanminus
 
 $DIR/linker.pl
+
+cd $OLDDIR
