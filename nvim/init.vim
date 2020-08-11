@@ -38,7 +38,7 @@ Plug 'neomake/neomake'
 Plug 'lervag/vimtex'
 
 " For snippets. Because snippets.
-Plug 'Shougo/neosnippet'
+Plug 'SirVer/ultisnips'
 
 " For making things look pretty and formatted
 Plug 'godlygeek/tabular'
@@ -99,6 +99,12 @@ Plug 'neoclide/coc.nvim', {'branch': 'release'}
 " For Brewfile editing
 Plug 'bfontaine/Brewfile.vim'
 
+" For commenting stuff out
+Plug 'tomtom/tcomment_vim'
+
+" For toml config files
+Plug 'cespare/vim-toml'
+
 call plug#end()
 
 "=============-Go Setup ==============
@@ -110,11 +116,10 @@ let g:go_auto_type_info = 1           " Automatically get signature/type info fo
 let g:vim_markdown_new_list_item_indent = 2
 
 "============== Neosnippet Setup ==============
-let g:neosnippet#snippets_directory = '~/.config/nvim/snippets'
-let g:neosnippet#disable_runtime_snippets = { '_' : 1, }
-
-imap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
-smap <expr><TAB> neosnippet#expandable_or_jumpable() ? "\<Plug>(neosnippet_expand_or_jump)" : "\<TAB>"
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+let g:UltiSnipsEditSplit="horizontal"
 
 "============== Vimwiki Setup ==============
 let wiki = {}
@@ -213,7 +218,7 @@ nmap <Leader><left> :bp<CR>
 autocmd Filetype tex,latex nmap <Leader>p :!pdflatex %<CR><CR>
 autocmd Filetype tex,latex nmap <Leader><S-P> :!pdflatex %<CR>
 autocmd Filetype tex,latex nmap <Leader>o :!open %<.pdf<CR><CR>
-autocmd Filetype tex,latex nmap <Leader>mk :!make clean pdf<CR>
+autocmd Filetype tex,latex nmap <Leader>mk :!ltxbuild<CR><CR>
 
 nnoremap <Space> :nohlsearch<CR>
 

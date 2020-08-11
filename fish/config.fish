@@ -8,7 +8,9 @@ fish_vi_key_bindings
 
 set -gx GOPATH $HOME/code/go
 set -gx PATH $PATH $GOPATH/bin
-set -gx PATH $PATH $HOME/utility-scripts
+
+set -gx SCRIPT_DIR $HOME/Sync/Scripts/bin
+set -gx PATH $PATH $SCRIPT_DIR
 
 set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.git/*"'
 
