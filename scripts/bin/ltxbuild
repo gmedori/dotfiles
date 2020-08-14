@@ -1,4 +1,4 @@
 #!/bin/bash
 
 latexmk -pdf
-osascript ~/Dropbox/Scripts/applescripts/activate-preview-then-iterm.scpt
+osascript ~/Sync/Scripts/applescripts/activate-preview-then-iterm.scpt
