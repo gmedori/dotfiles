@@ -1,4 +1,4 @@
-module gitlab.com/gposcidonio/scripts
+module gitlab.com/gposcidonio/scripts/gitlab
 
 go 1.14
 
