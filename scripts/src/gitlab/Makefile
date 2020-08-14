@@ -1,6 +1,9 @@
 build:
 	go build
 
+clean:
+	rm gitlab
+
 install: build
 	mv gitlab ../../bin/
 
