@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -10,9 +8,6 @@ import (
 var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Creates new things like projects.",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("new called")
-	},
 }
 
 func init() {
