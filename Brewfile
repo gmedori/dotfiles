@@ -12,9 +12,11 @@ brew "fish"
 brew "neovim"
 brew "tmux"
 brew "reattach-to-user-namespace"
+brew "starship"
 
 # Utilities
 brew "tree"
 brew "httpie"
 brew "python3"
 brew "ripgrep"
+brew "sd"

@@ -28,6 +28,7 @@ abbr efish 'nvim ~/.config/fish/config.fish'
 abbr etmux 'nvim ~/.tmux.conf'
 abbr egit  'nvim ~/.git'
 abbr essh  'nvim ~/.ssh/config'
+abbr estar 'nvim ~/.config/starship.toml'
 abbr rld   'source ~/.config/fish/config.fish'
 
 #General
@@ -111,55 +112,7 @@ set fish_color_cancel white
 #	FUNCTIONS
 #################################
 
-function fish_mode_prompt; end
-
 set fish_color_search_match --background=8A8A8A
-
-function fish_right_prompt --description 'Write out the right prompt'
-
-    set_color red --bold
-
-	printf '%s ' (__fish_git_prompt)
-
-	set_color normal
-    set_color yellow
-
-	# PWD
-	set directory (echo $PWD | sed -e "s|^$HOME|~|")
-	echo -n "[ $directory ]"
-
-	set_color normal
-end
-
-function fish_prompt --description 'Write out the prompt'
-	set -l last_status $status
-
-	if not set -q __fish_prompt_normal
-		set -g __fish_prompt_normal (set_color normal)
-	end
-
-	switch $fish_bind_mode
-		case insert
-            set_color green
-		case default
-            set_color yellow
-		case visual
-            set_color magenta
-	end
-
-    echo -n ' ['
-    echo -n (date '+%H:%M:%S')
-	echo -n ']' (whoami) ''
-
-	if not test $last_status -eq 0
-        #set_color FF1C00
-        set_color red
-	end
-
-	echo -n '><> '
-
-	set_color normal
-end
 
 function vimf --description 'Fuzzy file opener for vim'
 	if fzf > $TMPDIR/fzf.result
@@ -171,3 +124,5 @@ cat ~/perl5/perlbrew/etc/perlbrew.fish | source
 
 set PATH $HOME/dotfiles/scripts/ $PATH
 set PATH $HOME/perl5/perlbrew/bin $PATH
+
+starship init fish | source
