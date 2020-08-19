@@ -39,6 +39,7 @@ alias la  'ls -AFlh'
 abbr  cdc 'cd ~/code'
 abbr  cdg 'cd ~/code/go/src'
 abbr  cds 'cd ~/scratchpad'
+abbr  cdw 'cd ~/Sync/Writing'
 abbr  cl  'clear'
 
 #FZF
