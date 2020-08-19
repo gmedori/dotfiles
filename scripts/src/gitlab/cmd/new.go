@@ -11,7 +11,7 @@ var newCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(newCmd)
+	GitlabCmd.AddCommand(newCmd)
 
 	// Here you will define your flags and configuration settings.
 
