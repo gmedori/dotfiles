@@ -9,3 +9,5 @@ install: build
 
 uninstall:
 	rm ../../bin/gitlab
+
+reinstall: uninstall install

@@ -17,6 +17,8 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 
 	"github.com/spf13/cobra"
 )
@@ -27,7 +29,12 @@ var projectCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Short: "Creates a new Gitlab project with the specified name & namespace.",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("Creating new project at %v/%v/%v", projectFlags.Host, projectFlags.Namespace, args[0])
+		err := createNewProject(args[0], projectFlags.Namespace, projectFlags.Host)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("\nCreated new project at %v/%v/%v\n", projectFlags.Host, projectFlags.Namespace, args[0])
 	},
 }
 
@@ -38,16 +45,56 @@ var projectFlags struct {
 
 func init() {
 	newCmd.AddCommand(projectCmd)
+	projectCmd.Flags().StringVarP(&projectFlags.Namespace, "namespace", "n", "gposcidonio", "The namespace of the project you wish to create. This is often your Gitlab username.")
+	projectCmd.Flags().StringVar(&projectFlags.Host, "host", "gitlab.com", "The hostname of the Gitlab instance you wish to access. Defaults to gitlab.com")
+}
 
-	// Here you will define your flags and configuration settings.
+func createNewProject(name, namespace, host string) error {
+	_, err := exec.LookPath("git")
+	if err != nil {
+		return err
+	}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// projectCmd.PersistentFlags().String("foo", "", "A help for foo")
-	projectCmd.PersistentFlags().StringVarP(&projectFlags.Namespace, "namespace", "n", "gposcidonio", "The namespace of the project you wish to create. This is often your Gitlab username.")
-	projectCmd.PersistentFlags().StringVar(&projectFlags.Host, "host", "gitlab.com", "The hostname of the Gitlab instance you wish to access. Defaults to gitlab.com")
+	insideGitRepo, err := isInsideGitRepo()
+	if err != nil {
+		return err
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// projectCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	if !insideGitRepo {
+		err = exec.Command("git", "init").Run()
+		if err != nil {
+			return err
+		}
+	}
+
+	originURL := fmt.Sprintf("git@%v:%v/%v.git", host, namespace, name)
+	output, err := exec.Command("git", "remote", "add", "origin", originURL).CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%v\n%v", err, string(output))
+	}
+	fmt.Print(string(output))
+
+	output, err = exec.Command("git", "commit", "--allow-empty", "-m", "Initializing Gitlab repo.").CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%v\n%v", err, string(output))
+	}
+	fmt.Print(string(output))
+
+	output, err = exec.Command("git", "push", "-u", "origin", "master").CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%v\n%v", err, string(output))
+	}
+	fmt.Print(string(output))
+
+	return nil
+}
+
+func isInsideGitRepo() (bool, error) {
+	cmd := exec.Command("git", "rev-parse", "--git-dir")
+	err := cmd.Run()
+	if err != nil {
+		return false, nil
+	}
+
+	return true, nil
 }
