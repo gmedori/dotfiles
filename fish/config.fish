@@ -40,6 +40,8 @@ abbr  cdc 'cd ~/code'
 abbr  cdg 'cd ~/code/go/src'
 abbr  cds 'cd ~/scratchpad'
 abbr  cdw 'cd ~/Sync/Writing'
+abbr  cdt 'cd ~/Sync/Writing/techtechgoose'
+
 abbr  cl  'clear'
 
 #FZF
@@ -66,6 +68,7 @@ abbr gfc  'git commit -eF (git rev-parse --show-toplevel)/.git/COMMIT_EDITMSG'
 abbr gg   'git log --graph --oneline --decorate'
 abbr glg  'git log --graph --oneline --decorate --all'
 abbr gd   'git diff'
+abbr gdc  'git diff --cached'
 abbr gk   'git checkout'
 abbr gb   'git branch'
 abbr gkb  'git checkout -b'
