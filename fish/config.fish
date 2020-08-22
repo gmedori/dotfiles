@@ -41,6 +41,7 @@ abbr  cdg 'cd ~/code/go/src'
 abbr  cds 'cd ~/scratchpad'
 abbr  cdw 'cd ~/Sync/Writing'
 abbr  cdt 'cd ~/Sync/Writing/techtechgoose'
+abbr  cdd 'cd ~/dotfiles'
 
 abbr  cl  'clear'
 
