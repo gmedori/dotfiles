@@ -2,6 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -19,21 +22,32 @@ func init() {
 }
 
 func createNewPost(cmd *cobra.Command, args []string) {
-	postName := properTitle(strings.Join(args, " "))
-	fmt.Printf("Creating Project %v\n", postName)
-}
 
-func properTitle(input string) string {
-	words := strings.Split(input, " ")
-	smallwords := " a an on the to "
-
-	for index, word := range words {
-		if strings.Contains(smallwords, " "+word+" ") && word != string(word[0]) {
-			words[index] = word
-		} else {
-			words[index] = strings.Title(word)
-		}
+	errFunc := func(err error) {
+		fmt.Printf("Error when attempting to create a new post: %v\n", err)
+		os.Exit(1)
 	}
 
-	return strings.Join(words, " ")
+	oldDir, err := os.Getwd()
+	if err != nil {
+		errFunc(err)
+	}
+	defer func() {
+		_ = os.Chdir(oldDir)
+	}()
+
+	err = os.Chdir(config.RootDir)
+	if err != nil {
+		errFunc(err)
+	}
+
+	postDirName := strings.Join(strings.Fields(strings.ToLower(strings.Join(args, " "))), "-")
+	postPath := filepath.Join("posts", postDirName, "index.md")
+
+	output, err := exec.Command("hugo", "new", postPath).Output()
+	if err != nil {
+		errFunc(err)
+	}
+
+	fmt.Print(string(output))
 }
