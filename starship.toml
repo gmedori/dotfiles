@@ -2,10 +2,12 @@
 use_symbol_for_status = true
 
 [git_branch]
+symbol = "🌱 "
 style = "green"
 
 [golang]
 symbol = "Go "
 
 [java]
+symbol = "Java "
 style = "blue"
