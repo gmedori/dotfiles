@@ -42,6 +42,8 @@ abbr  cdw 'cd ~/Sync/Writing'
 abbr  cdt 'cd ~/Sync/Writing/techtechgoose'
 abbr  cdd 'cd ~/dotfiles'
 
+abbr cdsc 'cd ~/Sync/Scripts/src'
+
 abbr  cl  'clear'
 
 #FZF
