@@ -118,6 +118,8 @@ set fish_color_cancel white
 #	FUNCTIONS
 #################################
 
+set fish_function_path ~/.config/fish/functions/*/ $fish_function_path
+
 set fish_color_search_match --background=8A8A8A
 
 function vimf --description 'Fuzzy file opener for vim'
