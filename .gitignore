@@ -5,3 +5,4 @@ resurrect
 .DS_Store
 *.lock*
 fish_variables
+work_specific
