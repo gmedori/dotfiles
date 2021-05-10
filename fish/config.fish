@@ -16,6 +16,10 @@ set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.
 
 set -gx HOMEBREW_GITHUB_API_TOKEN 2a0fa730f314728ded05e8d546706626f3bea9f7
 
+# Directories
+set -gx appleWork $HOME/Library/Mobile\ Documents/com~apple~icloud~applecorporate/Documents 
+set -gx workNotes $appleWork/Work\ Notes
+
 #################################
 #	CUSTOM ALIASES
 #################################
