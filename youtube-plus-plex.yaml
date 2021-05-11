@@ -1,0 +1,16 @@
+channels:
+  - title: Jeff Hoogland
+    rss: https://www.youtube.com/feeds/videos.xml?channel_id=UC0OFObRNMjSsnuEMGA-K29Q
+    playlists:
+      - title: Favorite Leagues
+        rss: https://www.youtube.com/feeds/videos.xml?playlist_id=PLMgaV3fg_ghA4sNlahp_ZG1ypxEoVZakF
+  - title: The Command Zone
+    rss: https://www.youtube.com/feeds/videos.xml?channel_id=UCLsiaNUb42gRAP7ewbJ0ecQ
+    playlists:
+      - title: Game Knights
+        rss: https://www.youtube.com/feeds/videos.xml?playlist_id=PLyLzs6vB3Xk75kjIm45DQLrR8oT63_OvD
+      - title: Extra Turns
+        rss: https://www.youtube.com/feeds/videos.xml?playlist_id=PLyLzs6vB3Xk6ghVVmVgNFF5vI83vH0AWU
+  - title: Andy Laso
+    rss: https://www.youtube.com/c/AndyLaso/featured
+    videoFilter: (?i)tournament|ladder|race|a link to the past

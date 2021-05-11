@@ -1,3 +1,3 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =1
-let g:netrw_dirhist_1='/Users/odin/code/bapi-builder/simple-bapi-builder/src/main/java/com/apple/amp/commerce/bapi/builders'
+let g:netrw_dirhistcnt =1
+let g:netrw_dirhist_1='/Users/lucario/scratchpad/lex_and_yacc'

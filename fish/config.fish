@@ -9,7 +9,7 @@ fish_vi_key_bindings
 set -gx GOPATH $HOME/code/go
 set -gx PATH $PATH $GOPATH/bin
 
-set -gx SCRIPT_DIR $HOME/Sync/Scripts/bin
+set -gx SCRIPT_DIR $HOME/Dropbox/Scripts/bin
 set -gx PATH $PATH $SCRIPT_DIR
 
 set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.git/*"'
@@ -79,6 +79,7 @@ abbr gk   'git checkout'
 abbr gb   'git branch'
 abbr gkb  'git checkout -b'
 abbr gkm  'git checkout master'
+abbr gkd  'git checkout develop'
 abbr gkr  'git checkout release'
 abbr gkf  'git checkout -b feature/'
 abbr gdd  'git diff develop'
