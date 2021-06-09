@@ -47,7 +47,8 @@ Plug 'godlygeek/tabular'
 Plug 'EinfachToll/DidYouMean'
 
 " For fuzzy file finding!
-Plug '/usr/local/opt/fzf' | Plug 'junegunn/fzf.vim'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
 
 " For git stuff from within vim
 Plug 'tpope/vim-fugitive'
@@ -126,13 +127,13 @@ let g:UltiSnipsEditSplit="horizontal"
 
 "============== Vimwiki Setup ==============
 let wiki = {}
-let wiki.path = '$HOME/code/wiki/vimwiki'
+let wiki.path = '$workNotes'
 let wiki.syntax = 'markdown'
 let wiki.ext = '.md'
 let wiki.template_path = '$HOME/code/wiki/vimwiki/templates'
 let wiki.template_default = 'default'
 let wiki.template_ext = '.html'
-let wiki.nested_syntaxes = {'python': 'python', 'c': 'c', 'sml': 'sml', 'bash': 'bash', 'text': 'text'}
+let wiki.nested_syntaxes = {'python': 'python', 'c': 'c', 'sml': 'sml', 'bash': 'bash', 'text': 'text', 'swift':'swift'}
 
 let g:vimwiki_list = [wiki]
 let g:vimwiki_valid_html_tags = 'p,blockquote,span'
@@ -217,12 +218,6 @@ map <C-=> <C-W>=
 nmap <Leader><right> :bn<CR>
 nmap <Leader><left> :bp<CR>
 
-"compile and view latex files.
-autocmd Filetype tex,latex nmap <Leader>p :!pdflatex %<CR><CR>
-autocmd Filetype tex,latex nmap <Leader><S-P> :!pdflatex %<CR>
-autocmd Filetype tex,latex nmap <Leader>o :!open %<.pdf<CR><CR>
-autocmd Filetype tex,latex nmap <Leader>mk :!ltxbuild<CR><CR>
-
 nnoremap <Space> :nohlsearch<CR>
 
 "fugitive shortcuts
@@ -234,6 +229,9 @@ no <Leader>qq :copen<CR>
 
 " Search and replace under text
 nnoremap <Leader>s :%s/\<<C-r><C-w>\>/
+
+" Open file quickly with fzf
+nnoremap <Leader>o :Files<CR>
 
 "=======================================
 "============== Settings ===============

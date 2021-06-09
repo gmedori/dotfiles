@@ -16,6 +16,9 @@ set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.
 
 set -gx HOMEBREW_GITHUB_API_TOKEN 2a0fa730f314728ded05e8d546706626f3bea9f7
 
+set -gx PATH /opt/brew/opt/ruby/bin $PATH
+set -gx PATH /opt/brew/lib/ruby/gems/3.0.0/bin $PATH
+
 # Directories
 set -gx appleWork $HOME/Library/Mobile\ Documents/com~apple~icloud~applecorporate/Documents 
 set -gx workNotes $appleWork/Work\ Notes
@@ -62,7 +65,7 @@ abbr tmnp 'tmux new -s (basename (pwd))'
 #Git
 abbr gs   'git status -s'
 abbr gl   'git pull'
-abbr glm  'git pull upstream master'
+abbr glm  'git pull upstream main'
 abbr glr  'git pull upstream release'
 abbr gld  'git pull upstream develop'
 abbr gp   'git push'
@@ -73,13 +76,13 @@ abbr gc   'git commit'
 abbr gfc  'git commit -eF (git rev-parse --show-toplevel)/.git/COMMIT_EDITMSG'
 abbr gg   'git log --graph --oneline --decorate'
 abbr glg  'git log --graph --oneline --decorate --all'
-abbr gd   'git diff'
-abbr gdc  'git diff --cached'
+abbr gd   'git diff --color-words'
+abbr gdc  'git diff --color-words --cached'
 abbr gk   'git checkout'
 abbr gb   'git branch'
 abbr gkb  'git checkout -b'
-abbr gkm  'git checkout master'
 abbr gkd  'git checkout develop'
+abbr gkm  'git checkout main'
 abbr gkr  'git checkout release'
 abbr gkf  'git checkout -b feature/'
 abbr gdd  'git diff develop'
