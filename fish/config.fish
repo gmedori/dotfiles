@@ -6,12 +6,6 @@ fish_vi_key_bindings
 #	ENVIRONMENT VARIABLES
 #################################
 
-set -gx GOPATH $HOME/code/go
-set -gx PATH $PATH $GOPATH/bin
-
-set -gx SCRIPT_DIR $HOME/Dropbox/Scripts/bin
-set -gx PATH $PATH $SCRIPT_DIR
-
 set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.git/*"'
 
 set -gx HOMEBREW_GITHUB_API_TOKEN 2a0fa730f314728ded05e8d546706626f3bea9f7
@@ -52,6 +46,9 @@ abbr  cdd 'cd ~/dotfiles'
 abbr cdsc 'cd ~/Sync/Scripts/src'
 
 abbr  cl  'clear'
+
+# System Info
+alias showPath 'string join \n $PATH'
 
 #FZF
 alias fzf 'fzf --height=15 --reverse -m --bind ctrl-a:toggle-all'
@@ -138,7 +135,33 @@ end
 
 cat ~/perl5/perlbrew/etc/perlbrew.fish | source
 
-set PATH $HOME/dotfiles/scripts/ $PATH
-set PATH $HOME/perl5/perlbrew/bin $PATH
+
+# Path Setup
+
+# Go
+if not contains $GOPATH/bin $PATH
+    set -gx PATH $PATH $GOPATH/bin
+end
+
+## Scripts
+set -gx SCRIPT_DIR $HOME/Dropbox/Scripts/bin
+if not contains $SCRIPT_DIR $PATH
+    set -gx PATH $PATH $SCRIPT_DIR
+end
+
+## Ruby
+set RUBY_PATH /usr/local/opt/ruby/bin
+if contains $RUBY_PATH $PATH
+    # Ruby path goes in front to override system Ruby
+    set PATH (string match -v $RUBY_PATH $PATH)
+end
+set -gx PATH $RUBY_PATH $PATH
+
+## Perlbrew
+set PERLBREW_BIN $HOME/perl5/perlbrew/bin
+if contains $PERLBREW_BIN $PATH
+    set PATH (string match -v $PERLBREW_BIN $PATH)
+end
+set -gx PATH $PERLBREW_BIN $PATH
 
 starship init fish | source

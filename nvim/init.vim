@@ -95,7 +95,7 @@ Plug 'vim-scripts/ingo-library'
 Plug 'hotchpotch/perldoc-vim'
 
 " For decent autocomplete
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " For Brewfile editing
 Plug 'bfontaine/Brewfile.vim'
@@ -300,4 +300,5 @@ set grepprg=rg\ --vimgrep\ --no-heading\ --smart-case
 " Folding is stupid.
 set nofoldenable
 
-source $HOME/.config/nvim/coc-config.vim
+" Configure coc.vim
+" source $HOME/.config/nvim/coc-config.vim
