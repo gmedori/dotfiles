@@ -18,6 +18,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"regexp"
+	"strings"
+
+	"github.com/c-bata/go-prompt"
 	"github.com/spf13/cobra"
 
 	homedir "github.com/mitchellh/go-homedir"
@@ -38,7 +42,63 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+		completer := func(d prompt.Document) []prompt.Suggest {
+			if d.TextBeforeCursor() == "" {
+				return []prompt.Suggest{}
+			}
+
+			args = strings.Split(d.TextBeforeCursor(), " ")
+			w := d.GetWordBeforeCursor()
+
+			if len(args) > 1 && args[len(args)-2] == "roll" {
+				s := []prompt.Suggest{
+					{Text: "1d20", Description: "Roll a d20."},
+					{Text: "adv", Description: "Roll with advantage."},
+				}
+
+				if w == args[len(args)-2] {
+					return s
+				} else {
+					return prompt.FilterFuzzy(s, w, true)
+				}
+
+			}
+
+			s := []prompt.Suggest{
+				{Text: "roll", Description: "Roll one or more dice"},
+				{Text: "reroll", Description: "Reroll the last dice"},
+			}
+
+			return prompt.FilterHasPrefix(s, d.GetWordBeforeCursorWithSpace(), true)
+		}
+
+		executor := func(input string) {
+			if input == "" {
+				return
+			}
+
+			args := strings.Split(input, " ")
+
+			switch args[0] {
+			case "roll":
+				roll(args[1:])
+				fmt.Printf("Attempting to roll: %v\n", strings.Join(args[1:], ", "))
+			case "exit":
+				os.Exit(0)
+			default:
+				fmt.Printf("Unknown command: %v\n", args[0])
+			}
+		}
+
+		p := prompt.New(executor, completer, prompt.OptionPrefix("> "))
+		p.Run()
+	},
+}
+
+func roll(args []string) {
+	roller := NewRoller()
+	regexp.MustCompile("^(\d*)d(\d+)$")
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
