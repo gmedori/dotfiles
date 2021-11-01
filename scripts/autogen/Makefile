@@ -5,12 +5,12 @@ clean:
 	-rm autogen
 
 install: build generateFishCompletion
-	mv autogen ../../bin/
+	mv autogen ../bin/
 	mv autogen.fish ~/dotfiles/fish/completions/
 
 
 uninstall:
-	-rm ../../bin/autogen 2> /dev/null
+	-rm ../bin/autogen 2> /dev/null
 	-rm ~/dotfiles/fish/completions/autogen.fish 2> /dev/null
 
 reinstall: uninstall install
