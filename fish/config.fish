@@ -12,6 +12,7 @@ set -gx HOMEBREW_GITHUB_API_TOKEN 2a0fa730f314728ded05e8d546706626f3bea9f7
 
 set -gx PATH /opt/brew/opt/ruby/bin $PATH
 set -gx PATH /opt/brew/lib/ruby/gems/3.0.0/bin $PATH
+set -gx PATH /opt/homebrew/bin $PATH
 
 # Directories
 set -gx appleWork $HOME/Library/Mobile\ Documents/com~apple~icloud~applecorporate/Documents 

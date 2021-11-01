@@ -103,9 +103,6 @@ Plug 'bfontaine/Brewfile.vim'
 " For commenting stuff out
 Plug 'tomtom/tcomment_vim'
 
-" For toml config files
-Plug 'cespare/vim-toml'
-
 call plug#end()
 
 "=============-Git Commit Setup ==============
