@@ -40,7 +40,7 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	TechTechGooseCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/.ttg.yaml)")
+	TechTechGooseCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/ttg.yaml)")
 	TechTechGooseCmd.PersistentFlags().StringVarP(&config.RootDir, "root", "r", "", "The blog's root directory.")
 	viper.BindPFlag("root", TechTechGooseCmd.PersistentFlags().Lookup("root"))
 }
@@ -57,13 +57,10 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-
-		configDir := filepath.Join(home, ".config")
-
-		// Search config in config directory with name ".ttg" (without extension).
-		viper.AddConfigPath(configDir)
-		viper.SetConfigName("ttg")
+		// Search config in config directory with name "ttg.yaml" (without extension).
+		viper.AddConfigPath("$HOME/.config")
+		viper.SetConfigName("ttg.yaml")
+		viper.SetConfigType("yaml")
 	}
 
 	// If a config file is found, read it in.
