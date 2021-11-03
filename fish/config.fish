@@ -14,6 +14,10 @@ set -gx PATH /opt/brew/opt/ruby/bin $PATH
 set -gx PATH /opt/brew/lib/ruby/gems/3.0.0/bin $PATH
 set -gx PATH /opt/homebrew/bin $PATH
 
+if [ -d $HOME/dotfiles/work_specific/bin ]
+    set -gx PATH $HOME/dotfiles/work_specific/bin $PATH
+end
+
 # Directories
 set -gx appleWork $HOME/Library/Mobile\ Documents/com~apple~icloud~applecorporate/Documents 
 set -gx workNotes $appleWork/Work\ Notes
@@ -44,7 +48,7 @@ abbr  cdw 'cd ~/Sync/Writing'
 abbr  cdt 'cd ~/Sync/Writing/techtechgoose'
 abbr  cdd 'cd ~/dotfiles'
 
-abbr cdsc 'cd ~/Sync/Scripts/src'
+abbr cdsc 'cd ~/Dropbox/Scripts/src/'
 
 abbr  cl  'clear'
 
@@ -71,8 +75,10 @@ abbr gf   'git fetch'
 abbr ga   'git add'
 abbr gaa  'git add --all; and git status -s'
 abbr gc   'git commit'
+abbr gca  'git commit --amend --date=now'
 abbr gfc  'git commit -eF (git rev-parse --show-toplevel)/.git/COMMIT_EDITMSG'
 abbr gg   'git log --graph --oneline --decorate'
+abbr ggm  'git log --graph --oneline --decorate main..'
 abbr glg  'git log --graph --oneline --decorate --all'
 abbr gd   'git diff --color-words'
 abbr gdc  'git diff --color-words --cached'
@@ -84,7 +90,7 @@ abbr gkm  'git checkout main'
 abbr gkr  'git checkout release'
 abbr gkf  'git checkout -b feature/'
 abbr gdd  'git diff develop'
-abbr gdm  'git diff master'
+abbr gdm  'git diff main'
 abbr gsh  'git stash push -m '
 abbr gsp  'git stash pop'
 abbr gpub 'git push -u origin (git branch | rg "\\\\*" | cut -d " " -f 2)'
@@ -140,6 +146,7 @@ cat ~/perl5/perlbrew/etc/perlbrew.fish | source
 # Path Setup
 
 # Go
+set -gx GOPATH $HOME/go
 if not contains $GOPATH/bin $PATH
     set -gx PATH $PATH $GOPATH/bin
 end

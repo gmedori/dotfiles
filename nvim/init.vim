@@ -38,7 +38,7 @@ Plug 'neomake/neomake'
 Plug 'lervag/vimtex'
 
 " For snippets. Because snippets.
-Plug 'SirVer/ultisnips'
+" Plug 'SirVer/ultisnips'
 
 " For making things look pretty and formatted
 Plug 'godlygeek/tabular'
@@ -102,6 +102,12 @@ Plug 'bfontaine/Brewfile.vim'
 
 " For commenting stuff out
 Plug 'tomtom/tcomment_vim'
+
+" For auto-inserting end in Ruby
+Plug 'tpope/vim-endwise'
+
+" For Swift syntax highlighting
+Plug 'keith/swift.vim'
 
 call plug#end()
 
@@ -267,7 +273,7 @@ set list listchars=tab:› ,trail:·,extends:>,precedes:<
 set tabstop=4 softtabstop=4 shiftwidth=4 expandtab
 
 " Creates the dropdown menu for autocompletion
-set completeopt=menu
+" set completeopt=menu
 
 " New splits should be created to the right and down.
 set splitbelow
