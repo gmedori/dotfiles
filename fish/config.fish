@@ -94,6 +94,7 @@ abbr gdm  'git diff main'
 abbr gsh  'git stash push -m '
 abbr gsp  'git stash pop'
 abbr gpub 'git push -u origin (git branch | rg "\\\\*" | cut -d " " -f 2)'
+abbr gcp  'git cherry-pick'
 
 alias currentBranch "git branch | rg '\\*' | cut -d ' ' -f 2"
 
