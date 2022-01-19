@@ -10,14 +10,6 @@ set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.
 
 set -gx HOMEBREW_GITHUB_API_TOKEN 2a0fa730f314728ded05e8d546706626f3bea9f7
 
-set -gx PATH /opt/brew/opt/ruby/bin $PATH
-set -gx PATH /opt/brew/lib/ruby/gems/3.0.0/bin $PATH
-set -gx PATH /opt/homebrew/bin $PATH
-
-if [ -d $HOME/dotfiles/work_specific/bin ]
-    set -gx PATH $HOME/dotfiles/work_specific/bin $PATH
-end
-
 # Directories
 set -gx appleWork $HOME/Library/Mobile\ Documents/com~apple~icloud~applecorporate/Documents 
 set -gx workNotes $appleWork/Work\ Notes
@@ -37,6 +29,10 @@ abbr essh  'nvim ~/.ssh/config'
 abbr estar 'nvim ~/.config/starship.toml'
 abbr rld   'source ~/.config/fish/config.fish'
 
+function temp
+    nvim /tmp/(uuidgen).$argv[1]
+end
+
 #General
 alias ls  'ls -G'
 alias l   'ls -Flh'
@@ -48,7 +44,7 @@ abbr  cdw 'cd ~/Sync/Writing'
 abbr  cdt 'cd ~/Sync/Writing/techtechgoose'
 abbr  cdd 'cd ~/dotfiles'
 
-abbr cdsc 'cd ~/Dropbox/Scripts/src/'
+abbr cdsc 'cd ~/scripts'
 
 abbr  cl  'clear'
 
@@ -153,7 +149,7 @@ if not contains $GOPATH/bin $PATH
 end
 
 ## Scripts
-set -gx SCRIPT_DIR $HOME/Dropbox/Scripts/bin
+set SCRIPT_DIR $HOME/scripts/bin
 if not contains $SCRIPT_DIR $PATH
     set -gx PATH $PATH $SCRIPT_DIR
 end
@@ -172,5 +168,21 @@ if contains $PERLBREW_BIN $PATH
     set PATH (string match -v $PERLBREW_BIN $PATH)
 end
 set -gx PATH $PERLBREW_BIN $PATH
+
+## Homebrew
+set HOMEBREW_PATH /opt/homebrew/bin
+if contains $HOMEBREW_PATH $PATH
+    set PATH (string match -v $HOMEBREW_PATH $PATH)
+end
+set -gx PATH $HOMEBREW_PATH $PATH
+
+## Work Specific Stuff
+set WORK_SPECIFIC_DIR $HOME/dotfiles/work_specific/bin
+if [ -d $WORK_SPECIFIC_DIR ] # Only do this one if the directory exists (i.e. only on a work computer)
+    if contains $WORK_SPECIFIC_DIR $PATH
+        set PATH (string match -v $WORK_SPECIFIC_DIR $PATH)
+    end
+    set -gx PATH $HOME/dotfiles/work_specific/bin $PATH
+end
 
 starship init fish | source
