@@ -31,7 +31,11 @@ end
 message = ARGV.join(" ")
 
 command = "display notification \"#{message}\""
-command = "#{command} with title \"#{options[:title]}\"" unless options[:title].nil?
+if options[:title].nil?
+  command = "#{command} with title \"Notify\""
+else
+  command = "#{command} with title \"#{options[:title]}\""
+end
 command = "#{command} with subtitle \"#{options[:subtitle]}\"" unless options[:subtitle].nil?
 
 if options[:sound]
