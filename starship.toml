@@ -1,5 +1,5 @@
 [character]
-use_symbol_for_status = true
+vicmd_symbol = "[N](bold cyan)"
 
 [git_branch]
 symbol = "🌱 "

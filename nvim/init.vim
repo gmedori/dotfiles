@@ -146,9 +146,10 @@ let g:tex_flavor='latex'
 let g:tex_conceal=""
 
 "============== Colorscheme Configs ===============
-packadd! dracula_pro
-let g:dracula_colorterm = 1
-colorscheme dracula_pro_blade
+" packadd! dracula_pro
+" let g:dracula_colorterm = 1
+" colorscheme dracula_pro_blade
+colorscheme badwolf
 
 "============== DevIcons Configs ===============
 function! MyFiletype()
