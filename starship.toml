@@ -28,3 +28,5 @@ disabled = true
 [swift]
 disabled = true
 
+[perl]
+disabled = true
