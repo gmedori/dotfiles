@@ -13,6 +13,8 @@ brew "neovim"
 brew "tmux"
 brew "reattach-to-user-namespace"
 brew "starship"
+brew "exa"
+brew "delta"
 
 # Utilities
 brew "tree"

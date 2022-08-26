@@ -1,3 +1,3 @@
 function fish_greeting
-	fortune | cowsay | lolcat
+	printf "Did you know?\n\nAsana is a cool place to work!" | cowsay | lolcat
 end

@@ -1,5 +1,15 @@
+format = """$fill
+$character"""
+right_format = """$all"""
+
+[fill]
+symbol = "━"
+
 [character]
-vicmd_symbol = "[N](bold cyan)"
+success_symbol = "[❯](bold red)[❯](bold cyan)[❯](bold green)"
+error_symbol = "[❯❯❯](bold red)"
+vimcmd_symbol = "[❮❮❮](bold cyan)"
+vimcmd_visual_symbol = "[❮❮❮](bold yellow)"
 
 [git_branch]
 symbol = "🌱 "
@@ -11,3 +21,10 @@ symbol = "Go "
 [java]
 symbol = "Java "
 style = "blue"
+
+[ruby]
+disabled = true
+
+[swift]
+disabled = true
+

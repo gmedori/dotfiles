@@ -167,7 +167,22 @@ let g:airline_right_sep=''
 " let g:airline#extensions#tabline#fnamemod = ':t'
 
 "============== Neomake Configs ===============
-call neomake#configure#automake('rnw')
+call neomake#configure#automake('w')
+let g:neomake_python_enabled_makers = ['pylint']
+let g:neomake_python_pylint_maker = {
+  \ 'args': [
+  \ '-d', 'C0114',
+  \ '-f', 'text',
+  \ '--msg-template="{path}:{line}:{column}:{C}: [{symbol}] {msg}"',
+  \ '-r', 'n'
+  \ ],
+  \ 'errorformat':
+  \ '%A%f:%l:%c:%t: %m,' .
+  \ '%A%f:%l: %m,' .
+  \ '%A%f:(%l): %m,' .
+  \ '%-Z%p^%.%#,' .
+  \ '%-G%.%#',
+  \ }
 
 "============== Color Inspector ===============
 nmap <C-F> :call <SID>SymbStack()<CR>

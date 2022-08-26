@@ -34,13 +34,16 @@ function temp
 end
 
 #General
-alias ls  'ls -G'
-alias l   'ls -Flh'
-alias la  'ls -AFlh'
+#alias ls  'ls -G'
+#alias l   'ls -Flh'
+#alias la  'ls -AFlh'
+alias ls 'exa --icons'
+alias l  'exa --oneline --icons'
+alias la 'exa --all --oneline --icons'
 
 abbr  cdc 'cd ~/code'
 abbr  cds 'cd ~/scratchpad'
-abbr  cdw 'cd ~/Sync/Writing'
+abbr  cdw 'cd ~/dotfiles/work_specific'
 abbr  cdt 'cd ~/Sync/Writing/techtechgoose'
 abbr  cdd 'cd ~/dotfiles'
 
@@ -59,11 +62,13 @@ abbr tml  'tmux list-sessions'
 abbr tma  'tmux attach -t'
 abbr tmn  'tmux new -s'
 abbr tmnp 'tmux new -s (basename (pwd))'
+abbr tmni 'tmux new -s asana-ios'
+abbr tmns 'tmux new -s asana-server'
 
 #Git
 abbr gs   'git status -s'
 abbr gl   'git pull'
-abbr glm  'git pull upstream main'
+abbr glm  'git pull upstream master'
 abbr glr  'git pull upstream release'
 abbr gld  'git pull upstream develop'
 abbr gp   'git push'
@@ -74,23 +79,27 @@ abbr gc   'git commit'
 abbr gca  'git commit --amend --date=now'
 abbr gfc  'git commit -eF (git rev-parse --show-toplevel)/.git/COMMIT_EDITMSG'
 abbr gg   'git log --graph --oneline --decorate'
-abbr ggm  'git log --graph --oneline --decorate main..'
+abbr ggm  'git log --graph --oneline --decorate master..'
 abbr glg  'git log --graph --oneline --decorate --all'
-abbr gd   'git diff --color-words'
-abbr gdc  'git diff --color-words --cached'
+abbr gd   'git diff'
+abbr gdc  'git diff --cached'
 abbr gk   'git checkout'
 abbr gb   'git branch'
 abbr gkb  'git checkout -b'
+abbr gkbg 'git checkout -b gposcidonio/'
 abbr gkd  'git checkout develop'
-abbr gkm  'git checkout main'
+abbr gkm  'git checkout master'
 abbr gkr  'git checkout release'
 abbr gkf  'git checkout -b feature/'
 abbr gdd  'git diff develop'
-abbr gdm  'git diff main'
+abbr gdm  'git diff master'
 abbr gsh  'git stash push -m '
 abbr gsp  'git stash pop'
 abbr gpub 'git push -u origin (git branch | rg "\\\\*" | cut -d " " -f 2)'
 abbr gcp  'git cherry-pick'
+abbr gr   'git rebase'
+abbr grm  'git rebase master'
+abbr grc  'git rebase --continue'
 
 alias currentBranch "git branch | rg '\\*' | cut -d ' ' -f 2"
 
@@ -142,11 +151,17 @@ cat ~/perl5/perlbrew/etc/perlbrew.fish | source
 
 # Path Setup
 
-# Go
+## Go Setup
 set -gx GOPATH $HOME/go
-if not contains $GOPATH/bin $PATH
-    set -gx PATH $PATH $GOPATH/bin
+set -gx GOBIN $GOPATH/bin
+if not contains $GOBIN $PATH
+    set -gx PATH $PATH $GOBIN
 end
+set -gx GOROOT (brew --prefix golang)/libexec
+if not contains $GOROOT/bin $PATH
+    set -gx PATH $PATH $GOROOT/bin
+end
+
 
 ## Scripts
 set SCRIPT_DIR $HOME/scripts/bin
@@ -177,12 +192,12 @@ end
 set -gx PATH $HOMEBREW_PATH $PATH
 
 ## Work Specific Stuff
-set WORK_SPECIFIC_DIR $HOME/dotfiles/work_specific/bin
+set WORK_SPECIFIC_DIR $HOME/dotfiles/work_specific
 if [ -d $WORK_SPECIFIC_DIR ] # Only do this one if the directory exists (i.e. only on a work computer)
-    if contains $WORK_SPECIFIC_DIR $PATH
-        set PATH (string match -v $WORK_SPECIFIC_DIR $PATH)
-    end
-    set -gx PATH $HOME/dotfiles/work_specific/bin $PATH
+    source $WORK_SPECIFIC_DIR/config/config.fish
 end
 
 starship init fish | source
+
+## Ruby Management // rbenv
+status --is-interactive; and rbenv init - fish | source
