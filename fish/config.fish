@@ -24,7 +24,7 @@ abbr evim  'nvim ~/.config/nvim/init.vim'
 abbr ebash 'nvim ~/.bash_profile'
 abbr efish 'nvim ~/.config/fish/config.fish'
 abbr etmux 'nvim ~/.tmux.conf'
-abbr egit  'nvim ~/.git'
+abbr egit  'nvim ~/.gitconfig'
 abbr essh  'nvim ~/.ssh/config'
 abbr estar 'nvim ~/.config/starship.toml'
 abbr rld   'source ~/.config/fish/config.fish'
@@ -101,6 +101,12 @@ abbr gr   'git rebase'
 abbr grm  'git rebase master'
 abbr grc  'git rebase --continue'
 
+# Github
+abbr pr   'gh pr'
+abbr mypr 'gh pr list -a @me'
+abbr prv  'gh pr view --web'
+abbr prk  'gh pr checkout'
+
 alias currentBranch "git branch | rg '\\*' | cut -d ' ' -f 2"
 
 #Docker
@@ -112,6 +118,7 @@ abbr grf 'gr clean build jacocoTestReport'
 #Other Tools
 abbr kb 'kubectl'
 abbr java_home '/usr/libexec/java_home'
+alias lipsum 'cat $HOME/dotfiles/resources/lipsum.txt'
 
 #################################
 #	COLORS
