@@ -322,3 +322,6 @@ set nofoldenable
 
 " Configure coc.vim
 " source $HOME/.config/nvim/coc-config.vim
+
+" autocommands
+au BufNewFile,BufRead *.gitconfig setf gitconfig

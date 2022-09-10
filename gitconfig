@@ -1,0 +1,42 @@
+[user]
+	name = Gustavo Poscidonio
+	email = gustavoposcidonio@asana.com
+	signingkey = 482CCB887AB00925
+[commit]
+	gpgsign = true
+[maintenance]
+	repo = /Users/greninja/sandbox/asana
+[diff]
+	tool = Kaleidoscope
+[difftool "Kaleidoscope"]
+	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+[difftool]
+	prompt = false
+[merge]
+	tool = Kaleidoscope
+[mergetool "Kaleidoscope"]
+	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+	trustExitCode = true
+[mergetool]
+	prompt = false
+
+# Delta configs
+[core]
+    pager = delta
+[interactive]
+    diffFilter = delta --color-only
+[add.interactive]
+    useBuiltin = false # required for git 2.37.0
+[delta]
+    navigate = true    # use n and N to move between diff sections
+    light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+    minus-style = "syntax #700000"
+    minus-emph-style = "normal #a00000"
+    minus-empty-line-marker-style = "normal #700000"
+    plus-style = "syntax #005000"
+    plus-emph-style = "normal #008c00"
+    plus-empty-line-marker-style = "normal #005000"
+[merge]
+    conflictstyle = diff3
+[diff]
+    colorMoved = default
