@@ -17,7 +17,7 @@ my @fileList = (
     ["$directory/fish", "$HOME/.config/fish"],
     ["$directory/starship.toml", "$HOME/.config/starship.toml"],
     ["$directory/tmux/tmux.conf", "$HOME/.tmux.conf"],
-    ["$directory/tmux/tmux", "$HOME/.tmux"]
+    ["$directory/tmux/tmux", "$HOME/.tmux"],
     ["$directory/gitconfig", "$HOME/.gitconfig"]
 );
 

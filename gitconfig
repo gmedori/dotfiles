@@ -40,3 +40,7 @@
     conflictstyle = diff3
 [diff]
     colorMoved = default
+
+# Personal git settings
+[includeIf "hasconfig:remote.*.url:git@github.com:gposcidonio/**"]
+    path = "~/dotfiles/personal.gitconfig"
