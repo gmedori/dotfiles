@@ -1,3 +1,7 @@
 [user]
     name = "Gustavo Poscidonio"
     email = "mail@gustavo.sh"
+    #signingkey = ""
+
+[commit]
+    gpgsign = false

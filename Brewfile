@@ -14,7 +14,7 @@ brew "tmux"
 brew "reattach-to-user-namespace"
 brew "starship"
 brew "exa"
-brew "delta"
+brew "git-delta"
 
 # Utilities
 brew "tree"
