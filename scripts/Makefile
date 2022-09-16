@@ -6,7 +6,15 @@ install: build
 	cp build/* gobin
 
 .PHONY: build
-build: chapter-splitter
+build: build/*
 
-chapter-splitter:
-	go build -o ./build/chapter-splitter ./cmd/chapter-splitter/main.go
+.PHONY: clean
+clean:
+	rm -rf build/*
+
+build/%: cmd/%/main.go cmd/%/**/*.go
+	go build -o $@ $<
+
+.PHONY: chapter-splitter
+chapter-splitter: build/chapter-splitter
+
