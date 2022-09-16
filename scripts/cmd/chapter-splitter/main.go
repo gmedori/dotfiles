@@ -1,6 +1,6 @@
 package main
 
-import "gitlab.com/gposcidonio/scripts/chapter-splitter/cmd"
+import "github.com/gposcidonio/scripts/cmd/chapter-splitter/cmd"
 
 func main() {
 	cmd.Execute()
