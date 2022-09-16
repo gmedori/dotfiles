@@ -1,4 +1,0 @@
-#!/bin/bash
-
-perlbrew switch 5.28.1
-~/Sync/Scripts/download-youtube.pl $@

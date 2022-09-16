@@ -1,4 +1,0 @@
-#! /usr/bin/env perl -p
-
-s/>(?! \[!quote\])(.*)/> \n>\1/g;
-s/^ /\n/g;

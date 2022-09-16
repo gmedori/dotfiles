@@ -1,4 +1,0 @@
-#!/bin/bash
-
-latexmk -pdf
-osascript ~/Sync/Scripts/applescripts/activate-preview-then-iterm.scpt
