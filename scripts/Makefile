@@ -1,20 +1,23 @@
-.PHONY: all
+EXECUTABLES = $(shell ls cmd)
+BUILDS = $(foreach ex, ${EXECUTABLES},build/${ex})
+
+.PHONY: all install uninstall build clean
+
 all: build
 
-.PHONY: install
-install: build
-	cp build/* gobin
+install: build gobin
+	cp ${BUILDS} gobin
 
-.PHONY: build
-build: build/*
+uninstall:
+	rm -rf gobin
 
-.PHONY: clean
+build: ${BUILDS}
+
 clean:
-	rm -rf build/*
+	rm -rf $(wildcard build/*)
 
 build/%: cmd/%/main.go cmd/%/**/*.go
 	go build -o $@ $<
 
-.PHONY: chapter-splitter
-chapter-splitter: build/chapter-splitter
-
+gobin:
+	mkdir -p gobin
