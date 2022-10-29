@@ -159,22 +159,22 @@ cat ~/perl5/perlbrew/etc/perlbrew.fish | source
 
 # Path Setup
 
-## Go Setup
-set -gx GOPATH $HOME/go
-set -gx GOBIN $GOPATH/bin
-if not contains $GOBIN $PATH
-    set -gx PATH $PATH $GOBIN
-end
-set -gx GOROOT (brew --prefix golang)/libexec
-if not contains $GOROOT/bin $PATH
-    set -gx PATH $PATH $GOROOT/bin
-end
-
-
 ## Scripts
 set SCRIPT_DIR $HOME/scripts/bin
 if not contains $SCRIPT_DIR $PATH
     set -gx PATH $PATH $SCRIPT_DIR
+end
+
+set GO_SCRIPT_DIR $HOME/scripts/gobin
+if not contains $GO_SCRIPT_DIR $PATH
+    set -gx PATH $PATH $GO_SCRIPT_DIR
+end
+
+## Go
+
+set GO_BIN $HOME/go/bin
+if not contains $GO_BIN $PATH
+    set -gx PATH $PATH $GO_BIN
 end
 
 ## Ruby
