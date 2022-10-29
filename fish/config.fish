@@ -164,6 +164,18 @@ if not contains $SCRIPT_DIR $PATH
     set -gx PATH $PATH $SCRIPT_DIR
 end
 
+set GO_SCRIPT_DIR $HOME/scripts/gobin
+if not contains $GO_SCRIPT_DIR $PATH
+    set -gx PATH $PATH $GO_SCRIPT_DIR
+end
+
+## Go
+
+set GO_BIN $HOME/go/bin
+if not contains $GO_BIN $PATH
+    set -gx PATH $PATH $GO_BIN
+end
+
 ## Ruby
 set RUBY_PATH /usr/local/opt/ruby/bin
 if contains $RUBY_PATH $PATH
