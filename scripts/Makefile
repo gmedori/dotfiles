@@ -1,5 +1,5 @@
 EXECUTABLES = $(shell ls cmd)
-BUILDS = $(foreach ex, ${EXECUTABLES},build/${ex})
+BUILDS = $(foreach ex,${EXECUTABLES},build/${ex})
 
 .PHONY: all install uninstall build clean
 

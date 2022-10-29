@@ -1,0 +1,57 @@
+/*
+Copyright © 2022 Gustavo Poscidonio <mail@gustavo.sh>
+*/
+package cmd
+
+import (
+	"fmt"
+	"os"
+
+	asana "bitbucket.org/mikehouston/asana-go"
+	"github.com/spf13/cobra"
+)
+
+var goosanaKey string
+var asanaClient *asana.Client
+
+// rootCmd represents the base command when called without any subcommands
+var rootCmd = &cobra.Command{
+	Use:   "goosana",
+	Short: "Interact with Asana on the command line.",
+	// Uncomment the following line if your bare application
+	// has an action associated with it:
+	// Run: func(cmd *cobra.Command, args []string) { },
+}
+
+// Execute adds all child commands to the root command and sets flags appropriately.
+// This is called by main.main(). It only needs to happen once to the rootCmd.
+func Execute() {
+	err := rootCmd.Execute()
+	if err != nil {
+		os.Exit(1)
+	}
+}
+
+func init() {
+	// Here you will define your flags and configuration settings.
+	// Cobra supports persistent flags, which, if defined here,
+	// will be global for your application.
+
+	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.goosana.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&goosanaKey, "key", "k", "", "API access token for Asana")
+
+	// Cobra also supports local flags, which will only run
+	// when this action is called directly.
+	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	// Default to looking up the GOOSANA_KEY environment variable if goosanaKey is empty.
+	if len(goosanaKey) == 0 {
+		goosanaKey = os.Getenv("GOOSANA_KEY")
+	}
+	if len(goosanaKey) == 0 {
+		fmt.Fprintf(os.Stderr, "No API key set. Please use --key or set the GOOSANA_KEY environment variable.")
+		os.Exit(1)
+	}
+
+	asanaClient = asana.NewClientWithAccessToken(goosanaKey)
+}

@@ -36,7 +36,7 @@ if options[:title].nil?
 else
   command = "#{command} with title \"#{options[:title]}\""
 end
-command = "#{command} with subtitle \"#{options[:subtitle]}\"" unless options[:subtitle].nil?
+command = "#{command} subtitle \"#{options[:subtitle]}\"" unless options[:subtitle].nil?
 
 if options[:sound]
   command = "#{command} sound name \"#{options[:sound]}\""

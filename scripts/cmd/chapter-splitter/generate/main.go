@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"gitlab.com/gposcidonio/scripts/chapter-splitter/cmd"
+	"github.com/gposcidonio/scripts/cmd/chapter-splitter/cmd"
 )
 
 func main() {
