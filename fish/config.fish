@@ -95,7 +95,7 @@ abbr gdd  'git diff develop'
 abbr gdm  'git diff master'
 abbr gsh  'git stash push -m '
 abbr gsp  'git stash pop'
-abbr gpub 'git push -u origin (git branch | rg "\\\\*" | cut -d " " -f 2)'
+abbr gpub 'git push -u origin (git branch --show-current)'
 abbr gcp  'git cherry-pick'
 abbr gr   'git rebase'
 abbr grm  'git rebase master'
@@ -106,6 +106,7 @@ abbr pr   'gh pr'
 abbr mypr 'gh pr list -a @me'
 abbr prv  'gh pr view --web'
 abbr prk  'gh pr checkout'
+abbr prs  'gh pr status'
 
 alias currentBranch "git branch | rg '\\*' | cut -d ' ' -f 2"
 

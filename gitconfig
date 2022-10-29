@@ -36,6 +36,7 @@
     plus-style = "syntax #005000"
     plus-emph-style = "normal #008c00"
     plus-empty-line-marker-style = "normal #005000"
+    side-by-side = true
 [merge]
     conflictstyle = diff3
 [diff]

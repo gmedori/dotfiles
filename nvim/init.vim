@@ -25,9 +25,6 @@ Plug 'morhetz/gruvbox'
 " For more pretty colors
 Plug 'jonathanfilip/vim-lucius'
 
-" For pretty glyphs
-" Plug 'ryanoasis/vim-devicons'
-
 " For editing fish files
 Plug 'dag/vim-fish'
 
@@ -36,9 +33,6 @@ Plug 'neomake/neomake'
 
 " For writing latex, because it's better in nvim
 Plug 'lervag/vimtex'
-
-" For snippets. Because snippets.
-" Plug 'SirVer/ultisnips'
 
 " For making things look pretty and formatted
 Plug 'godlygeek/tabular'
@@ -81,9 +75,6 @@ Plug 'sjl/badwolf'
 Plug 'plasticboy/vim-markdown'
 " Plug 'tpope/vim-markdown'
 
-" For writing CQL scripts
-Plug 'elubow/cql-vim'
-
 " For staying organized
 Plug 'vimwiki/vimwiki', { 'branch' : 'dev' }
 
@@ -95,13 +86,13 @@ Plug 'vim-scripts/ingo-library'
 Plug 'hotchpotch/perldoc-vim'
 
 " For decent autocomplete
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " For Brewfile editing
 Plug 'bfontaine/Brewfile.vim'
 
 " For commenting stuff out
-Plug 'tomtom/tcomment_vim'
+Plug 'tpope/vim-commentary'
 
 " For auto-inserting end in Ruby
 Plug 'tpope/vim-endwise'
@@ -321,7 +312,7 @@ set grepprg=rg\ --vimgrep\ --no-heading\ --smart-case
 set nofoldenable
 
 " Configure coc.vim
-" source $HOME/.config/nvim/coc-config.vim
+source $HOME/.config/nvim/coc-config.vim
 
 " autocommands
 au BufNewFile,BufRead *.gitconfig setf gitconfig
