@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gposcidonio/scripts/asana"
 	"github.com/spf13/cobra"
 )
 
@@ -20,18 +19,7 @@ var rootCmd = &cobra.Command{
 	Short: "Interact with Asana on the command line.",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	Run: func(cmd *cobra.Command, args []string) {
-		client := &asana.AsanaClient{APIKey: goosanaKey}
-		tasks, err := client.GetTasks(defaultWorkspaceID)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Bad stuff happened getting tasks: %v\n", err)
-			os.Exit(1)
-		}
-		fmt.Printf("Fount %v tasks!\n", len(tasks))
-		for _, t := range tasks {
-			fmt.Printf("%v - %v\n", t.DueDate, t.Text)
-		}
-	},
+	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -58,6 +46,7 @@ func init() {
 	// Default to looking up the GOOSANA_KEY environment variable if goosanaKey is empty.
 	goosanaKeyIsSet := false
 	if len(goosanaKey) == 0 {
+		goosanaKeyIsSet = true
 		goosanaKey, goosanaKeyIsSet = os.LookupEnv("GOOSANA_KEY")
 	}
 	if !goosanaKeyIsSet {
