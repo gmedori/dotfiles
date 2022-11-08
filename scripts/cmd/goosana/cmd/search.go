@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -22,15 +21,6 @@ var searchCmd = &cobra.Command{
 	// to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("search called")
-		fmt.Printf("GOOSANA_KEY length = %v.\n", len(goosanaKey))
-		ws, _, err := asanaClient.Workspaces()
-		if err != nil {
-			cmd.PrintErrf("Error: %v\n", err)
-			os.Exit(1)
-		}
-		for _, w := range ws {
-			fmt.Printf("Workspace: %v.\n", w.Name)
-		}
 	},
 }
 

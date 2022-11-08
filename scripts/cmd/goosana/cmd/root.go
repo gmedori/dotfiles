@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"os"
 
-	asana "bitbucket.org/mikehouston/asana-go"
+	"github.com/gposcidonio/scripts/asana"
 	"github.com/spf13/cobra"
 )
 
 var goosanaKey string
-var asanaClient *asana.Client
+var defaultWorkspaceID = "15793206719"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -20,7 +20,18 @@ var rootCmd = &cobra.Command{
 	Short: "Interact with Asana on the command line.",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+		client := &asana.AsanaClient{APIKey: goosanaKey}
+		tasks, err := client.GetTasks(defaultWorkspaceID)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Bad stuff happened getting tasks: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Fount %v tasks!\n", len(tasks))
+		for _, t := range tasks {
+			fmt.Printf("%v - %v\n", t.DueDate, t.Text)
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -45,13 +56,12 @@ func init() {
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	// Default to looking up the GOOSANA_KEY environment variable if goosanaKey is empty.
+	goosanaKeyIsSet := false
 	if len(goosanaKey) == 0 {
-		goosanaKey = os.Getenv("GOOSANA_KEY")
+		goosanaKey, goosanaKeyIsSet = os.LookupEnv("GOOSANA_KEY")
 	}
-	if len(goosanaKey) == 0 {
+	if !goosanaKeyIsSet {
 		fmt.Fprintf(os.Stderr, "No API key set. Please use --key or set the GOOSANA_KEY environment variable.")
 		os.Exit(1)
 	}
-
-	asanaClient = asana.NewClientWithAccessToken(goosanaKey)
 }
