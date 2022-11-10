@@ -8,11 +8,12 @@ fish_vi_key_bindings
 
 set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.git/*"'
 
-set -gx HOMEBREW_GITHUB_API_TOKEN 2a0fa730f314728ded05e8d546706626f3bea9f7
 
-# Directories
-set -gx appleWork $HOME/Library/Mobile\ Documents/com~apple~icloud~applecorporate/Documents 
-set -gx workNotes $appleWork/Work\ Notes
+#################################
+#	OTHER VARIABLES
+#################################
+
+set -gx FISH_FUNC_DIR ~/.config/fish/functions/
 
 #################################
 #	CUSTOM ALIASES
@@ -23,15 +24,12 @@ alias vim  'nvim'
 abbr evim  'nvim ~/.config/nvim/init.vim'
 abbr ebash 'nvim ~/.bash_profile'
 abbr efish 'nvim ~/.config/fish/config.fish'
+abbr efunc "nvim $FISH_FUNC_DIR"
 abbr etmux 'nvim ~/.tmux.conf'
 abbr egit  'nvim ~/.gitconfig'
 abbr essh  'nvim ~/.ssh/config'
 abbr estar 'nvim ~/.config/starship.toml'
 abbr rld   'source ~/.config/fish/config.fish'
-
-function temp
-    nvim /tmp/(uuidgen).$argv[1]
-end
 
 #General
 #alias ls  'ls -G'
@@ -104,7 +102,8 @@ abbr grc  'git rebase --continue'
 # Github
 abbr pr   'gh pr'
 abbr mypr 'gh pr list -a @me'
-abbr prv  'gh pr view --web'
+abbr prv  'gh pr view'
+abbr prvw 'gh pr view --web'
 abbr prk  'gh pr checkout'
 abbr prs  'gh pr status'
 
@@ -154,10 +153,14 @@ function vimf --description 'Fuzzy file opener for vim'
 	end
 end
 
-cat ~/perl5/perlbrew/etc/perlbrew.fish | source
+function temp
+    nvim /tmp/(uuidgen).$argv[1]
+end
 
 
-# Path Setup
+#################################
+#	ENVIRONMENT VARIABLES
+#################################
 
 ## Scripts
 set SCRIPT_DIR $HOME/scripts/bin
@@ -170,12 +173,13 @@ if not contains $GO_SCRIPT_DIR $PATH
     set -gx PATH $PATH $GO_SCRIPT_DIR
 end
 
-## Go
+## Go (Homebrew requires a specific path setup)
 
-set GO_BIN $HOME/go/bin
-if not contains $GO_BIN $PATH
-    set -gx PATH $PATH $GO_BIN
+set GOBIN $GOPATH/bin
+if not contains $GOBIN $PATH
+    set -gx PATH $PATH $GOBIN
 end
+set -gx GOROOT (brew --prefix golang)/libexec
 
 ## Ruby
 set RUBY_PATH /usr/local/opt/ruby/bin
@@ -205,7 +209,14 @@ if [ -d $WORK_SPECIFIC_DIR ] # Only do this one if the directory exists (i.e. on
     source $WORK_SPECIFIC_DIR/config/config.fish
 end
 
+## Perlbrew 
+
+cat ~/perl5/perlbrew/etc/perlbrew.fish | source
+
+## Starship
+
 starship init fish | source
 
 ## Ruby Management // rbenv
+
 status --is-interactive; and rbenv init - fish | source
