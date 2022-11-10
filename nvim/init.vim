@@ -14,10 +14,12 @@ call plug#begin()
 Plug 'jiangmiao/auto-pairs'
 
 " For navigating my project structure in the way that I'm used to with IDEs
-Plug 'scrooloose/nerdtree'
+" Plug 'scrooloose/nerdtree'
+Plug 'nvim-tree/nvim-tree.lua'
 
 " For making pretty status bars
-Plug 'vim-airline/vim-airline'
+"Plug 'vim-airline/vim-airline'
+Plug 'feline-nvim/feline.nvim'
 
 " For pretty colors
 Plug 'morhetz/gruvbox'
@@ -100,9 +102,27 @@ Plug 'tpope/vim-endwise'
 " For Swift syntax highlighting
 Plug 'keith/swift.vim'
 
+" For snippets!
+Plug 'L3MON4D3/LuaSnip', {'tag': 'v1.*'}
+
 call plug#end()
 
-"=============-Git Commit Setup ==============
+"============= LuaSnip Setup ==============
+" press <Tab> to expand or jump in a snippet. These can also be mapped separately
+" via <Plug>luasnip-expand-snippet and <Plug>luasnip-jump-next.
+imap <silent><expr> <Tab> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<Tab>' 
+" -1 for jumping backwards.
+inoremap <silent> <S-Tab> <cmd>lua require'luasnip'.jump(-1)<Cr>
+snoremap <silent> <Tab> <cmd>lua require('luasnip').jump(1)<Cr>
+snoremap <silent> <S-Tab> <cmd>lua require('luasnip').jump(-1)<Cr>
+" For changing choices in choiceNodes (not strictly necessary for a basic setup).
+imap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
+smap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
+lua << EOF
+require("luasnip.loaders.from_snipmate").lazy_load()
+EOF
+
+"============= Git Commit Setup ==============
 au FileType gitcommit setlocal textwidth=0
 
 "=============-Go Setup ==============
@@ -112,12 +132,6 @@ let g:go_auto_type_info = 1           " Automatically get signature/type info fo
 
 "============== Vim-Markdown Setup ==============
 let g:vim_markdown_new_list_item_indent = 2
-
-"============== Neosnippet Setup ==============
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"
-let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
-let g:UltiSnipsEditSplit="horizontal"
 
 "============== Vimwiki Setup ==============
 let wiki = {}
@@ -152,12 +166,19 @@ function! MyFileformat()
 endfunction
 
 "============== Vim-Airline Configs ===============
-let g:airline_left_sep=''
-let g:airline_right_sep=''
+" let g:airline_left_sep=''
+" let g:airline_right_sep=''
 " let g:airline#extensions#tabline#enabled = 1
 " let g:airline#extensions#tabline#fnamemod = ':t'
 
-"============== Neomake Configs ===============
+"============== Vim-Airline Configs ===============
+set termguicolors " needs to come before feline config
+lua << EOF
+require('feline').setup()
+EOF
+
+
+""============== Neomake Configs ===============
 call neomake#configure#automake('w')
 let g:neomake_python_enabled_makers = ['pylint']
 let g:neomake_python_pylint_maker = {
@@ -216,8 +237,8 @@ nmap } }zz
 nmap { {zz
 
 " Open an close NERDTree easily
-nmap <Leader>> :NERDTree<CR>
-nmap <Leader>< :NERDTreeClose<CR>
+" nmap <Leader>> :NERDTree<CR>
+" nmap <Leader>< :NERDTreeClose<CR>
 
 " fix file indentation
 nmap <Leader>== gg=G''
@@ -293,9 +314,6 @@ set encoding=utf-8
 " Center the damn cursor
 " let &scrolloff=999
 
-" Enable true color support
-set termguicolors
-
 " Recursive search for files
 set path+=**
 
@@ -316,3 +334,13 @@ source $HOME/.config/nvim/coc-config.vim
 
 " autocommands
 au BufNewFile,BufRead *.gitconfig setf gitconfig
+
+" Nvim-Tree setup
+lua << EOF
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+require("nvim-tree").setup()
+EOF
+
+nmap <Leader>> :NvimTreeOpen<CR>
+nmap <Leader>< :NvimTreeClose<CR>

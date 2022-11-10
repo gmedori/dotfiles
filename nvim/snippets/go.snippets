@@ -1,0 +1,22 @@
+snippet errn "if error not nil, return err"
+	if err != nil {
+		return err
+	}
+	${0}
+
+snippet bubbletea
+	type ${1:placeholder}Model struct {
+		${0}
+	}
+
+	func (m ${1}Model) Init() tea.Cmd { 
+
+	}
+
+	func (m ${1}Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) { 
+
+	}
+
+	func (m ${1}Model) View() string {
+
+	}
