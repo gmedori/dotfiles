@@ -77,9 +77,6 @@ Plug 'sjl/badwolf'
 Plug 'plasticboy/vim-markdown'
 " Plug 'tpope/vim-markdown'
 
-" For staying organized
-Plug 'vimwiki/vimwiki', { 'branch' : 'dev' }
-
 " For VimDeck syntax highlighting
 Plug 'vim-scripts/SyntaxRange'
 Plug 'vim-scripts/ingo-library'
@@ -132,19 +129,6 @@ let g:go_auto_type_info = 1           " Automatically get signature/type info fo
 
 "============== Vim-Markdown Setup ==============
 let g:vim_markdown_new_list_item_indent = 2
-
-"============== Vimwiki Setup ==============
-let wiki = {}
-let wiki.path = '$workNotes'
-let wiki.syntax = 'markdown'
-let wiki.ext = '.md'
-let wiki.template_path = '$HOME/code/wiki/vimwiki/templates'
-let wiki.template_default = 'default'
-let wiki.template_ext = '.html'
-let wiki.nested_syntaxes = {'python': 'python', 'c': 'c', 'sml': 'sml', 'bash': 'bash', 'text': 'text', 'swift':'swift'}
-
-let g:vimwiki_list = [wiki]
-let g:vimwiki_valid_html_tags = 'p,blockquote,span'
 
 "============== Latex Stuff ===============
 let g:tex_flavor='latex'

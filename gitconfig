@@ -45,3 +45,5 @@
 # Personal git settings
 [includeIf "hasconfig:remote.*.url:git@github.com:gposcidonio/**"]
     path = "~/dotfiles/personal.gitconfig"
+[url "git@github.com:"]
+	insteadOf = https://github.com/
