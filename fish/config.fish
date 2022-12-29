@@ -162,6 +162,13 @@ end
 #	ENVIRONMENT VARIABLES
 #################################
 
+## Homebrew
+set HOMEBREW_PATH /opt/homebrew/bin
+if contains $HOMEBREW_PATH $PATH
+    set PATH (string match -v $HOMEBREW_PATH $PATH)
+end
+set -gx PATH $HOMEBREW_PATH $PATH
+
 ## Scripts
 set SCRIPT_DIR $HOME/scripts/bin
 if not contains $SCRIPT_DIR $PATH
@@ -195,13 +202,6 @@ if contains $PERLBREW_BIN $PATH
     set PATH (string match -v $PERLBREW_BIN $PATH)
 end
 set -gx PATH $PERLBREW_BIN $PATH
-
-## Homebrew
-set HOMEBREW_PATH /opt/homebrew/bin
-if contains $HOMEBREW_PATH $PATH
-    set PATH (string match -v $HOMEBREW_PATH $PATH)
-end
-set -gx PATH $HOMEBREW_PATH $PATH
 
 ## Work Specific Stuff
 set WORK_SPECIFIC_DIR $HOME/dotfiles/work_specific
