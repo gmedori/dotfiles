@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/table"
@@ -16,6 +17,10 @@ import (
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
+
+var planCmdFlags = struct {
+	useTaskPaperFormat *bool
+}{}
 
 // planCmd represents the plan command
 var planCmd = &cobra.Command{
@@ -43,6 +48,8 @@ Those tasks will then be copied to your clipboard as Markdown tasks.`,
 
 func init() {
 	rootCmd.AddCommand(planCmd)
+
+	planCmdFlags.useTaskPaperFormat = planCmd.Flags().BoolP("taskpaper", "t", false, "Determines whether to use taskpaper format for the output.")
 
 	// Here you will define your flags and configuration settings.
 
@@ -85,18 +92,15 @@ func (m *planModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.table.UpdateViewport()
 			return m, cmd
 		case "enter":
-			builder := strings.Builder{}
+			tasksToProcess := make([]asana.AsanaTask, 0)
 			for i, task := range m.tasks {
-				if !m.selectedRows[i] {
-					continue
+				if m.selectedRows[i] {
+					tasksToProcess = append(tasksToProcess, task)
 				}
-				markdownTitle := strings.ReplaceAll(task.Text, "[", "\\[")
-				markdownTitle = strings.ReplaceAll(markdownTitle, "]", "\\]")
-				makrdownURL := fmt.Sprintf("https://app.asana.com/0/0/%v", task.ID)
-				builder.WriteString(fmt.Sprintf("- [ ] [%v](%v)\n", markdownTitle, makrdownURL))
 			}
-			_ = clipboard.WriteAll(builder.String())
-			fmt.Print(builder.String())
+			outputString := buildOutputString(tasksToProcess, *planCmdFlags.useTaskPaperFormat)
+			_ = clipboard.WriteAll(outputString)
+			fmt.Print(outputString)
 			return m, tea.Quit
 		}
 	}
@@ -117,7 +121,11 @@ func (m *planModel) recomputeRows() {
 		} else {
 			rowName = task.Text
 		}
-		rows = append(rows, table.Row{rowName, task.DueDate})
+
+		var style = styleForTask(task)
+		rowName = style.SetString(rowName).String()
+		dueDate := style.SetString(task.DueDate).String()
+		rows = append(rows, table.Row{rowName, dueDate})
 	}
 	m.table.SetRows(rows)
 }
@@ -129,8 +137,8 @@ func (m *planModel) toggleRowSelection(n int) {
 func newTable(tasks []asana.AsanaTask) table.Model {
 	termWidth, _, _ := term.GetSize(int(os.Stdin.Fd()))
 	columns := []table.Column{
-		{Title: "Name", Width: termWidth - 12 - 6},
-		{Title: "Due Date", Width: 12},
+		{Title: "Name", Width: termWidth - 20 - 6},
+		{Title: "Due Date", Width: 20},
 	}
 
 	rows := make([]table.Row, 0)
@@ -155,10 +163,57 @@ func newTable(tasks []asana.AsanaTask) table.Model {
 
 	s.Selected = s.Selected.
 		Foreground(lipgloss.Color("7")).
-		Background(lipgloss.Color("1")).
+		Background(lipgloss.Color("#4c4b4a")).
 		Bold(false)
 
 	t.SetStyles(s)
 
 	return t
+}
+
+// App Logic
+
+func buildOutputString(tasks []asana.AsanaTask, useTaskPaperFormat bool) string {
+	if useTaskPaperFormat {
+		return buildTaskpaperOutputString(tasks)
+	} else {
+		return buildMarkdownOutputString(tasks)
+	}
+}
+
+func buildMarkdownOutputString(tasks []asana.AsanaTask) string {
+	builder := strings.Builder{}
+	for _, task := range tasks {
+		markdownTitle := strings.ReplaceAll(task.Text, "[", "\\[")
+		markdownTitle = strings.ReplaceAll(markdownTitle, "]", "\\]")
+		makrdownURL := fmt.Sprintf("https://app.asana.com/0/0/%v", task.ID)
+		builder.WriteString(fmt.Sprintf("- [ ] [%v](%v)\n", markdownTitle, makrdownURL))
+	}
+	return builder.String()
+}
+
+func buildTaskpaperOutputString(tasks []asana.AsanaTask) string {
+	builder := strings.Builder{}
+	for _, task := range tasks {
+		taskLine := fmt.Sprintf("- %v @tags(asana)", task.Text)
+		notesText := fmt.Sprintf("\thttps://app.asana.com/0/0/%v", task.ID)
+		builder.WriteString(fmt.Sprintf("%v\n%v\n", taskLine, notesText))
+	}
+	return builder.String()
+}
+
+func styleForTask(t asana.AsanaTask) lipgloss.Style {
+	foregroundColor := lipgloss.NewStyle().Foreground(lipgloss.Color("7"))
+	taskDueDate, err := time.Parse("2006-01-02", t.DueDate)
+	if err != nil {
+		return foregroundColor
+	}
+
+	if taskDueDate.Before(time.Now()) {
+		foregroundColor = foregroundColor.Foreground(lipgloss.Color("1"))
+	} else if taskDueDate.Before(time.Now().AddDate(0, 0, 1)) {
+		foregroundColor = foregroundColor.Foreground(lipgloss.Color("2"))
+	}
+
+	return foregroundColor
 }
