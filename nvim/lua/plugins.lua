@@ -25,6 +25,12 @@ return require("packer").startup(function(use)
         end
     }
 
+    -- For a nice status line
+    use {
+        "nvim-lualine/lualine.nvim",
+        requires = { "nvim-tree/nvim-web-devicons", opt = true }
+    } 
+
     -- For making things look pretty and formatted
     use "godlygeek/tabular"
 

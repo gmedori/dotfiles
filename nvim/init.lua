@@ -129,3 +129,14 @@ vim.o.grepprg = "rg --vimgrep --no-heading --smart-case"
 vim.o.foldenable = false
 
 require('plugins')
+
+
+------------------------------------------------
+----------------- Plugin Config ----------------
+------------------------------------------------
+
+require("lualine").setup {
+    options = {
+        theme = "ayu_mirage"
+    }
+}
