@@ -162,7 +162,7 @@ require('feline').setup()
 EOF
 
 
-""============== Neomake Configs ===============
+"============== Neomake Configs ===============
 call neomake#configure#automake('w')
 let g:neomake_python_enabled_makers = ['pylint']
 let g:neomake_python_pylint_maker = {
@@ -305,7 +305,7 @@ set path+=**
 set showcmd
 
 " Wider text width
-set tw=120
+set tw=0
 
 " Use ripgrep for grep
 set grepprg=rg\ --vimgrep\ --no-heading\ --smart-case
@@ -323,7 +323,11 @@ au BufNewFile,BufRead *.gitconfig setf gitconfig
 lua << EOF
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
-require("nvim-tree").setup()
+require("nvim-tree").setup({
+git = {
+    ignore = false,
+    },
+})
 EOF
 
 nmap <Leader>> :NvimTreeOpen<CR>

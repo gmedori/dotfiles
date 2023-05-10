@@ -203,6 +203,13 @@ if contains $PERLBREW_BIN $PATH
 end
 set -gx PATH $PERLBREW_BIN $PATH
 
+## Rust
+set RUST_BIN $HOME/.cargo/bin
+if contains $RUST_BIN $PATH
+    set PATH (string match -v $RUST_BIN $PATH)
+end
+set -gx PATH $RUST_BIN $PATH
+
 ## Work Specific Stuff
 set WORK_SPECIFIC_DIR $HOME/dotfiles/work_specific
 if [ -d $WORK_SPECIFIC_DIR ] # Only do this one if the directory exists (i.e. only on a work computer)
