@@ -1,11 +1,6 @@
 [user]
-	name = Gustavo Poscidonio
-	email = gustavoposcidonio@asana.com
-	signingkey = 482CCB887AB00925
-[commit]
-	gpgsign = true
-[maintenance]
-	repo = /Users/greninja/sandbox/asana
+    name = "Gustavo Poscidonio"
+    email = "mail@gustavo.sh"
 [diff]
 	tool = Kaleidoscope
 [difftool "Kaleidoscope"]
@@ -43,7 +38,9 @@
     colorMoved = default
 
 # Personal git settings
-[includeIf "hasconfig:remote.*.url:git@github.com:gposcidonio/**"]
-    path = "~/dotfiles/personal.gitconfig"
-[url "git@github.com:"]
-	insteadOf = https://github.com/
+# [includeIf "hasconfig:remote.*.url:git@github.com:gposcidonio/**"]
+#     path = "~/dotfiles/personal.gitconfig"
+# [url "git@github.com:"]
+#     insteadOf = https://github.com/
+[init]
+	defaultBranch = main
