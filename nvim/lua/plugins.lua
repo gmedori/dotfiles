@@ -1,3 +1,4 @@
+-- This function and the local variable after it are for bootstrapping packer on a new install. It should run on first vim boot.
 local ensure_packer = function()
     local fn = vim.fn
     local install_path = fn.stdpath("data").."/site/pack/packer/start/packer.nvim"
@@ -20,7 +21,7 @@ return require("packer").startup(function(use)
             "nvim-tree/nvim-web-devicons",
         },
         config = function()
-            require("nvim-tree").setup {}
+            require("nvim-tree").setup()
         end
     }
 
@@ -59,6 +60,17 @@ return require("packer").startup(function(use)
 
     -- For fish syntax highlighting
     use { "khaveesh/vim-fish-syntax", ft = "fish" }
+
+    -- For closing brackets, but only when you hit newline. I using a package that did string quotes too and it was always more annoying than it was worth.
+    use "rstacruz/vim-closer"
+
+    -- For git symbols/colors in the gutter
+    use {
+        "lewis6991/gitsigns.nvim",
+        config = function()
+            require("gitsigns").setup()
+        end
+    }
 
     -- Automatically set up your configuration after cloning packer.nvim
     -- Put this at the end after all plugins

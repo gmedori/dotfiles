@@ -80,9 +80,6 @@ vim.o.mouse = "a"
 -- Makes cursor line visible
 vim.o.cursorline = true
 
--- Allows searching before enter key is pressed
-vim.o.incmenu = true
-
 -- Allows fancy menu which you can tab thru when executing commands
 vim.o.wildmenu = true
 
