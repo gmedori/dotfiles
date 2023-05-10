@@ -21,7 +21,8 @@ set -gx FISH_FUNC_DIR ~/.config/fish/functions/
 
 #Editing configs
 alias vim  'nvim'
-abbr evim  'nvim ~/.config/nvim/init.vim'
+abbr evim  'nvim ~/.config/nvim/init.lua'
+abbr evimp 'nvim ~/.config/nvim/lua/plugins.lua'
 abbr ebash 'nvim ~/.bash_profile'
 abbr efish 'nvim ~/.config/fish/config.fish'
 abbr efunc "nvim $FISH_FUNC_DIR"
