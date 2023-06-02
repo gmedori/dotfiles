@@ -7,12 +7,11 @@ import (
 	"fmt"
 	"os"
 
-	asana "bitbucket.org/mikehouston/asana-go"
 	"github.com/spf13/cobra"
 )
 
 var goosanaKey string
-var asanaClient *asana.Client
+var defaultWorkspaceID = "15793206719"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -45,13 +44,13 @@ func init() {
 	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	// Default to looking up the GOOSANA_KEY environment variable if goosanaKey is empty.
+	goosanaKeyIsSet := false
 	if len(goosanaKey) == 0 {
-		goosanaKey = os.Getenv("GOOSANA_KEY")
+		goosanaKeyIsSet = true
+		goosanaKey, goosanaKeyIsSet = os.LookupEnv("GOOSANA_KEY")
 	}
-	if len(goosanaKey) == 0 {
+	if !goosanaKeyIsSet {
 		fmt.Fprintf(os.Stderr, "No API key set. Please use --key or set the GOOSANA_KEY environment variable.")
 		os.Exit(1)
 	}
-
-	asanaClient = asana.NewClientWithAccessToken(goosanaKey)
 }
