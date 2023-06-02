@@ -1,3 +1,2 @@
-.DS_Store
-build
-gobin
+target
+iosd.fish
