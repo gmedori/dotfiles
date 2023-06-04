@@ -5,7 +5,7 @@ use std::process::Command;
 #[command(name = "notify", author, version, about, long_about = None)]
 pub struct Cli {
     /// The message to display.
-    #[arg()]
+    #[arg(required = true)]
     message: Vec<String>,
 
     /// The title of the message.
@@ -30,8 +30,6 @@ impl Cli {
             command += &format!(" subtitle \"{}\"", subtitle);
         }
         command += &format!(" sound name \"{}\"", self.sound.as_str());
-
-        println!("{}", command);
 
         let mut binding = Command::new("/usr/bin/osascript");
         let applescript = binding
