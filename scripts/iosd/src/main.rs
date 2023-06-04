@@ -1,9 +1,9 @@
 use clap::Parser;
-use iosd;
+use iosd::{Commands::*, Runnable};
 
 fn main() {
     let cli = iosd::Cli::parse();
     match cli.command {
-        iosd::Commands::NukeDerivedData(arguments) => { arguments.run() }
+        NukeDerivedData(arguments) => arguments.run(),
     }
 }
