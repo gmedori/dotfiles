@@ -22,21 +22,4 @@ vimcmd_symbol = "[❮❮❮](bold cyan)"
 vimcmd_visual_symbol = "[❮❮❮](bold yellow)"
 
 [git_branch]
-symbol = "🌱 "
 style = "green"
-
-[golang]
-symbol = "Go "
-
-[java]
-symbol = "Java "
-style = "blue"
-
-[ruby]
-disabled = true
-
-[swift]
-disabled = true
-
-[perl]
-disabled = true
