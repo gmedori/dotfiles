@@ -1,3 +1,3 @@
 function fish_greeting
-	printf "Did you know?\n\nAsana is a cool place to work!" | cowsay | lolcat
+	printf "Can you spare a moment to speak about our lord and savior passkeys?" | cowsay | lolcat
 end
