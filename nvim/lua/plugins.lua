@@ -31,6 +31,40 @@ return require("packer").startup(function(use)
         requires = { "nvim-tree/nvim-web-devicons", opt = true }
     } 
 
+    -- For LSP configurations
+    -- Collection of common configurations for the Nvim LSP client
+    use("neovim/nvim-lspconfig")
+    -- Visualize lsp progress
+    use({
+        "j-hui/fidget.nvim",
+        config = function()
+            require("fidget").setup()
+        end
+    })
+
+    -- For LSP and snippet completions
+    use("hrsh7th/nvim-cmp")
+    use({
+        -- cmp LSP completion
+        "hrsh7th/cmp-nvim-lsp",
+        -- cmp Snippet completion
+        "hrsh7th/cmp-vsnip",
+        -- cmp Path completion
+        "hrsh7th/cmp-path",
+        "hrsh7th/cmp-buffer",
+        after = { "hrsh7th/nvim-cmp" },
+        requires = { "hrsh7th/nvim-cmp" },
+    })
+    -- See hrsh7th other plugins for more great completion sources!
+    -- Snippet engine
+    use('hrsh7th/vim-vsnip')
+
+    -- To fix some common bugs with Rust support that is baked into Neovim
+    use "rust-lang/rust.vim"
+
+    -- More Rust support over the standard LSP stuff
+    use("simrat39/rust-tools.nvim")
+
     -- For making things look pretty and formatted
     use "godlygeek/tabular"
 
@@ -61,8 +95,6 @@ return require("packer").startup(function(use)
     -- For Swift syntax highlighting
     use "keith/swift.vim"
 
-    -- For snippets!
-    use { "L3MON4D3/LuaSnip", tag = "v1.*" }
 
     -- For fish syntax highlighting
     use { "khaveesh/vim-fish-syntax", ft = "fish" }

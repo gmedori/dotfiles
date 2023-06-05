@@ -176,11 +176,6 @@ if not contains $SCRIPT_DIR $PATH
     set -gx PATH $PATH $SCRIPT_DIR
 end
 
-set GO_SCRIPT_DIR $HOME/scripts/gobin
-if not contains $GO_SCRIPT_DIR $PATH
-    set -gx PATH $PATH $GO_SCRIPT_DIR
-end
-
 ## Go (Homebrew requires a specific path setup)
 
 set GOBIN $GOPATH/bin

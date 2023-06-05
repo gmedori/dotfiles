@@ -1,4 +1,5 @@
-require('plugins')
+require("plugins")
+require("lsp")
 
 -- Comma should be mapleader
 vim.g.mapleader = ","
@@ -7,23 +8,6 @@ vim.g.mapleader = ","
 -- compressed help pages and many third-party plugins.
 
 vim.cmd("if &shell =~# 'fish$' | set shell=sh | endif")
-
----------------- LuaSnip Setup ----------------
-vim.cmd([[
-" press <Tab> to expand or jump in a snippet. These can also be mapped separately
-" via <Plug>luasnip-expand-snippet and <Plug>luasnip-jump-next.
-imap <silent><expr> <Tab> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<Tab>' 
-
-" -1 for jumping backwards.
-inoremap <silent> <S-Tab> <cmd>lua require'luasnip'.jump(-1)<Cr>
-snoremap <silent> <Tab> <cmd>lua require('luasnip').jump(1)<Cr>
-snoremap <silent> <S-Tab> <cmd>lua require('luasnip').jump(-1)<Cr>
-
-" For changing choices in choiceNodes (not strictly necessary for a basic setup).
-imap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
-smap <silent><expr> <C-E> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-E>'
-]])
-require("luasnip.loaders.from_snipmate").lazy_load()
 
 ---------------- Vim-Markdown Setup ----------------
 vim.g.vim_markdown_new_list_item_indent = 2
@@ -71,6 +55,9 @@ vim.keymap.set("n", "<Leader>s", ":%s/\\<<C-r><C-w>\\>/")
 -- Open and close sidebar
 vim.keymap.set("n", "<Leader>>", ":NvimTreeOpen<CR>")
 vim.keymap.set("n", "<Leader><", ":NvimTreeClose<CR>")
+
+-- Delete a buffer more easily
+vim.keymap.set("n", "<Leader>d", ":bd<CR>")
 
 ------------------------------------------------
 ------------------- Settings -------------------
@@ -129,6 +116,8 @@ vim.o.grepprg = "rg --vimgrep --no-heading --smart-case"
 
 -- Folding is stupid.
 vim.o.foldenable = false
+
+
 ------------------------------------------------
 ----------------- Plugin Config ----------------
 ------------------------------------------------
