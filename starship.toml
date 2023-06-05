@@ -1,6 +1,16 @@
 format = """$fill
 $character"""
-right_format = """$all"""
+right_format = """
+$directory\
+$git_branch\
+$git_commit\
+$git_state\
+$git_metrics\
+$git_status\
+$battery\
+$time\
+$status\
+"""
 
 [fill]
 symbol = "━"
