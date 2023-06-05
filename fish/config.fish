@@ -36,9 +36,9 @@ abbr rld   'source ~/.config/fish/config.fish'
 #alias ls  'ls -G'
 #alias l   'ls -Flh'
 #alias la  'ls -AFlh'
-alias ls 'exa --icons'
-alias l  'exa --oneline --icons'
-alias la 'exa --all --oneline --icons'
+alias ls 'exa --icons -s type'
+alias l  'exa --oneline --icons -s type'
+alias la 'exa --all --oneline --icons -s type'
 
 abbr  cdc 'cd ~/code'
 abbr  cds 'cd ~/scratchpad'
@@ -110,15 +110,7 @@ abbr prs  'gh pr status'
 
 alias currentBranch "git branch | rg '\\*' | cut -d ' ' -f 2"
 
-#Docker
-abbr jshell 'docker run -it openjdk jshell'
-
-#Gradle
-abbr grf 'gr clean build jacocoTestReport'
-
 #Other Tools
-abbr kb 'kubectl'
-abbr java_home '/usr/libexec/java_home'
 alias lipsum 'cat $HOME/dotfiles/resources/lipsum.txt'
 
 #################################
