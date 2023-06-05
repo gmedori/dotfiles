@@ -6,3 +6,4 @@ resurrect
 *.lock*
 fish_variables
 work_specific
+packer_compiled.lua

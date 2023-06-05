@@ -1,3 +1,5 @@
+require('plugins')
+
 -- Comma should be mapleader
 vim.g.mapleader = ","
 
@@ -127,10 +129,6 @@ vim.o.grepprg = "rg --vimgrep --no-heading --smart-case"
 
 -- Folding is stupid.
 vim.o.foldenable = false
-
-require('plugins')
-
-
 ------------------------------------------------
 ----------------- Plugin Config ----------------
 ------------------------------------------------

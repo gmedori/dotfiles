@@ -227,4 +227,4 @@ starship init fish | source
 
 ## Ruby Management // rbenv
 
-status --is-interactive; and rbenv init - fish | source
+# status --is-interactive; and rbenv init - fish | source
