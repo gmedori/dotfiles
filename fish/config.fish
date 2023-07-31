@@ -30,15 +30,18 @@ abbr etmux 'nvim ~/.tmux.conf'
 abbr egit  'nvim ~/.gitconfig'
 abbr essh  'nvim ~/.ssh/config'
 abbr estar 'nvim ~/.config/starship.toml'
+abbr ework 'nvim ~/dotfiles/work_specific'
 abbr rld   'source ~/.config/fish/config.fish'
 
 #General
 #alias ls  'ls -G'
 #alias l   'ls -Flh'
 #alias la  'ls -AFlh'
-alias ls 'exa --icons -s type'
-alias l  'exa --oneline --icons -s type'
-alias la 'exa --all --oneline --icons -s type'
+alias ls  'exa --icons -s type'
+alias l   'exa --oneline --icons -s type'
+alias la  'exa --all --oneline --icons -s type'
+alias lc  'exa --icons -s type'
+alias lca 'exa --all --icons -s type'
 
 abbr  cdc 'cd ~/code'
 abbr  cds 'cd ~/scratchpad'
@@ -51,7 +54,7 @@ abbr cdsc 'cd ~/scripts'
 abbr  cl  'clear'
 
 # System Info
-alias showPath 'string join \n $PATH'
+alias show-path 'string join \n ">>> fish_user_paths" "" $fish_user_paths "" ">>> PATH" "" $PATH'
 
 #FZF
 alias fzf 'fzf --height=15 --reverse -m --bind ctrl-a:toggle-all'
@@ -67,7 +70,7 @@ abbr tmns 'tmux new -s asana-server'
 #Git
 abbr gs   'git status -s'
 abbr gl   'git pull'
-abbr glm  'git pull upstream master'
+abbr glm  'git pull upstream main'
 abbr glr  'git pull upstream release'
 abbr gld  'git pull upstream develop'
 abbr gp   'git push'
@@ -78,26 +81,26 @@ abbr gc   'git commit'
 abbr gca  'git commit --amend --date=now'
 abbr gfc  'git commit -eF (git rev-parse --show-toplevel)/.git/COMMIT_EDITMSG'
 abbr gg   'git log --graph --oneline --decorate'
-abbr ggm  'git log --graph --oneline --decorate master..'
+abbr ggm  'git log --graph --oneline --decorate main..'
 abbr glg  'git log --graph --oneline --decorate --all'
 abbr gd   'git diff'
 abbr gdc  'git diff --cached'
 abbr gk   'git checkout'
 abbr gb   'git branch'
 abbr gkb  'git checkout -b'
-abbr gkbg 'git checkout -b gposcidonio/'
+abbr gkbg 'git checkout -b goose/'
 abbr gkd  'git checkout develop'
-abbr gkm  'git checkout master'
+abbr gkm  'git checkout main'
 abbr gkr  'git checkout release'
 abbr gkf  'git checkout -b feature/'
 abbr gdd  'git diff develop'
-abbr gdm  'git diff master'
+abbr gdm  'git diff main'
 abbr gsh  'git stash push -m '
 abbr gsp  'git stash pop'
 abbr gpub 'git push -u origin (git branch --show-current)'
 abbr gcp  'git cherry-pick'
 abbr gr   'git rebase'
-abbr grm  'git rebase master'
+abbr grm  'git rebase main'
 abbr grc  'git rebase --continue'
 
 # Github
@@ -150,68 +153,31 @@ function temp
     nvim /tmp/(uuidgen).$argv[1]
 end
 
+function capitalize --description 'Capitalize the first letter of each word provided'
+    awk '{for (i=1; i<=NF; ++i) { $i=toupper(substr($i,1,1)) tolower(substr($i,2)); } print }'
+end
+
 
 #################################
 #	ENVIRONMENT VARIABLES
 #################################
 
-## Homebrew
-set HOMEBREW_PATH /opt/homebrew/bin
-if contains $HOMEBREW_PATH $PATH
-    set PATH (string match -v $HOMEBREW_PATH $PATH)
-end
-set -gx PATH $HOMEBREW_PATH $PATH
+## GOPATH
+set -gx GOPATH $HOME/go
 
-## Scripts
-set SCRIPT_DIR $HOME/scripts/bin
-if not contains $SCRIPT_DIR $PATH
-    set -gx PATH $PATH $SCRIPT_DIR
-end
-
-## Go (Homebrew requires a specific path setup)
-
-set GOBIN $GOPATH/bin
-if not contains $GOBIN $PATH
-    set -gx PATH $PATH $GOBIN
-end
-set -gx GOROOT (brew --prefix golang)/libexec
-
-## Ruby
-set RUBY_PATH /usr/local/opt/ruby/bin
-if contains $RUBY_PATH $PATH
-    # Ruby path goes in front to override system Ruby
-    set PATH (string match -v $RUBY_PATH $PATH)
-end
-set -gx PATH $RUBY_PATH $PATH
-
-## Perlbrew
-set PERLBREW_BIN $HOME/perl5/perlbrew/bin
-if contains $PERLBREW_BIN $PATH
-    set PATH (string match -v $PERLBREW_BIN $PATH)
-end
-set -gx PATH $PERLBREW_BIN $PATH
-
-## Rust
-set RUST_BIN $HOME/.cargo/bin
-if contains $RUST_BIN $PATH
-    set PATH (string match -v $RUST_BIN $PATH)
-end
-set -gx PATH $RUST_BIN $PATH
+fish_add_path /opt/homebrew/bin #.................... Homebrew
+fish_add_path $HOME/scripts/bin #.................... Scripts
+fish_add_path (brew --prefix go@1.19)/bin #.......... Golang binary
+fish_add_path $GOPATH/bin #.......................... GOPATH
+fish_add_path $HOME/.cargo/bin #..................... Rust
 
 ## Work Specific Stuff
 set WORK_SPECIFIC_DIR $HOME/dotfiles/work_specific
-if [ -d $WORK_SPECIFIC_DIR ] # Only do this one if the directory exists (i.e. only on a work computer)
-    source $WORK_SPECIFIC_DIR/config/config.fish
+if [ -f $WORK_SPECIFIC_DIR/config.fish ] # Only do this one if the directory exists (i.e. only on a work computer)
+    source $WORK_SPECIFIC_DIR/config.fish
 end
-
-## Perlbrew 
-
-cat ~/perl5/perlbrew/etc/perlbrew.fish | source
 
 ## Starship
 
 starship init fish | source
 
-## Ruby Management // rbenv
-
-# status --is-interactive; and rbenv init - fish | source

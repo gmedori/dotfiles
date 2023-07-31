@@ -46,3 +46,6 @@
 	defaultBranch = main
 [pull]
 	rebase = false
+
+[includeIf "gitdir:/Users/lugia/"]
+    path = "~/dotfiles/work_specific/gitconfig"
