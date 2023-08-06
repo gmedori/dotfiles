@@ -7,6 +7,7 @@ fish_vi_key_bindings
 #################################
 
 set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.git/*"'
+set -gx MANPAGER 'nvim +Man!'
 
 
 #################################
