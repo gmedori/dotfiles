@@ -39,7 +39,7 @@
     colorMoved = default
 
 [alias]
-    lg = log --graph --abbrev-commit --format=format:'%C(blue)%h%C(reset) | %C(green)%ar%C(reset) - %C(dim white)%an%C(reset) %C(red)%d%C(reset)%n        | %s%n'
+    lg = log --graph --abbrev-commit --format=format:'%C(blue)%h%C(reset) | %C(green)%ar%C(reset) - %C(dim white)%an%C(reset) %C(red)%d%C(reset)%n         | %s%n'
 
 # Personal git settings
 # [includeIf "hasconfig:remote.*.url:git@github.com:gposcidonio/**"]
