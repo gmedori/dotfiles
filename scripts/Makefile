@@ -1,5 +1,5 @@
 SHELL = fish
-EXECUTABLES = iosd notify
+EXECUTABLES = iosd notify chapter-splitter
 BUILDS = $(foreach ex, ${EXECUTABLES}, target/release/${ex})
 
 .PHONY: all clean install uninstall ${EXECUTABLES}
