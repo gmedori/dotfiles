@@ -1,3 +1,7 @@
+use clap::Parser;
+use chapter_splitter::Cli;
+
 fn main() {
-    println!("Hello, world!");
+    let cli = Cli::parse();
+    cli.run();
 }
