@@ -26,4 +26,3 @@ style = "green"
 
 [hostname]
 style = "cyan"
-format = "[$ssh_symbol $hostname]($style) "
