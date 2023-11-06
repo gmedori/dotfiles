@@ -1,6 +1,6 @@
 [user]
-    name = "Gustavo Poscidonio"
-    email = "mail@gustavo.sh"
+	name = Gustavo Poscidonio
+	email = mail@gustavo.sh
 [diff]
 	tool = Kaleidoscope
 [difftool "Kaleidoscope"]
@@ -13,8 +13,12 @@
 [mergetool "Kaleidoscope"]
 	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
 	trustExitCode = true
+[mergetool "nvim"]
+  cmd = nvim -f -c \"Gdiffsplit!\" \"$MERGED\"
 [mergetool]
 	prompt = false
+[rerere]
+	enabled = true
 
 # Delta configs
 [core]

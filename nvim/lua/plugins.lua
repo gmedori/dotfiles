@@ -37,6 +37,7 @@ return require("packer").startup(function(use)
     -- Visualize lsp progress
     use({
         "j-hui/fidget.nvim",
+		tag = "legacy",
         config = function()
             require("fidget").setup()
         end
@@ -109,6 +110,9 @@ return require("packer").startup(function(use)
             require("gitsigns").setup()
         end
     }
+
+	-- For using vim as a git mergetool and other git niceties
+	use "tpope/vim-fugitive"
 
     -- Automatically set up your configuration after cloning packer.nvim
     -- Put this at the end after all plugins

@@ -93,7 +93,7 @@ vim.o.list = "listchars=tab:› ,trail:·,extends:>,precedes:<"
 vim.o.tabstop = 4 
 vim.o.softtabstop = 4
 vim.o.shiftwidth = 4
-vim.o.expandtab = true
+vim.o.expandtab = false
 
 -- New splits should be created to the right and down.
 vim.o.splitbelow = true
