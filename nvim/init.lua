@@ -87,7 +87,8 @@ vim.o.relativenumber = true
 vim.o.number = true
 
 -- Visualize whitespace
-vim.o.list = "listchars=tab:› ,trail:·,extends:>,precedes:<"
+vim.o.list = true
+vim.o.listchars="tab:› ,trail:·,extends:>,precedes:<"
 
 -- TAB MADNESS
 vim.o.tabstop = 4 
