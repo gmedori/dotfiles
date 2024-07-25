@@ -1,4 +1,4 @@
-setenv EDITOR "nvim"
+set -gx EDITOR "nvim"
 
 fish_vi_key_bindings
 
@@ -38,10 +38,10 @@ abbr rld   'source ~/.config/fish/config.fish'
 #alias ls  'ls -G'
 #alias l   'ls -Flh'
 #alias la  'ls -AFlh'
-alias l  'exa --icons -s type'
-alias la 'exa --all --icons -s type'
-alias lo   'exa --oneline --icons -s type'
-alias loa  'exa --all --oneline --icons -s type'
+alias l   'eza --icons -s type'
+alias la  'eza --icons -s type --all'
+alias ll  'eza --long --icons -s type'
+alias lla 'eza --long --icons -s type --all'
 
 abbr  cdc 'cd ~/code'
 abbr  cds 'cd ~/scratchpad'
@@ -78,6 +78,7 @@ abbr gf   'git fetch'
 abbr ga   'git add'
 abbr gaa  'git add --all; and git status -s'
 abbr gc   'git commit -v'
+abbr gcn  'git commit -v --no-verify'
 abbr gca  'git commit --amend --date=now'
 abbr gfc  'git commit -eF (git rev-parse --show-toplevel)/.git/COMMIT_EDITMSG'
 abbr gg   'git lg'
@@ -157,6 +158,16 @@ end
 function capitalize --description 'Capitalize the first letter of each word provided'
     awk '{for (i=1; i<=NF; ++i) { $i=toupper(substr($i,1,1)) tolower(substr($i,2)); } print }'
 end
+
+function fish_title
+    # Prevent fish from trying to write the title to the terminal window by overwriting fish_title to not print anything.
+end
+
+function title
+    echo -e "\033];$argv\007"
+end
+
+
 
 
 #################################
