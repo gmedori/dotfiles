@@ -7,7 +7,14 @@ return {
 			"nvim-lua/plenary.nvim",
 			"nvim-tree/nvim-web-devicons",
 			"MunifTanjim/nui.nvim",
-		}
+		},
+		config = function()
+			require("neo-tree").setup {
+				filesystem = {
+					hijack_netrw_behavior = "open_current"
+				}
+			}
+		end
 	},
 
 	-- For finding files quickly
