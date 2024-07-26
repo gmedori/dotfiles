@@ -1,8 +1,9 @@
-require("plugins")
-require("lsp")
+-- Old Packer-based setup
+-- require("plugins")
+-- require("lsp")
 
--- Comma should be mapleader
-vim.g.mapleader = ","
+
+require("config.lazy")
 
 -- Vim needs a more POSIX compatible shell than fish for certain functionality to work, such as :%!,
 -- compressed help pages and many third-party plugins.
@@ -13,13 +14,13 @@ vim.cmd("if &shell =~# 'fish$' | set shell=sh | endif")
 vim.g.vim_markdown_new_list_item_indent = 2
 
 ---------------- Colorscheme Setup ----------------
-vim.cmd("colorscheme badwolf")
+-- vim.cmd("colorscheme flow")
 
 ---------------- Vim-Tree Setup ----------------
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
-vim.o.termguicolors = true
-require("nvim-tree").setup({git = { ignore = false} })
+-- vim.g.loaded_netrw = 1
+-- vim.g.loaded_netrwPlugin = 1
+-- vim.o.termguicolors = true
+-- require("nvim-tree").setup({git = { ignore = false} })
 
 ------------------------------------------------
 ------------------- Mappings -------------------
@@ -53,8 +54,8 @@ vim.keymap.set("n", "{", "{zz")
 vim.keymap.set("n", "<Leader>s", ":%s/\\<<C-r><C-w>\\>/")
 
 -- Open and close sidebar
-vim.keymap.set("n", "<Leader>>", ":NvimTreeOpen<CR>")
-vim.keymap.set("n", "<Leader><", ":NvimTreeClose<CR>")
+vim.keymap.set("n", "<Leader>>", ":Neotree focus left<CR>")
+vim.keymap.set("n", "<Leader><", ":Neotree close<CR>")
 
 -- Delete a buffer more easily
 vim.keymap.set("n", "<Leader>d", ":bd<CR>")
@@ -123,8 +124,8 @@ vim.o.foldenable = false
 ----------------- Plugin Config ----------------
 ------------------------------------------------
 
-require("lualine").setup {
-    options = {
-        theme = "ayu_mirage"
-    }
-}
+-- require("lualine").setup {
+--     options = {
+--         theme = "ayu_mirage"
+--     }
+-- }
