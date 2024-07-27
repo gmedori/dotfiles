@@ -1,30 +1,238 @@
--- Old Packer-based setup
--- require("plugins")
--- require("lsp")
+-- ██████  ██      ██    ██  ██████  ██ ███    ██ ███████ 
+-- ██   ██ ██      ██    ██ ██       ██ ████   ██ ██      
+-- ██████  ██      ██    ██ ██   ███ ██ ██ ██  ██ ███████ 
+-- ██      ██      ██    ██ ██    ██ ██ ██  ██ ██      ██ 
+-- ██      ███████  ██████   ██████  ██ ██   ████ ███████ 
 
 
-require("config.lazy")
+local plugin_spec = { ----------------------------
+	-- EDITING PLUGINS
+	----------------------------
+	
 
--- Vim needs a more POSIX compatible shell than fish for certain functionality to work, such as :%!,
--- compressed help pages and many third-party plugins.
+	-- For making things look pretty and formatted
+	{ "godlygeek/tabular", lazy = true },
 
-vim.cmd("if &shell =~# 'fish$' | set shell=sh | endif")
+	-- For changing surrounding characters
+	{ "tpope/vim-surround", lazy = true },
 
----------------- Vim-Markdown Setup ----------------
-vim.g.vim_markdown_new_list_item_indent = 2
+	-- For closing brackets, but only when you hit newline.
+	{ "rstacruz/vim-closer", lazy = false },
 
----------------- Colorscheme Setup ----------------
--- vim.cmd("colorscheme flow")
+	-- For commenting stuff out
+	{ "tpope/vim-commentary", lazy = false },
 
----------------- Vim-Tree Setup ----------------
--- vim.g.loaded_netrw = 1
--- vim.g.loaded_netrwPlugin = 1
--- vim.o.termguicolors = true
--- require("nvim-tree").setup({git = { ignore = false} })
+	-- For auto-inserting end in Ruby
+	{ "tpope/vim-endwise", lazy = true },
 
-------------------------------------------------
-------------------- Mappings -------------------
-------------------------------------------------
+
+	----------------------------
+	-- NAVIGATION PLUGINS
+	----------------------------
+
+
+	-- For navigating my project structure in the way that I"m used to with IDEs
+	{
+		"nvim-neo-tree/neo-tree.nvim",
+		branch = "v3.x",
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-tree/nvim-web-devicons",
+			"MunifTanjim/nui.nvim",
+		},
+		config = function()
+			require("neo-tree").setup {
+				filesystem = {
+					hijack_netrw_behavior = "open_current"
+				}
+			}
+		end
+	},
+
+	-- For finding files quickly
+	{
+		"nvim-telescope/telescope.nvim", 
+		branch = "0.1.x",
+		dependencies = { 
+			-- Helper lib for telescope
+			{ "nvim-lua/plenary.nvim" },
+			-- Faster sorting
+			{ "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+			-- Ability to pass ripgrep arguments to the live_grep picker
+			{ "nvim-telescope/telescope-live-grep-args.nvim" , version = "^1.0.0" },
+		},
+		config = function()
+			local telescope = require("telescope")
+			telescope.load_extension("fzf")
+			telescope.load_extension("live_grep_args")
+			local builtin = require("telescope.builtin")
+
+			vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Find files by name" })
+			vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Search help tags" })
+			vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
+		end
+	},
+
+
+	----------------------------
+	-- STYLE PLUGINS
+	----------------------------
+
+
+	-- My primary colorscheme. Has been for a long time.
+	-- I finally forked it so that I could tweak how it looks in Rust.
+	{ 
+		"gposcidonio/badwolf",
+		lazy = false ,
+		config = function()
+			vim.cmd("colorscheme badwolf")
+		end
+	},
+
+	-- For a nice status line
+	{ 
+		"nvim-lualine/lualine.nvim",
+		dependencies = { "nvim-tree/nvim-web-devicons", opt = true },
+		config = function()
+			require("lualine").setup {
+				options = {
+					theme = "ayu_mirage"
+				}
+			}
+		end,
+	},
+
+	-- For git symbols/colors in the gutter
+	{
+		"lewis6991/gitsigns.nvim",
+		config = function()
+			require("gitsigns").setup()
+		end
+	},
+
+	
+	----------------------------
+	-- QOL PLUGINS
+	----------------------------
+
+
+	-- For a fancy start screen
+	{  
+		"mhinz/vim-startify", 
+		lazy = false 
+	},
+
+	-- For no more accidental empty files
+	{
+		"EinfachToll/DidYouMean",
+		lazy = true
+	},
+
+	-- What key does that thing again?
+	{
+		"folke/which-key.nvim",
+		event = "VeryLazy",
+		opts = {
+			-- TODO
+		},
+		keys = {
+			{
+				"<leader>?",
+				function()
+					require("which-key").show({ global = false })
+				end,
+				desc = "Buffer Local Keymaps (which-key)",
+			},
+		},
+	},
+
+	-- Lots of little utilities
+	{ 'echasnovski/mini.nvim', version = '*' },
+
+	
+	----------------------------
+	-- SYNTAX PLUGINS
+	----------------------------
+	
+
+	{ "keith/swift.vim", lazy = true },
+	{ "bfontaine/Brewfile.vim", lazy = true },
+	{ "khaveesh/vim-fish-syntax", lazy = true },
+
+
+	----------------------------
+	-- RUST PLUGINS
+	----------------------------
+	{
+		'mrcjkb/rustaceanvim',
+		version = '^5', -- Recommended
+		lazy = false, -- This plugin is already lazy
+	},
+
+	----------------------------
+	-- LSP PLUGINS
+	----------------------------
+
+
+	-- The default LSP configs everyone uses
+	{ "neovim/nvim-lspconfig" },
+
+	-- For viewing LSP progress
+	{ 
+		"j-hui/fidget.nvim",
+		config = function()
+			require("fidget").setup()
+		end
+	},
+}
+
+
+-- ██       █████  ███████ ██    ██    ███    ██ ██    ██ ██ ███    ███ 
+-- ██      ██   ██    ███   ██  ██     ████   ██ ██    ██ ██ ████  ████ 
+-- ██      ███████   ███     ████      ██ ██  ██ ██    ██ ██ ██ ████ ██ 
+-- ██      ██   ██  ███       ██       ██  ██ ██  ██  ██  ██ ██  ██  ██ 
+-- ███████ ██   ██ ███████    ██    ██ ██   ████   ████   ██ ██      ██ 
+-- lazy.nvim
+
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not (vim.uv or vim.loop).fs_stat(lazypath) then
+	local lazyrepo = "https://github.com/folke/lazy.nvim.git"
+	local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
+	if vim.v.shell_error ~= 0 then
+		vim.api.nvim_echo({
+			{ "Failed to clone lazy.nvim:\n", "ErrorMsg" },
+			{ out, "WarningMsg" },
+			{ "\nPress any key to exit..." },
+		}, true, {})
+		vim.fn.getchar()
+		os.exit(1)
+	end
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- Make sure to setup `mapleader` and `maplocalleader` before
+-- loading lazy.nvim so that mappings are correct.
+-- This is also a good place to setup other settings (vim.opt)
+vim.g.mapleader = ","
+vim.g.maplocalleader = "\\"
+
+-- Setup lazy.nvim
+require("lazy").setup({
+	spec = plugin_spec,
+	-- Configure any other settings here. See the documentation for more details.
+	-- colorscheme that will be used when installing plugins.
+	install = { colorscheme = { "habamax" } },
+	-- automatically check for plugin updates
+	checker = { enabled = true },
+})
+
+
+-- ███    ███  █████  ██████  ██████  ██ ███    ██  ██████  ███████ 
+-- ████  ████ ██   ██ ██   ██ ██   ██ ██ ████   ██ ██       ██      
+-- ██ ████ ██ ███████ ██████  ██████  ██ ██ ██  ██ ██   ███ ███████ 
+-- ██  ██  ██ ██   ██ ██      ██      ██ ██  ██ ██ ██    ██      ██ 
+-- ██      ██ ██   ██ ██      ██      ██ ██   ████  ██████  ███████ 
+-- mappings
 
 -- Unmap the arrow keys
 vim.keymap.set("n"  , "<down>"  , "ddp")
@@ -60,9 +268,18 @@ vim.keymap.set("n", "<Leader><", ":Neotree close<CR>")
 -- Delete a buffer more easily
 vim.keymap.set("n", "<Leader>d", ":bd<CR>")
 
-------------------------------------------------
-------------------- Settings -------------------
-------------------------------------------------
+
+-- ███████ ███████ ████████ ████████ ██ ███    ██  ██████  ███████ 
+-- ██      ██         ██       ██    ██ ████   ██ ██       ██      
+-- ███████ █████      ██       ██    ██ ██ ██  ██ ██   ███ ███████ 
+--      ██ ██         ██       ██    ██ ██  ██ ██ ██    ██      ██ 
+-- ███████ ███████    ██       ██    ██ ██   ████  ██████  ███████ 
+-- settings
+
+-- Vim needs a more POSIX compatible shell than fish for certain functionality to work, such as :%!,
+-- compressed help pages and many third-party plugins.
+
+vim.cmd("if &shell =~# 'fish$' | set shell=sh | endif")
 
 -- Enables mouse in vim
 vim.o.mouse = "a"
@@ -120,12 +337,72 @@ vim.o.grepprg = "rg --vimgrep --no-heading --smart-case"
 vim.o.foldenable = false
 
 
-------------------------------------------------
------------------ Plugin Config ----------------
-------------------------------------------------
+-- ██      ███████ ██████         ██                                                  
+-- ██      ██      ██   ██        ██                                                  
+-- ██      ███████ ██████      ████████                                               
+-- ██           ██ ██          ██  ██                                                 
+-- ███████ ███████ ██          ██████                                                 
+--                                                                                    
+--                                                                                    
+--  ██████  ██████  ███    ███ ██████  ██      ███████ ████████ ██  ██████  ███    ██ 
+-- ██      ██    ██ ████  ████ ██   ██ ██      ██         ██    ██ ██    ██ ████   ██ 
+-- ██      ██    ██ ██ ████ ██ ██████  ██      █████      ██    ██ ██    ██ ██ ██  ██ 
+-- ██      ██    ██ ██  ██  ██ ██      ██      ██         ██    ██ ██    ██ ██  ██ ██ 
+--  ██████  ██████  ██      ██ ██      ███████ ███████    ██    ██  ██████  ██   ████ 
+--  lsp & completion
 
--- require("lualine").setup {
---     options = {
---         theme = "ayu_mirage"
---     }
--- }
+
+-- rustaceanvim Setup
+
+-- local capabilities = require('cmp_nvim_lsp').default_capabilities()
+vim.g.rustaceanvim = {
+	tools = {
+	},
+	-- all the opts to send to nvim-lspconfig
+	-- these override the defaults
+	-- see https://github.com/neovim/nvim-lspconfig/blob/master/doc/server-configurations.md
+	server = {
+		settings = {
+			-- to enable rust-analyzer settings visit:
+			-- https://github.com/rust-analyzer/rust-analyzer/blob/master/docs/user/generated_config.adoc
+			["rust-analyzer"] = {
+				completion = {
+					callable = {
+						snippets = "none"
+					},
+				},
+				cargo = {
+					allFeatures = true,
+				},
+				-- enable clippy on save
+				check = {
+					allTargets = true,
+					command = "clippy",
+				},
+				diagnostics = {
+					disabled = {"inactive-code"}
+				},
+				procMacro = {
+					enable = true,
+				},
+				rust = {
+					analyzerTargetDir = true,
+				},
+				flags = {
+					exit_timeout = 100,
+				},
+			}
+		}
+	},
+}
+
+
+-- ███    ███ ██ ███    ██ ██    ███    ██ ██    ██ ██ ███    ███ 
+-- ████  ████ ██ ████   ██ ██    ████   ██ ██    ██ ██ ████  ████ 
+-- ██ ████ ██ ██ ██ ██  ██ ██    ██ ██  ██ ██    ██ ██ ██ ████ ██ 
+-- ██  ██  ██ ██ ██  ██ ██ ██    ██  ██ ██  ██  ██  ██ ██  ██  ██ 
+-- ██      ██ ██ ██   ████ ██ ██ ██   ████   ████   ██ ██      ██ 
+-- mini.nvim
+
+
+require("mini.completion").setup()
