@@ -1,14 +1,17 @@
--- ██████  ██      ██    ██  ██████  ██ ███    ██ ███████ 
--- ██   ██ ██      ██    ██ ██       ██ ████   ██ ██      
--- ██████  ██      ██    ██ ██   ███ ██ ██ ██  ██ ███████ 
--- ██      ██      ██    ██ ██    ██ ██ ██  ██ ██      ██ 
--- ██      ███████  ██████   ██████  ██ ██   ████ ███████ 
+-- ██████  ██      ██    ██  ██████  ██ ███    ██ ███████
+-- ██   ██ ██      ██    ██ ██       ██ ████   ██ ██
+-- ██████  ██      ██    ██ ██   ███ ██ ██ ██  ██ ███████
+-- ██      ██      ██    ██ ██    ██ ██ ██  ██ ██      ██
+-- ██      ███████  ██████   ██████  ██ ██   ████ ███████
 
 
-local plugin_spec = { ----------------------------
+local plugin_spec = {
+
+
+	----------------------------
 	-- EDITING PLUGINS
 	----------------------------
-	
+
 
 	-- For making things look pretty and formatted
 	{ "godlygeek/tabular", lazy = true },
@@ -51,9 +54,9 @@ local plugin_spec = { ----------------------------
 
 	-- For finding files quickly
 	{
-		"nvim-telescope/telescope.nvim", 
+		"nvim-telescope/telescope.nvim",
 		branch = "0.1.x",
-		dependencies = { 
+		dependencies = {
 			-- Helper lib for telescope
 			{ "nvim-lua/plenary.nvim" },
 			-- Faster sorting
@@ -63,13 +66,29 @@ local plugin_spec = { ----------------------------
 		},
 		config = function()
 			local telescope = require("telescope")
-			telescope.load_extension("fzf")
-			telescope.load_extension("live_grep_args")
+			local live_grep_args_actions = require("telescope-live-grep-args.actions")
 			local builtin = require("telescope.builtin")
+
+			telescope.setup {
+				extensions = {
+					live_grep_args = {
+						auto_quoting = true,
+						mappings = {
+							i = {
+								["<C-q>"] = live_grep_args_actions.quote_prompt(),
+								["<C-f>"] = live_grep_args_actions.to_fuzzy_refine,
+							}
+						}
+					}
+				}
+			}
 
 			vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Find files by name" })
 			vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Search help tags" })
-			vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
+			vim.keymap.set("n", "<leader>fg", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
+
+			telescope.load_extension("fzf")
+			telescope.load_extension("live_grep_args")
 		end
 	},
 
@@ -81,7 +100,7 @@ local plugin_spec = { ----------------------------
 
 	-- My primary colorscheme. Has been for a long time.
 	-- I finally forked it so that I could tweak how it looks in Rust.
-	{ 
+	{
 		"gposcidonio/badwolf",
 		lazy = false ,
 		config = function()
@@ -90,7 +109,7 @@ local plugin_spec = { ----------------------------
 	},
 
 	-- For a nice status line
-	{ 
+	{
 		"nvim-lualine/lualine.nvim",
 		dependencies = { "nvim-tree/nvim-web-devicons", opt = true },
 		config = function()
@@ -110,16 +129,16 @@ local plugin_spec = { ----------------------------
 		end
 	},
 
-	
+
 	----------------------------
 	-- QOL PLUGINS
 	----------------------------
 
 
 	-- For a fancy start screen
-	{  
-		"mhinz/vim-startify", 
-		lazy = false 
+	{
+		"mhinz/vim-startify",
+		lazy = false
 	},
 
 	-- For no more accidental empty files
@@ -149,11 +168,11 @@ local plugin_spec = { ----------------------------
 	-- Lots of little utilities
 	{ 'echasnovski/mini.nvim', version = '*' },
 
-	
+
 	----------------------------
 	-- SYNTAX PLUGINS
 	----------------------------
-	
+
 
 	{ "keith/swift.vim", lazy = true },
 	{ "bfontaine/Brewfile.vim", lazy = true },
@@ -178,7 +197,7 @@ local plugin_spec = { ----------------------------
 	{ "neovim/nvim-lspconfig" },
 
 	-- For viewing LSP progress
-	{ 
+	{
 		"j-hui/fidget.nvim",
 		config = function()
 			require("fidget").setup()
@@ -187,11 +206,11 @@ local plugin_spec = { ----------------------------
 }
 
 
--- ██       █████  ███████ ██    ██    ███    ██ ██    ██ ██ ███    ███ 
--- ██      ██   ██    ███   ██  ██     ████   ██ ██    ██ ██ ████  ████ 
--- ██      ███████   ███     ████      ██ ██  ██ ██    ██ ██ ██ ████ ██ 
--- ██      ██   ██  ███       ██       ██  ██ ██  ██  ██  ██ ██  ██  ██ 
--- ███████ ██   ██ ███████    ██    ██ ██   ████   ████   ██ ██      ██ 
+-- ██       █████  ███████ ██    ██    ███    ██ ██    ██ ██ ███    ███
+-- ██      ██   ██    ███   ██  ██     ████   ██ ██    ██ ██ ████  ████
+-- ██      ███████   ███     ████      ██ ██  ██ ██    ██ ██ ██ ████ ██
+-- ██      ██   ██  ███       ██       ██  ██ ██  ██  ██  ██ ██  ██  ██
+-- ███████ ██   ██ ███████    ██    ██ ██   ████   ████   ██ ██      ██
 -- lazy.nvim
 
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -227,11 +246,11 @@ require("lazy").setup({
 })
 
 
--- ███    ███  █████  ██████  ██████  ██ ███    ██  ██████  ███████ 
--- ████  ████ ██   ██ ██   ██ ██   ██ ██ ████   ██ ██       ██      
--- ██ ████ ██ ███████ ██████  ██████  ██ ██ ██  ██ ██   ███ ███████ 
--- ██  ██  ██ ██   ██ ██      ██      ██ ██  ██ ██ ██    ██      ██ 
--- ██      ██ ██   ██ ██      ██      ██ ██   ████  ██████  ███████ 
+-- ███    ███  █████  ██████  ██████  ██ ███    ██  ██████  ███████
+-- ████  ████ ██   ██ ██   ██ ██   ██ ██ ████   ██ ██       ██
+-- ██ ████ ██ ███████ ██████  ██████  ██ ██ ██  ██ ██   ███ ███████
+-- ██  ██  ██ ██   ██ ██      ██      ██ ██  ██ ██ ██    ██      ██
+-- ██      ██ ██   ██ ██      ██      ██ ██   ████  ██████  ███████
 -- mappings
 
 -- Unmap the arrow keys
@@ -269,11 +288,11 @@ vim.keymap.set("n", "<Leader><", ":Neotree close<CR>")
 vim.keymap.set("n", "<Leader>d", ":bd<CR>")
 
 
--- ███████ ███████ ████████ ████████ ██ ███    ██  ██████  ███████ 
--- ██      ██         ██       ██    ██ ████   ██ ██       ██      
--- ███████ █████      ██       ██    ██ ██ ██  ██ ██   ███ ███████ 
---      ██ ██         ██       ██    ██ ██  ██ ██ ██    ██      ██ 
--- ███████ ███████    ██       ██    ██ ██   ████  ██████  ███████ 
+-- ███████ ███████ ████████ ████████ ██ ███    ██  ██████  ███████
+-- ██      ██         ██       ██    ██ ████   ██ ██       ██
+-- ███████ █████      ██       ██    ██ ██ ██  ██ ██   ███ ███████
+--      ██ ██         ██       ██    ██ ██  ██ ██ ██    ██      ██
+-- ███████ ███████    ██       ██    ██ ██   ████  ██████  ███████
 -- settings
 
 -- Vim needs a more POSIX compatible shell than fish for certain functionality to work, such as :%!,
@@ -309,7 +328,7 @@ vim.o.list = true
 vim.o.listchars="tab:› ,trail:·,extends:>,precedes:<"
 
 -- TAB MADNESS
-vim.o.tabstop = 4 
+vim.o.tabstop = 4
 vim.o.softtabstop = 4
 vim.o.shiftwidth = 4
 vim.o.expandtab = false
@@ -337,18 +356,18 @@ vim.o.grepprg = "rg --vimgrep --no-heading --smart-case"
 vim.o.foldenable = false
 
 
--- ██      ███████ ██████         ██                                                  
--- ██      ██      ██   ██        ██                                                  
--- ██      ███████ ██████      ████████                                               
--- ██           ██ ██          ██  ██                                                 
--- ███████ ███████ ██          ██████                                                 
---                                                                                    
---                                                                                    
---  ██████  ██████  ███    ███ ██████  ██      ███████ ████████ ██  ██████  ███    ██ 
--- ██      ██    ██ ████  ████ ██   ██ ██      ██         ██    ██ ██    ██ ████   ██ 
--- ██      ██    ██ ██ ████ ██ ██████  ██      █████      ██    ██ ██    ██ ██ ██  ██ 
--- ██      ██    ██ ██  ██  ██ ██      ██      ██         ██    ██ ██    ██ ██  ██ ██ 
---  ██████  ██████  ██      ██ ██      ███████ ███████    ██    ██  ██████  ██   ████ 
+-- ██      ███████ ██████         ██
+-- ██      ██      ██   ██        ██
+-- ██      ███████ ██████      ████████
+-- ██           ██ ██          ██  ██
+-- ███████ ███████ ██          ██████
+--
+--
+--  ██████  ██████  ███    ███ ██████  ██      ███████ ████████ ██  ██████  ███    ██
+-- ██      ██    ██ ████  ████ ██   ██ ██      ██         ██    ██ ██    ██ ████   ██
+-- ██      ██    ██ ██ ████ ██ ██████  ██      █████      ██    ██ ██    ██ ██ ██  ██
+-- ██      ██    ██ ██  ██  ██ ██      ██      ██         ██    ██ ██    ██ ██  ██ ██
+--  ██████  ██████  ██      ██ ██      ███████ ███████    ██    ██  ██████  ██   ████
 --  lsp & completion
 
 
@@ -397,11 +416,11 @@ vim.g.rustaceanvim = {
 }
 
 
--- ███    ███ ██ ███    ██ ██    ███    ██ ██    ██ ██ ███    ███ 
--- ████  ████ ██ ████   ██ ██    ████   ██ ██    ██ ██ ████  ████ 
--- ██ ████ ██ ██ ██ ██  ██ ██    ██ ██  ██ ██    ██ ██ ██ ████ ██ 
--- ██  ██  ██ ██ ██  ██ ██ ██    ██  ██ ██  ██  ██  ██ ██  ██  ██ 
--- ██      ██ ██ ██   ████ ██ ██ ██   ████   ████   ██ ██      ██ 
+-- ███    ███ ██ ███    ██ ██    ███    ██ ██    ██ ██ ███    ███
+-- ████  ████ ██ ████   ██ ██    ████   ██ ██    ██ ██ ████  ████
+-- ██ ████ ██ ██ ██ ██  ██ ██    ██ ██  ██ ██    ██ ██ ██ ████ ██
+-- ██  ██  ██ ██ ██  ██ ██ ██    ██  ██ ██  ██  ██  ██ ██  ██  ██
+-- ██      ██ ██ ██   ████ ██ ██ ██   ████   ████   ██ ██      ██
 -- mini.nvim
 
 
