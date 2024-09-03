@@ -20,11 +20,9 @@ struct NukeDerivedData: AsyncParsableCommand {
 		if input.trimmingCharacters(in: .whitespacesAndNewlines) == "yes" {
 			let loadingTask = echoLoadingText(prefix: "🔥 Nuking ", foregroundColor: .red)
 			do {
-//				try FileManager.default.removeItem(atPath: derivedDataDirectory.string)
-				try await Task.sleep(for: .seconds(2))
+				try FileManager.default.removeItem(atPath: derivedDataDirectory.string)
 				loadingTask.cancel()
-//				try await Task.sleep(for: .seconds(1))
-				print("✅ Successfully nuked \(derivedDataDirectory.string)".colorized(foreground: .green))
+				print("✅ Successfully nuked \(derivedDataDirectory.string, foreground: .green)")
 			} catch {
 				exit(error: "❌ Failed to nuke derived data: \(error.localizedDescription)")
 			}
