@@ -22,7 +22,7 @@ set -gx FISH_FUNC_DIR ~/.config/fish/functions/
 
 #Editing configs
 alias vim  'nvim'
-abbr evim  'nvim ~/.config/nvim'
+abbr evim  'nvim ~/.config/nvim/init.lua'
 abbr ebash 'nvim ~/.bash_profile'
 abbr efish 'nvim ~/.config/fish/config.fish'
 abbr efunc "nvim $FISH_FUNC_DIR"
@@ -98,7 +98,7 @@ abbr gdm  'git diff main'
 abbr gsh  'git stash push -m '
 abbr gsp  'git stash pop'
 abbr gpub 'git push -u origin (git branch --show-current)'
-abbr gcp  'git rev-parse --short HEAD | pbcopy'
+abbr gcs  'git rev-parse --short HEAD | tr -d \' \\n\' | pbcopy'
 abbr gchp 'git cherry-pick'
 abbr gr   'git rebase'
 abbr grm  'git rebase main'
@@ -151,7 +151,10 @@ function vimf --description 'Fuzzy file opener for vim'
 end
 
 function temp
-    nvim /tmp/(uuidgen).$argv[1]
+    set -l UUID (uuidgen)
+    set -l FILE /tmp/$UUID.$argv[1]
+    nvim $FILE
+    echo "Temp file located at $FILE"
 end
 
 function capitalize --description 'Capitalize the first letter of each word provided'
@@ -191,4 +194,3 @@ end
 ## Starship
 
 starship init fish | source
-

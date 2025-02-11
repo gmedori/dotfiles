@@ -1,6 +1,6 @@
 [user]
-	name = Gustavo Poscidonio
-	email = mail@gustavo.sh
+	name = Goose Medori
+	email = goose@agilebits.com
 [diff]
 	tool = Kaleidoscope
 [difftool "Kaleidoscope"]
@@ -45,6 +45,7 @@
 
 [alias]
     lg = log --graph --abbrev-commit --format=format:'%C(blue)%h%C(reset) | %C(green)%ar%C(reset) - %C(dim white)%an%C(reset) %C(auto)%d%C(reset)%n         | %s%n'
+	here = lg -1
 
 # Personal git settings
 # [includeIf "hasconfig:remote.*.url:git@github.com:gposcidonio/**"]

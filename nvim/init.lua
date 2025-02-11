@@ -43,13 +43,24 @@ local plugin_spec = {
 			"nvim-tree/nvim-web-devicons",
 			"MunifTanjim/nui.nvim",
 		},
-		config = function()
-			require("neo-tree").setup {
-				filesystem = {
-					hijack_netrw_behavior = "open_current"
+		opts = {
+			filesystem = {
+				hijack_netrw_behavior = "open_current"
+			},
+			window = {
+				mappings = {
+					["z"] = ""
 				}
 			}
-		end
+		}
+	},
+
+	{
+		"nvim-telescope/telescope-file-browser.nvim",
+		dependencies = { 
+			"nvim-telescope/telescope.nvim",
+			"nvim-lua/plenary.nvim" 
+		}
 	},
 
 	-- For finding files quickly
@@ -66,6 +77,7 @@ local plugin_spec = {
 		},
 		config = function()
 			local telescope = require("telescope")
+			local actions = require("telescope.actions")
 			local live_grep_args_actions = require("telescope-live-grep-args.actions")
 			local builtin = require("telescope.builtin")
 
@@ -77,6 +89,10 @@ local plugin_spec = {
 							i = {
 								["<C-q>"] = live_grep_args_actions.quote_prompt(),
 								["<C-f>"] = live_grep_args_actions.to_fuzzy_refine,
+								["<CR>"] = function()
+									actions.select_default()
+									actions.center()
+								end,
 							}
 						}
 					}
@@ -85,10 +101,12 @@ local plugin_spec = {
 
 			vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Find files by name" })
 			vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Search help tags" })
-			vim.keymap.set("n", "<leader>fg", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
+			vim.keymap.set("n", "<leader>fg", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>", {desc = "Search workspace with ripgrep" })
+			vim.keymap.set("n", "<leader>fu", builtin.lsp_references, { desc = "Find usages" })
 
 			telescope.load_extension("fzf")
 			telescope.load_extension("live_grep_args")
+			telescope.load_extension("file_browser")
 		end
 	},
 
@@ -192,6 +210,7 @@ local plugin_spec = {
 	-- LSP PLUGINS
 	----------------------------
 
+	{ "folke/neoconf.nvim" },
 
 	-- The default LSP configs everyone uses
 	{ "neovim/nvim-lspconfig" },
@@ -284,8 +303,9 @@ vim.keymap.set("n", "<Leader>s", ":%s/\\<<C-r><C-w>\\>/")
 vim.keymap.set("n", "<Leader>>", ":Neotree focus left<CR>")
 vim.keymap.set("n", "<Leader><", ":Neotree close<CR>")
 
--- Delete a buffer more easily
-vim.keymap.set("n", "<Leader>d", ":bd<CR>")
+-- LSP Keymaps
+vim.keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "Go to definition" })
+vim.keymap.set("n", "<leader>dd", vim.diagnostic.setqflist, { desc = "Open diagnostics in quickfix window" })
 
 
 -- ███████ ███████ ████████ ████████ ██ ███    ██  ██████  ███████
