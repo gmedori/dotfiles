@@ -45,6 +45,9 @@ local plugin_spec = {
 		},
 		opts = {
 			filesystem = {
+				filtered_items = {
+					visible = true
+				},
 				hijack_netrw_behavior = "open_current"
 			},
 			window = {

@@ -103,6 +103,7 @@ abbr gchp 'git cherry-pick'
 abbr gr   'git rebase'
 abbr grm  'git rebase main'
 abbr grc  'git rebase --continue'
+abbr gci  'git clean -i'
 
 # Github
 abbr pr   'gh pr'
