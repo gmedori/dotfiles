@@ -13,7 +13,7 @@ brew "neovim"
 brew "tmux"
 brew "reattach-to-user-namespace"
 brew "starship"
-brew "exa"
+brew "eza"
 brew "git-delta"
 
 # Utilities
