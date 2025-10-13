@@ -7,3 +7,4 @@ resurrect
 fish_variables
 work_specific
 packer_compiled.lua
+lazy-lock.json
