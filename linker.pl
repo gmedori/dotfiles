@@ -20,7 +20,7 @@ my @fileList = (
     ["$directory/tmux/tmux", "$HOME/.tmux"],
     ["$directory/gitconfig", "$HOME/.gitconfig"],
 	["$directory/zed/settings.json", "$HOME/.config/zed/settings.json"],
-	["$directory/zed/keymap.json", "/Users/jolteon/.config/zed/keymap.json"]
+	["$directory/zed/keymap.json", "$HOME/.config/zed/keymap.json"]
 );
 
 
