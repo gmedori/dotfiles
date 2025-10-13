@@ -23,6 +23,7 @@ brew "python3"
 brew "ripgrep"
 brew "sd"
 brew "fd"
+brew "bat"
 
 # Services
 brew "gh"

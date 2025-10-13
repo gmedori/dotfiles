@@ -45,7 +45,6 @@ alias lla 'eza --long --icons -s type --all'
 abbr  cdc 'cd ~/code'
 abbr  cds 'cd ~/scratchpad'
 abbr  cdw 'cd ~/dotfiles/work_specific'
-abbr  cdt 'cd ~/Sync/Writing/techtechgoose'
 abbr  cdd 'cd ~/dotfiles'
 
 abbr cdsc 'cd ~/scripts'
@@ -63,15 +62,11 @@ abbr tml  'tmux list-sessions'
 abbr tma  'tmux attach -t'
 abbr tmn  'tmux new -s'
 abbr tmnp 'tmux new -s (basename (pwd))'
-abbr tmni 'tmux new -s asana-ios'
-abbr tmns 'tmux new -s asana-server'
 
 #Git
 abbr gs   'git status -s'
 abbr gl   'git pull'
 abbr glm  'git pull upstream main'
-abbr glr  'git pull upstream release'
-abbr gld  'git pull upstream develop'
 abbr gp   'git push'
 abbr gf   'git fetch'
 abbr ga   'git add'
@@ -89,21 +84,21 @@ abbr gk   'git checkout'
 abbr gb   'git branch'
 abbr gkb  'git checkout -b'
 abbr gkbg 'git checkout -b goose/'
-abbr gkd  'git checkout develop'
 abbr gkm  'git checkout main'
-abbr gkr  'git checkout release'
-abbr gkf  'git checkout -b feature/'
-abbr gdd  'git diff develop'
 abbr gdm  'git diff main'
 abbr gsh  'git stash push -m '
 abbr gsp  'git stash pop'
 abbr gpub 'git push -u origin (git branch --show-current)'
 abbr gcs  'git rev-parse --short HEAD | tr -d \' \\n\' | pbcopy'
-abbr gchp 'git cherry-pick'
+abbr gcp  'git cherry-pick'
 abbr gr   'git rebase'
 abbr grm  'git rebase main'
 abbr grc  'git rebase --continue'
 abbr gci  'git clean -i'
+
+# Graphite
+
+abbr gtsu 'gt submit --stack --update-only'
 
 # Github
 abbr pr   'gh pr'
@@ -120,6 +115,8 @@ alias currentBranch "git branch | rg '\\*' | cut -d ' ' -f 2"
 
 #Other Tools
 alias lipsum 'cat $HOME/dotfiles/resources/lipsum.txt'
+alias keyboardmaestro '/Applications/Keyboard\ Maestro.app/Contents/MacOS/keyboardmaestro'
+alias km keyboardmaestro
 
 #################################
 #	COLORS
@@ -185,7 +182,7 @@ set -gx GOPATH $HOME/go
 
 fish_add_path /opt/homebrew/bin #.................... Homebrew
 fish_add_path $HOME/scripts/bin #.................... Scripts
-fish_add_path (brew --prefix go@1.19)/bin #.......... Golang binary
+fish_add_path (brew --prefix go@1.24)/bin #.......... Golang binary
 fish_add_path $GOPATH/bin #.......................... GOPATH
 fish_add_path $HOME/.cargo/bin #..................... Rust
 

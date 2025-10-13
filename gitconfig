@@ -1,6 +1,7 @@
 [user]
-	name = Goose Medori
-	email = goose.medori@agilebits.com
+	name = Gustavo Medori
+	email = mail@gustavo.sh
+	signingkey = key::ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICe4grs0BTn06c7NIdENzJxnfV/Ytw9IYkRQXOkHITcI GitHub SSH Key
 [diff]
 	tool = Kaleidoscope
 [difftool "Kaleidoscope"]
@@ -57,23 +58,12 @@
 [pull]
 	rebase = false
 
-[includeIf "gitdir:/Users/lugia/"]
+[includeIf "gitdir:/Users/umbreon/"]
     path = "~/dotfiles/work_specific/gitconfig"
 
-[user]
-  signingkey = ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICe4grs0BTn06c7NIdENzJxnfV/Ytw9IYkRQXOkHITcI
-
-[gpg]
-  format = ssh
-
-[gpg "ssh"]
-  program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-
 [commit]
-  gpgsign = true
-
-[filter "lfs"]
-	process = git-lfs filter-process
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
+	gpgsign = false
+[gpg "ssh"]
+	program = /Applications/1Password.app/Contents/MacOS/op-ssh-sign
+[gpg]
+	format = ssh
