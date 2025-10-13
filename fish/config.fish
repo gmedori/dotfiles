@@ -113,6 +113,9 @@ abbr prvw 'gh pr view --web'
 abbr prk  'gh pr checkout'
 abbr prs  'gh pr status'
 
+# 1Password
+alias ynab-token 'op item get "YNAB Personal Access Token" --fields password --reveal'
+
 alias currentBranch "git branch | rg '\\*' | cut -d ' ' -f 2"
 
 #Other Tools

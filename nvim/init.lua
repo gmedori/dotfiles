@@ -142,14 +142,6 @@ local plugin_spec = {
 		end,
 	},
 
-	-- For git symbols/colors in the gutter
-	{
-		"lewis6991/gitsigns.nvim",
-		config = function()
-			require("gitsigns").setup()
-		end
-	},
-
 
 	----------------------------
 	-- QOL PLUGINS
@@ -201,15 +193,6 @@ local plugin_spec = {
 
 
 	----------------------------
-	-- RUST PLUGINS
-	----------------------------
-	{
-		'mrcjkb/rustaceanvim',
-		version = '^5', -- Recommended
-		lazy = false, -- This plugin is already lazy
-	},
-
-	----------------------------
 	-- LSP PLUGINS
 	----------------------------
 
@@ -224,6 +207,33 @@ local plugin_spec = {
 		config = function()
 			require("fidget").setup()
 		end
+	},
+
+	{
+		"hrsh7th/nvim-cmp",
+		version = false,
+		event = "InsertEnter",
+		dependencies = {
+			"hrsh7th/cmp-nvim-lsp",
+			"hrsh7th/cmp-path",
+			"hrsh7th/cmp-buffer",
+		},
+		config = function()
+			local cmp = require('cmp')
+			local opts = {
+				-- Where to get completion results from
+				sources = cmp.config.sources {
+					{ name = "nvim_lsp" },
+					{ name = "buffer"},
+					{ name = "path" },
+				},
+				-- Make 'enter' key select the completion
+				mapping = cmp.mapping.preset.insert({
+					["<CR>"] = cmp.mapping.confirm({ select = true })
+				}),
+			}
+			cmp.setup(opts)
+		end,
 	},
 }
 
@@ -394,49 +404,25 @@ vim.o.foldenable = false
 --  lsp & completion
 
 
--- rustaceanvim Setup
+-- Swift lspconfig setup
 
--- local capabilities = require('cmp_nvim_lsp').default_capabilities()
-vim.g.rustaceanvim = {
-	tools = {
-	},
-	-- all the opts to send to nvim-lspconfig
-	-- these override the defaults
-	-- see https://github.com/neovim/nvim-lspconfig/blob/master/doc/server-configurations.md
-	server = {
-		settings = {
-			-- to enable rust-analyzer settings visit:
-			-- https://github.com/rust-analyzer/rust-analyzer/blob/master/docs/user/generated_config.adoc
-			["rust-analyzer"] = {
-				completion = {
-					callable = {
-						snippets = "none"
-					},
-				},
-				cargo = {
-					allFeatures = true,
-				},
-				-- enable clippy on save
-				check = {
-					allTargets = true,
-					command = "clippy",
-				},
-				diagnostics = {
-					disabled = {"inactive-code"}
-				},
-				procMacro = {
-					enable = true,
-				},
-				rust = {
-					analyzerTargetDir = true,
-				},
-				flags = {
-					exit_timeout = 100,
-				},
-			}
-		}
-	},
+local lspconfig = require('lspconfig')
+lspconfig.sourcekit.setup {
+	    capabilities = {
+        workspace = {
+            didChangeWatchedFiles = {
+                dynamicRegistration = true,
+            },
+        },
+    },
 }
+vim.api.nvim_create_autocmd('LspAttach', {
+	desc = 'LSP Actions',
+	callback = function(args)
+		vim.keymap.set('n', 'K', vim.lsp.buf.hover, {noremap = true, silent = true})
+		vim.keymap.set('n', 'gd', vim.lsp.buf.definition, {noremap = true, silent = true})
+	end,
+})
 
 
 -- ███    ███ ██ ███    ██ ██    ███    ██ ██    ██ ██ ███    ███
@@ -446,5 +432,3 @@ vim.g.rustaceanvim = {
 -- ██      ██ ██ ██   ████ ██ ██ ██   ████   ████   ██ ██      ██
 -- mini.nvim
 
-
-require("mini.completion").setup()
