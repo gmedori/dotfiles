@@ -8,6 +8,7 @@
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
 	// Editor
+	"icon_theme": "Colored Zed Icons Theme Dark",
 	"vim_mode": true,
 	"hard_tabs": true,
 	"tab_size": 4,
@@ -26,7 +27,9 @@
 	},
 
 	// Disable AI in the editor, prefer Claude Code
-	"disable_ai": true,
+	"features": {
+		"edit_prediction_provider": "none"
+	},
 
 	// Fonts
 	"ui_font_family": "Avenir Next Rounded Pro",
