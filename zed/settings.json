@@ -1,0 +1,57 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+	// Editor
+	"vim_mode": true,
+	"hard_tabs": true,
+	"tab_size": 4,
+
+	// Theme
+	"theme": {
+		"mode": "system",
+		"light": "Gruvbox Dark",
+		"dark": "Everforest Dark Medium"
+	},
+
+	// UI Tweaks
+
+	"project_panel": {
+		"auto_fold_dirs": false
+	},
+
+	// Disable AI in the editor, prefer Claude Code
+	"disable_ai": true,
+
+	// Fonts
+	"ui_font_family": "Avenir Next Rounded Pro",
+	"ui_font_size": 16,
+	"buffer_font_family": "MonoLisa Variable",
+	"buffer_font_fallbacks": ["SauceCodePro Nerd Font"],
+	"buffer_font_size": 14,
+
+	// Custom File Types
+	"file_types": {
+		"JavaScript": ["js", "omnijs", "omnifocusjs"]
+	},
+
+	// Language-specific Settings
+	"languages": {
+		"Swift": {
+			"enable_language_server": true,
+			"language_servers": ["sourcekit-lsp"],
+			"formatter": {
+				"external": {
+					"command": "/opt/homebrew/bin/swiftformat",
+					"arguments": ["stdin", "--stdin-path", "{buffer_path}"]
+				}
+			},
+			"format_on_save": "on"
+		}
+	}
+}

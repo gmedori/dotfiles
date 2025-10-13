@@ -18,7 +18,9 @@ my @fileList = (
     ["$directory/starship.toml", "$HOME/.config/starship.toml"],
     ["$directory/tmux/tmux.conf", "$HOME/.tmux.conf"],
     ["$directory/tmux/tmux", "$HOME/.tmux"],
-    ["$directory/gitconfig", "$HOME/.gitconfig"]
+    ["$directory/gitconfig", "$HOME/.gitconfig"],
+	["$directory/zed/settings.json", "$HOME/.config/zed/settings.json"],
+	["$directory/zed/keymap.json", "/Users/jolteon/.config/zed/keymap.json"]
 );
 
 
