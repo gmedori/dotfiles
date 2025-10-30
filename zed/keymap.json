@@ -9,7 +9,7 @@
 	{
 		"context": "Workspace",
 		"bindings": {
-			// "shift shift": "file_finder::Toggle"
+			"cmd-shift-o": "file_finder::Toggle"
 		}
 	},
 	{
@@ -21,7 +21,14 @@
 	{
 		"context": "Editor",
 		"bindings": {
-			"ctrl-f": null
+			"cmd-shift-o": "file_finder::Toggle",
+			"ctrl-f": "editor::Format"
+		}
+	},
+	{
+		"context": "BufferSearchBar",
+		"bindings": {
+			"cmd-shift-o": null
 		}
 	}
 ]

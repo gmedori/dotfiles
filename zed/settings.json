@@ -16,7 +16,7 @@
 	// Theme
 	"theme": {
 		"mode": "system",
-		"light": "Gruvbox Dark",
+		"light": "Everforest Dark Medium",
 		"dark": "Everforest Dark Medium"
 	},
 
@@ -35,7 +35,7 @@
 	"ui_font_family": "Avenir Next Rounded Pro",
 	"ui_font_size": 16,
 	"buffer_font_family": "MonoLisa Variable",
-	"buffer_font_fallbacks": ["SauceCodePro Nerd Font"],
+	"buffer_font_fallbacks": ["FiraCode Nerd Font"],
 	"buffer_font_size": 14,
 
 	// Custom File Types
