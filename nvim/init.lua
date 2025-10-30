@@ -406,8 +406,7 @@ vim.o.foldenable = false
 
 -- Swift lspconfig setup
 
-local lspconfig = require('lspconfig')
-lspconfig.sourcekit.setup {
+vim.lsp.config('sourcekit', {
 	    capabilities = {
         workspace = {
             didChangeWatchedFiles = {
@@ -415,7 +414,7 @@ lspconfig.sourcekit.setup {
             },
         },
     },
-}
+})
 vim.api.nvim_create_autocmd('LspAttach', {
 	desc = 'LSP Actions',
 	callback = function(args)
