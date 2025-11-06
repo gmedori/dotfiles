@@ -14,6 +14,7 @@ $status\
 
 [fill]
 symbol = "━"
+style = "bright-black"
 
 [character]
 success_symbol = "[|>](bold #5a28ff)[|>](bold cyan)[|>](bold green)"

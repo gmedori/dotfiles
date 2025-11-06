@@ -21,17 +21,18 @@ set -gx FISH_FUNC_DIR ~/.config/fish/functions/
 #################################
 
 #Editing configs
-alias vim  'nvim'
-abbr evim  'nvim ~/.config/nvim/init.lua'
-abbr ebash 'nvim ~/.bash_profile'
-abbr efish 'nvim ~/.config/fish/config.fish'
-abbr efunc "nvim $FISH_FUNC_DIR"
-abbr etmux 'nvim ~/.tmux.conf'
-abbr egit  'nvim ~/.gitconfig'
-abbr essh  'nvim ~/.ssh/config'
-abbr estar 'nvim ~/.config/starship.toml'
-abbr ework 'nvim ~/dotfiles/work_specific'
-abbr rld   'source ~/.config/fish/config.fish'
+alias vim   'nvim'
+abbr evim   'nvim ~/.config/nvim/init.lua'
+abbr ebash  'nvim ~/.bash_profile'
+abbr efish  'nvim ~/.config/fish/config.fish'
+abbr efunc  "nvim $FISH_FUNC_DIR"
+abbr etmux  'nvim ~/.tmux.conf'
+abbr egit   'nvim ~/.gitconfig'
+abbr essh   'nvim ~/.ssh/config'
+abbr estar  'nvim ~/.config/starship.toml'
+abbr eghost 'nvim ~/.config/ghostty/config'
+abbr ework  'nvim ~/dotfiles/work_specific'
+abbr rld    'source ~/.config/fish/config.fish'
 
 #General
 #alias ls  'ls -G'

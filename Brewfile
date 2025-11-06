@@ -15,6 +15,7 @@ brew "reattach-to-user-namespace"
 brew "starship"
 brew "eza"
 brew "git-delta"
+brew "tree-sitter-cli"
 
 # Utilities
 brew "tree"

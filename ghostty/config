@@ -1,0 +1,22 @@
+font-family = "MonoLisa Variable"
+font-size = 16
+scrollback-limit = 1000000
+
+# Appearance Settings
+theme = badwolf
+background-opacity = 0.9
+
+# Window Settings
+window-colorspace = display-p3
+window-padding-color = extend
+macos-titlebar-style = hidden
+window-save-state = always
+
+# Keybindings
+keybind = ctrl+space>l=goto_split:right
+keybind = ctrl+space>h=goto_split:left
+keybind = ctrl+space>j=goto_split:down
+keybind = ctrl+space>k=goto_split:up
+
+keybind = ctrl+space>shift+\=new_split:right
+keybind = ctrl+space>-=new_split:down
