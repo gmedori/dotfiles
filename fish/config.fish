@@ -164,11 +164,20 @@ function capitalize --description 'Capitalize the first letter of each word prov
 end
 
 function fish_title
-    # Prevent fish from trying to write the title to the terminal window by overwriting fish_title to not print anything.
+	if set -q WINDOW_TITLE
+		echo $WINDOW_TITLE
+		return
+	end
+	set -q argv[1]; or set argv fish
+	if test $PWD = $HOME
+		echo $argv
+	else
+		echo (prompt_pwd) : $argv;
+	end
 end
 
 function title
-    echo -e "\033];$argv\007"
+	set -g WINDOW_TITLE "$argv"
 end
 
 
