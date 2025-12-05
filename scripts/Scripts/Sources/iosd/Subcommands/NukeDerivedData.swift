@@ -22,8 +22,9 @@ struct NukeDerivedData: AsyncParsableCommand {
 			do {
 				try FileManager.default.removeItem(atPath: derivedDataDirectory.string)
 				loadingTask.cancel()
-				print("✅ Successfully nuked \(derivedDataDirectory.string, foreground: .green)")
+				print("\n✅ Successfully nuked \(derivedDataDirectory.string, foreground: .green)")
 			} catch {
+                loadingTask.cancel()
 				exit(error: "❌ Failed to nuke derived data: \(error.localizedDescription)")
 			}
 		} else {

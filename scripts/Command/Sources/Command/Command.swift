@@ -22,11 +22,13 @@ public actor Command: Sendable {
 
 	public private(set) var standardOutput: String?
 	public private(set) var standardError: String?
+	public private(set) var exitStatus: Int?
 
 	let queue = DispatchQueue(label: "swift.command")
 
 	public func run(
-		interactive isInteractive: Bool = true
+		interactive isInteractive: Bool = true,
+		passthroughOutput: Bool = false
 	) throws {
 		guard !executable.isEmpty else { throw Error.missingExecutable }
 		let process = Process()
@@ -37,8 +39,10 @@ public actor Command: Sendable {
 		let stdoutPipe = Pipe()
 		let stderrPipe = Pipe()
 
-		process.standardOutput = stdoutPipe
-		process.standardError = stderrPipe
+		if !passthroughOutput {
+			process.standardOutput = stdoutPipe
+			process.standardError = stderrPipe
+		}
 
 		if isInteractive {
 			let stdinPipe = Pipe()
@@ -55,13 +59,17 @@ public actor Command: Sendable {
 		try process.run()
 		process.waitUntilExit()
 
-		if let outputData = try stdoutPipe.fileHandleForReading.readToEnd() {
-			standardOutput = String(data: outputData, encoding: .utf8)
+		if !passthroughOutput {
+			if let outputData = try stdoutPipe.fileHandleForReading.readToEnd() {
+				standardOutput = String(data: outputData, encoding: .utf8)
+			}
+
+			if let errorData = try stderrPipe.fileHandleForReading.readToEnd() {
+				standardError = String(data: errorData, encoding: .utf8)
+			}
 		}
 
-		if let errorData = try stderrPipe.fileHandleForReading.readToEnd() {
-			standardError = String(data: errorData, encoding: .utf8)
-		}
+		self.exitStatus = Int(process.terminationStatus)
 	}
 
 	public func output() async throws -> String? {
