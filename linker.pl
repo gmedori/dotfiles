@@ -21,6 +21,7 @@ my @fileList = (
     ["$directory/gitconfig", "$HOME/.gitconfig"],
 	["$directory/zed/settings.json", "$HOME/.config/zed/settings.json"],
 	["$directory/zed/keymap.json", "$HOME/.config/zed/keymap.json"]
+	["$directory/ghostty", "$HOME/.config/ghostty"]
 );
 
 

@@ -16,8 +16,8 @@
 	// Theme
 	"theme": {
 		"mode": "system",
-		"light": "Everforest Dark Medium",
-		"dark": "Everforest Dark Medium"
+		"light": "Everforest Dark Hard",
+		"dark": "Everforest Dark Hard"
 	},
 
 	// UI Tweaks

@@ -50,8 +50,6 @@ abbr  cdd 'cd ~/dotfiles'
 
 abbr cdsc 'cd ~/scripts'
 
-abbr  cl  'clear'
-
 # System Info
 alias show-path 'string join \n ">>> fish_user_paths" "" $fish_user_paths "" ">>> PATH" "" $PATH'
 
@@ -180,8 +178,10 @@ function title
 	set -g WINDOW_TITLE "$argv"
 end
 
-
-
+function clear
+    # preserve scrollback; do not send CSI 3J
+	printf '\033[H\033[22J'
+end
 
 #################################
 #	ENVIRONMENT VARIABLES
