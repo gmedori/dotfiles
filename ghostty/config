@@ -15,7 +15,7 @@ window-colorspace = display-p3
 window-padding-color = extend
 # macos-window-buttons = hidden
 macos-titlebar-proxy-icon = hidden
-macos-titlebar-style = tabs
+# macos-titlebar-style = tabs
 window-save-state = always
 
 # Quick Terminal
