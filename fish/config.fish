@@ -50,6 +50,8 @@ abbr  cdd 'cd ~/dotfiles'
 
 abbr cdsc 'cd ~/scripts'
 
+abbr cl 'clear'
+
 # System Info
 alias show-path 'string join \n ">>> fish_user_paths" "" $fish_user_paths "" ">>> PATH" "" $PATH'
 
@@ -98,6 +100,7 @@ abbr gci  'git clean -i'
 # Graphite
 
 abbr gtsu 'gt submit --stack --update-only'
+abbr gtg  'gt get'
 
 # Github
 abbr pr   'gh pr'

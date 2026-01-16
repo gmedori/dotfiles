@@ -30,5 +30,41 @@
 		"bindings": {
 			"cmd-shift-o": null
 		}
-	}
+	},
+ {
+  "context": "Pane",
+  "bindings": {
+   "cmd-[": "pane::GoBack"
+  }
+ },
+ {
+  "context": "Pane",
+  "bindings": {
+   "cmd-]": "pane::GoForward"
+  }
+ },
+ {
+  "context": "Editor",
+  "bindings": {
+   "cmd-]": null
+  }
+ },
+ {
+  "context": "Editor",
+  "bindings": {
+   "cmd-[": null
+  }
+ },
+ {
+  "context": "Pane",
+  "bindings": {
+   "ctrl--": null
+  }
+ },
+ {
+  "context": "Pane",
+  "bindings": {
+   "ctrl-_": null
+  }
+ }
 ]
