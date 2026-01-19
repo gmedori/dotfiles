@@ -17,10 +17,19 @@ struct Run: AsyncParsableCommand {
 			throw ExitCode.failure
 		}
 
-		print("Running Dia...".colorized(foreground: .cyan))
+		// Check for workspace user data directory
+		let userDirURL = projectRoot.appendingPathComponent(".goose-dia-user-dir")
+		var arguments = [String]()
+		if FileManager.default.fileExists(atPath: userDirURL.path) {
+			arguments.append("--user-data-dir=\(userDirURL.path)")
+			print("Running Dia with workspace user data...".colorized(foreground: .cyan))
+		} else {
+			print("Running Dia...".colorized(foreground: .cyan))
+		}
+
 		let runCommand = Command(
 			executable: "./build/dia-debug/bin/Dia.app/Contents/MacOS/Dia",
-			arguments: []
+			arguments: arguments
 		)
 		try await runCommand.run(interactive: true, passthroughOutput: true)
 	}
