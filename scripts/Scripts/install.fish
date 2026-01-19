@@ -9,6 +9,13 @@ swift build -c release
 
 set -l binaries (cat Package.swift | rg -r '$1' '\s*\.executable\(name: "([^"]*)".*' | xargs printf "./.build/release/%s\n")
 
+set -l bin_dir (git rev-parse --show-toplevel)/bin
+mkdir -p $bin_dir
+
 for bin in $binaries
-	echo "Install script would install $bin but installation isn't implemented yet."
+	set -l name (basename $bin)
+	echo "Installing $name to $bin_dir"
+	cp $bin $bin_dir/
 end
+
+echo "Installed "(count $binaries)" binaries to $bin_dir"

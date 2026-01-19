@@ -9,6 +9,8 @@ let package = Package(
 	products: [
 		.executable(name: "iosd", targets: ["iosd"]),
 		.executable(name: "chapter-splitter", targets: ["chapter-splitter"]),
+		.executable(name: "dia", targets: ["dia"]),
+		.executable(name: "notify", targets: ["notify"]),
 	],
 	dependencies: [
 		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
@@ -30,6 +32,20 @@ let package = Package(
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				"Escape",
 				"Command",
+			]
+		),
+		.executableTarget(
+			name: "dia",
+			dependencies: [
+				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+				"Escape",
+				"Command",
+			]
+		),
+		.executableTarget(
+			name: "notify",
+			dependencies: [
+				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 			]
 		),
 	]
