@@ -19,3 +19,16 @@ for bin in $binaries
 end
 
 echo "Installed "(count $binaries)" binaries to $bin_dir"
+
+# Install fish completions
+set -l completions_dir ~/.config/fish/completions
+mkdir -p $completions_dir
+
+for bin in $binaries
+	set -l name (basename $bin)
+	set -l completion_file "$completions_dir/$name.fish"
+	echo "Generating fish completions for $name"
+	$bin --generate-completion-script fish > $completion_file
+end
+
+echo "Installed "(count $binaries)" fish completion scripts to $completions_dir"
