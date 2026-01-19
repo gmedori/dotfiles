@@ -7,7 +7,6 @@ shell-integration-features = no-title
 
 # Appearance Settings
 theme = badwolf
-# background-opacity = 0.9
 
 # Window Settings
 
@@ -15,14 +14,7 @@ window-colorspace = display-p3
 window-padding-color = extend
 # macos-window-buttons = hidden
 macos-titlebar-proxy-icon = hidden
-# macos-titlebar-style = tabs
 window-save-state = always
-
-# Quick Terminal
-
-# quick-terminal-position = left
-quick-terminal-space-behavior = remain
-quick-terminal-size = 75%,75%
 
 # Miscellaneous Settings
 
@@ -40,5 +32,3 @@ keybind = ctrl+space>ctrl+h=previous_tab
 
 keybind = ctrl+space>shift+\=new_split:right
 keybind = ctrl+space>-=new_split:down
-
-keybind = global:cmd+ctrl+shift+opt+t=toggle_quick_terminal
