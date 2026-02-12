@@ -124,6 +124,18 @@ return {
 			end,
 		})
 
+		vim.api.nvim_create_autocmd('CursorHold', {
+			callback = function()
+				-- Don't show diagnostics if a floating window (e.g., hover docs) is already open
+				for _, win in ipairs(vim.api.nvim_list_wins()) do
+					if vim.api.nvim_win_get_config(win).relative ~= '' then
+						return
+					end
+				end
+				vim.diagnostic.open_float(nil, { focus = false })
+			end,
+		})
+
 		-- LSP servers and clients are able to communicate to each other what features they support.
 		-- By default, Neovim doesn't support everything that is in the LSP specification.
 		-- When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
@@ -199,6 +211,17 @@ return {
 				},
 			},
 
+		}
+
+		servers.gdscript = {
+			name = "gdscript",
+			--cmd = { "/Applications/Godot_mono.app/Contents/MacOS/Godot", "--headless", "--editor", "--lsp-port", "6005" },
+			cmd = { "nc", "127.0.0.1", "6005" },
+			filetypes = { "gdscript", "gd" },
+			root_markers = {
+				"project.godot",
+				".git",
+			}
 		}
 
 

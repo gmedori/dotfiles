@@ -195,6 +195,7 @@ fish_add_path $HOME/scripts/bin #.................... Scripts
 fish_add_path (brew --prefix go@1.24)/bin #.......... Golang binary
 fish_add_path $GOPATH/bin #.......................... GOPATH
 fish_add_path $HOME/.cargo/bin #..................... Rust
+fish_add_path $HOME/.local/bin #..................... Misc. local installs (e.g. Claude installs itself here)
 
 ## Work Specific Stuff
 set WORK_SPECIFIC_DIR $HOME/dotfiles/work_specific
@@ -205,3 +206,8 @@ end
 ## Starship
 
 starship init fish | source
+
+
+## Swiftly
+
+source "/Users/jolteon/.swiftly/env.fish"

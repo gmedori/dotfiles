@@ -7,7 +7,7 @@ shell-integration-features = no-title
 
 # Appearance Settings
 theme = badwolf
-background-opacity = 0.9
+# background-opacity = 0.9
 
 # Window Settings
 
@@ -40,5 +40,3 @@ keybind = ctrl+space>ctrl+h=previous_tab
 
 keybind = ctrl+space>shift+\=new_split:right
 keybind = ctrl+space>-=new_split:down
-
-keybind = global:cmd+ctrl+shift+opt+t=toggle_quick_terminal
