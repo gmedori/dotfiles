@@ -1,4 +1,4 @@
-font-family = "PragmataPro Mono Liga" # "MonoLisa Variable"
+font-family = "Menlo" # "PragmataPro Mono Liga" # "MonoLisa Variable"
 font-size = 16
 scrollback-limit = 1000000
 
@@ -7,7 +7,6 @@ shell-integration-features = no-title
 
 # Appearance Settings
 theme = badwolf
-# background-opacity = 0.9
 
 # Window Settings
 
@@ -15,14 +14,7 @@ window-colorspace = display-p3
 window-padding-color = extend
 # macos-window-buttons = hidden
 macos-titlebar-proxy-icon = hidden
-macos-titlebar-style = tabs
 window-save-state = always
-
-# Quick Terminal
-
-# quick-terminal-position = left
-quick-terminal-space-behavior = remain
-quick-terminal-size = 75%,75%
 
 # Miscellaneous Settings
 

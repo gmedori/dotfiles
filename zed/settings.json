@@ -36,7 +36,7 @@
 	"ui_font_size": 16,
 	"buffer_font_family": "MonoLisa Variable",
 	"buffer_font_fallbacks": ["FiraCode Nerd Font"],
-	"buffer_font_size": 14,
+	"buffer_font_size": 16.0,
 
 	// Custom File Types
 	"file_types": {
