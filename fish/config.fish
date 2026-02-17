@@ -21,18 +21,19 @@ set -gx FISH_FUNC_DIR ~/.config/fish/functions/
 #################################
 
 #Editing configs
-alias vim   'nvim'
-abbr evim   'nvim ~/.config/nvim/init.lua'
-abbr ebash  'nvim ~/.bash_profile'
-abbr efish  'nvim ~/.config/fish/config.fish'
-abbr efunc  "nvim $FISH_FUNC_DIR"
-abbr etmux  'nvim ~/.tmux.conf'
-abbr egit   'nvim ~/.gitconfig'
-abbr essh   'nvim ~/.ssh/config'
-abbr estar  'nvim ~/.config/starship.toml'
-abbr eghost 'nvim ~/.config/ghostty/config'
-abbr ework  'nvim ~/dotfiles/work_specific'
-abbr rld    'source ~/.config/fish/config.fish'
+alias vim         'nvim'
+abbr evim         'nvim ~/.config/nvim/init.lua'
+abbr ebash        'nvim ~/.bash_profile'
+abbr efish        'nvim ~/.config/fish/config.fish'
+abbr efunc        "nvim $FISH_FUNC_DIR"
+abbr etmux        'nvim ~/.tmux.conf'
+abbr egit         'nvim ~/.gitconfig'
+abbr egitignore   'nvim ~/.config/git/ignore'
+abbr essh         'nvim ~/.ssh/config'
+abbr estar        'nvim ~/.config/starship.toml'
+abbr eghost       'nvim ~/.config/ghostty/config'
+abbr ework        'nvim ~/dotfiles/work_specific'
+abbr rld          'source ~/.config/fish/config.fish'
 
 #General
 #alias ls  'ls -G'
@@ -67,7 +68,7 @@ abbr tmnp 'tmux new -s (basename (pwd))'
 #Git
 abbr gs   'git status -s'
 abbr gl   'git pull'
-abbr glm  'git pull upstream main'
+abbr glm  'git fetch origin main:main'
 abbr gp   'git push'
 abbr gf   'git fetch'
 abbr ga   'git add'
@@ -81,11 +82,12 @@ abbr ggm  'git lg main..'
 abbr glg  'git lg --all'
 abbr gd   'git diff'
 abbr gdc  'git diff --cached'
-abbr gk   'git checkout'
+abbr gk   'git switch'
 abbr gb   'git branch'
-abbr gkb  'git checkout -b'
-abbr gkbg 'git checkout -b goose/'
-abbr gkm  'git checkout main'
+abbr gkb  'git switch -c'
+abbr gkbg 'git switch -c goose/'
+abbr gkm  'git switch main'
+abbr gkd  'git switch --detach'
 abbr gdm  'git diff main'
 abbr gsh  'git stash push -m '
 abbr gsp  'git stash pop'
@@ -100,7 +102,7 @@ abbr gci  'git clean -i'
 # Graphite
 
 abbr gtsu 'gt submit --stack --update-only'
-abbr gtg  'gt get'
+abbr gtg  'git fetch origin main:main; and gt get'
 
 # Github
 abbr pr   'gh pr'

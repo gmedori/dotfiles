@@ -6,7 +6,7 @@ shell-integration = fish
 shell-integration-features = no-title
 
 # Appearance Settings
-theme = badwolf
+theme = alucard
 
 # Window Settings
 
