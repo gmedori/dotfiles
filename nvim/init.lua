@@ -29,4 +29,7 @@ require("lazy").setup({
 	require 'plugins.lsp',
 	require 'plugins.autocompletion',
 	-- require 'plugins.autoformatting',
+	require 'plugins.which-key',
+	require 'plugins.gitsigns',
+	require 'plugins.autopairs',
 })
