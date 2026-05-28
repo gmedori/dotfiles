@@ -8,6 +8,30 @@
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
 	// Editor
+	"format_on_save": "off",
+ "edit_predictions": {
+		"provider": "none",
+	},
+	"agent_servers": {
+		"claude-acp": {
+			"type": "registry",
+		},
+	},
+	"outline_panel": {
+		"dock": "left",
+	},
+	"collaboration_panel": {
+		"dock": "right",
+	},
+	"agent": {
+		"sidebar_side": "right",
+		"dock": "right",
+		"favorite_models": [],
+		"model_parameters": [],
+	},
+	"git_panel": {
+		"dock": "right",
+	},
 	"icon_theme": "Colored Zed Icons Theme Dark",
 	"vim_mode": true,
 	"hard_tabs": true,
@@ -16,21 +40,18 @@
 	// Theme
 	"theme": {
 		"mode": "system",
-		"light": "Everforest Dark Hard",
-		"dark": "Everforest Dark Hard"
+		"light": "One Light",
+		"dark": "Everforest Dark Hard",
 	},
 
 	// UI Tweaks
 
 	"project_panel": {
-		"auto_fold_dirs": false
+		"dock": "left",
+		"auto_fold_dirs": false,
 	},
 
 	// Disable AI in the editor, prefer Claude Code
-	"features": {
-		"edit_prediction_provider": "none"
-	},
-
 	// Fonts
 	"ui_font_family": "Avenir Next Rounded Pro",
 	"ui_font_size": 16,
@@ -40,7 +61,7 @@
 
 	// Custom File Types
 	"file_types": {
-		"JavaScript": ["js", "omnijs", "omnifocusjs"]
+		"JavaScript": ["js", "omnijs", "omnifocusjs"],
 	},
 
 	// Language-specific Settings
@@ -51,10 +72,10 @@
 			"formatter": {
 				"external": {
 					"command": "/opt/homebrew/bin/swiftformat",
-					"arguments": ["stdin", "--stdin-path", "{buffer_path}"]
-				}
+					"arguments": ["stdin", "--stdin-path", "{buffer_path}"],
+				},
 			},
-			"format_on_save": "on"
-		}
-	}
+			"format_on_save": "on",
+		},
+	},
 }
