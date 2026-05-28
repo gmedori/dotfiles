@@ -70,7 +70,7 @@ return {
 
 				-- Execute a code action, usually your cursor needs to be on top of an error
 				-- or a suggestion from your LSP for this to activate.
-				map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+				map('<leader>a', vim.lsp.buf.code_action, 'Code [A]ction')
 
 				-- Opens a popup that displays documentation about the word under your cursor
 				--  See `:help K` for why this keymap
@@ -136,6 +136,13 @@ return {
 			end,
 		})
 
+		vim.api.nvim_create_autocmd('BufWritePre', {
+			pattern = '*.go',
+			callback = function()
+				vim.lsp.buf.format()
+			end,
+		})
+
 		-- LSP servers and clients are able to communicate to each other what features they support.
 		-- By default, Neovim doesn't support everything that is in the LSP specification.
 		-- When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
@@ -173,6 +180,8 @@ return {
 				},
 			},
 			fish_lsp = {},
+			gopls = {},
+			openscad_lsp = {},
 		}
 
 		-- Ensure the servers and tools above are installed
