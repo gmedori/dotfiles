@@ -31,12 +31,12 @@
 [delta]
     navigate = true    # use n and N to move between diff sections
     light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
-    minus-style = "syntax #700000"
-    minus-emph-style = "normal #a00000"
-    minus-empty-line-marker-style = "normal #700000"
-    plus-style = "syntax #005000"
-    plus-emph-style = "normal #008c00"
-    plus-empty-line-marker-style = "normal #005000"
+	# minus-style = "syntax #700000"
+	# minus-emph-style = "normal #a00000"
+    # minus-empty-line-marker-style = "normal #700000"
+    # plus-style = "syntax #005000"
+    # plus-emph-style = "normal #008c00"
+    # plus-empty-line-marker-style = "normal #005000"
     side-by-side = false
     tabs = 2
 [merge]
