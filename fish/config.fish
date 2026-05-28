@@ -21,18 +21,19 @@ set -gx FISH_FUNC_DIR ~/.config/fish/functions/
 #################################
 
 #Editing configs
-alias vim   'nvim'
-abbr evim   'nvim ~/.config/nvim/init.lua'
-abbr ebash  'nvim ~/.bash_profile'
-abbr efish  'nvim ~/.config/fish/config.fish'
-abbr efunc  "nvim $FISH_FUNC_DIR"
-abbr etmux  'nvim ~/.tmux.conf'
-abbr egit   'nvim ~/.gitconfig'
-abbr essh   'nvim ~/.ssh/config'
-abbr estar  'nvim ~/.config/starship.toml'
-abbr eghost 'nvim ~/.config/ghostty/config'
-abbr ework  'nvim ~/dotfiles/work_specific'
-abbr rld    'source ~/.config/fish/config.fish'
+alias vim    'nvim'
+abbr evim    'nvim ~/.config/nvim/init.lua'
+abbr ebash   'nvim ~/.bash_profile'
+abbr efish   'nvim ~/.config/fish/config.fish'
+abbr efunc   "nvim $FISH_FUNC_DIR"
+abbr etmux   'nvim ~/.tmux.conf'
+abbr egit    'nvim ~/.gitconfig'
+abbr essh    'nvim ~/.ssh/config'
+abbr estar   'nvim ~/.config/starship.toml'
+abbr eghost  'nvim ~/.config/ghostty/config'
+abbr ework   'nvim ~/dotfiles/work_specific'
+abbr ezellij 'nvim ~/.config/zellij/config.kdl'
+abbr rld     'source ~/.config/fish/config.fish'
 
 #General
 #alias ls  'ls -G'
@@ -62,7 +63,7 @@ alias fzf 'fzf --height=15 --reverse -m --bind ctrl-a:toggle-all'
 abbr tml  'tmux list-sessions'
 abbr tma  'tmux attach -t'
 abbr tmn  'tmux new -s'
-abbr tmnp 'tmux new -s (basename (pwd))'
+abbr tmnp 'zellij --session (basename (pwd))' # 'tmux new -s (basename (pwd))'
 
 #Git
 abbr gs   'git status -s'
