@@ -273,6 +273,12 @@ web_client {
 // 
 // simplified_ui true
 
+ui {
+    pane_frames {
+        rounded_corners true
+    }
+}
+
 // Enable OSC8 hyperlink output
 // Options:
 //   - true (Default)
@@ -283,7 +289,7 @@ web_client {
 // Choose the theme that is specified in the themes section.
 // Default: default
 // 
-theme "dracula"
+theme "blade"
 
 // Theme to use when the host terminal reports a dark color palette.
 // Requires `theme_light` to also be set; otherwise `theme` is used.
@@ -363,8 +369,8 @@ default_mode "locked"
 // (Requires restart)
 // Valid values: positive integers
 // Default value: 10000
-// 
-// scroll_buffer_size 10000
+//
+scroll_buffer_size 20000
 
 // Provide a command to execute when copying text. The text will be piped to
 // the stdin of the program to perform the copy. This can be used with
@@ -375,8 +381,8 @@ default_mode "locked"
 // copy_command "xclip -selection clipboard" // x11
 // copy_command "wl-copy"                    // wayland
 // copy_command "pbcopy"                     // osx
-// 
-// copy_command "pbcopy"
+//
+copy_command "pbcopy"
 
 // Choose the destination for copied text
 // Allows using the primary selection buffer (on x11/wayland) instead of the system clipboard.

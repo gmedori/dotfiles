@@ -1,0 +1,128 @@
+// Dracula Pro (Blade) — matches the Ghostty `blade` theme.
+// Advanced component format (RGB triples) so the status/tab bar background
+// matches the terminal bg (#212C2A) instead of ANSI black.
+// RGB values produced by /tmp/hex-to-rgb from these Blade hex colors:
+//   bg #212C2A=33 44 42 · fg #F8F8F2=248 248 242 · sel #415854=65 88 84
+//   green #8AFF80=138 255 128 · orange #FFCA80=255 202 128
+//   cyan #80FFEA=128 255 234 · magenta #FF80BF=255 128 191
+//   red #FF9580=255 149 128 · muted #70A99F=112 169 159 · yellow #FFFF80=255 255 128
+themes {
+    blade {
+        text_unselected {
+            base 128 255 234
+            background 33 44 42
+            emphasis_0 255 202 128
+            emphasis_1 128 255 234
+            emphasis_2 138 255 128
+            emphasis_3 128 255 234
+        }
+        text_selected {
+            base 128 255 234
+            background 65 88 84
+            emphasis_0 255 202 128
+            emphasis_1 128 255 234
+            emphasis_2 138 255 128
+            emphasis_3 255 128 191
+        }
+        ribbon_selected {
+            base 33 44 42
+            background 138 255 128
+            emphasis_0 255 149 128
+            emphasis_1 255 202 128
+            emphasis_2 255 128 191
+            emphasis_3 112 169 159
+        }
+        ribbon_unselected {
+            base 33 44 42
+            background 248 248 242
+            emphasis_0 255 149 128
+            emphasis_1 248 248 242
+            emphasis_2 112 169 159
+            emphasis_3 255 128 191
+        }
+        table_title {
+            base 138 255 128
+            background 0
+            emphasis_0 255 202 128
+            emphasis_1 128 255 234
+            emphasis_2 138 255 128
+            emphasis_3 255 128 191
+        }
+        table_cell_selected {
+            base 248 248 242
+            background 65 88 84
+            emphasis_0 255 202 128
+            emphasis_1 128 255 234
+            emphasis_2 138 255 128
+            emphasis_3 255 128 191
+        }
+        table_cell_unselected {
+            base 248 248 242
+            background 33 44 42
+            emphasis_0 255 202 128
+            emphasis_1 128 255 234
+            emphasis_2 138 255 128
+            emphasis_3 255 128 191
+        }
+        list_selected {
+            base 248 248 242
+            background 65 88 84
+            emphasis_0 255 202 128
+            emphasis_1 128 255 234
+            emphasis_2 138 255 128
+            emphasis_3 255 128 191
+        }
+        list_unselected {
+            base 248 248 242
+            background 33 44 42
+            emphasis_0 255 202 128
+            emphasis_1 128 255 234
+            emphasis_2 138 255 128
+            emphasis_3 255 128 191
+        }
+        frame_selected {
+            base 138 255 128
+            background 0
+            emphasis_0 255 202 128
+            emphasis_1 128 255 234
+            emphasis_2 255 128 191
+            emphasis_3 0
+        }
+        frame_highlight {
+            base 255 202 128
+            background 0
+            emphasis_0 255 128 191
+            emphasis_1 255 202 128
+            emphasis_2 255 202 128
+            emphasis_3 255 202 128
+        }
+        exit_code_success {
+            base 138 255 128
+            background 0
+            emphasis_0 128 255 234
+            emphasis_1 0 0 0
+            emphasis_2 255 128 191
+            emphasis_3 112 169 159
+        }
+        exit_code_error {
+            base 255 149 128
+            background 0
+            emphasis_0 255 255 128
+            emphasis_1 0
+            emphasis_2 0
+            emphasis_3 0
+        }
+        multiplayer_user_colors {
+            player_1 255 128 191
+            player_2 112 169 159
+            player_3 0
+            player_4 255 255 128
+            player_5 128 255 234
+            player_6 0
+            player_7 255 149 128
+            player_8 0
+            player_9 0
+            player_10 0
+        }
+    }
+}
