@@ -59,10 +59,11 @@ alias show-path 'string join \n ">>> fish_user_paths" "" $fish_user_paths "" ">>
 #FZF
 alias fzf 'fzf --height=15 --reverse -m --bind ctrl-a:toggle-all'
 
-#Tmux
-abbr tml  'tmux list-sessions'
-abbr tma  'tmux attach -t'
-abbr tmn  'tmux new -s'
+#Tmux/Zellij
+abbr z    'zellij -l welcome'
+abbr tml  'zellij ls' # 'tmux list-sessions'
+abbr tma  'zellij attach' # 'tmux attach -t'
+abbr tmn  'zellij --session' # 'tmux new -s'
 abbr tmnp 'zellij --session (basename (pwd))' # 'tmux new -s (basename (pwd))'
 
 #Git
