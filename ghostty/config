@@ -32,3 +32,6 @@ bell-features = no-attention
 # 
 # keybind = ctrl+space>shift+\=new_split:right
 # keybind = ctrl+space>-=new_split:down
+
+# Forward cmd+shift+j to apps as CSI-u <D-S-J> (overrides write_screen_file:paste)
+keybind = cmd+shift+j=text:\u001b[74;6u

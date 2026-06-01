@@ -21,18 +21,41 @@ set -gx FISH_FUNC_DIR ~/.config/fish/functions/
 #################################
 
 #Editing configs
+
 alias vim    'nvim'
-abbr evim    'nvim ~/.config/nvim/init.lua'
-abbr ebash   'nvim ~/.bash_profile'
-abbr efish   'nvim ~/.config/fish/config.fish'
-abbr efunc   "nvim $FISH_FUNC_DIR"
-abbr etmux   'nvim ~/.tmux.conf'
-abbr egit    'nvim ~/.gitconfig'
-abbr essh    'nvim ~/.ssh/config'
-abbr estar   'nvim ~/.config/starship.toml'
-abbr eghost  'nvim ~/.config/ghostty/config'
-abbr ework   'nvim ~/dotfiles/work_specific'
-abbr ezellij 'nvim ~/.config/zellij/config.kdl'
+
+function __generate_config_edit_function --description "Generates a function that opens up the config file with a file browser in Neovim"
+	set -l function_name $argv[1]
+	set -l config_file $argv[2]
+	set -l config_dir (normalize_path (dirname $config_file))
+	set -l neovim_args ""
+	if not test $config_dir -ef $HOME
+		set neovim_args '+"Neotree show"'
+	end
+
+	set -l function_body "
+	function $function_name
+		pushd $config_dir
+		nvim $config_file $neovim_args
+		popd
+	end
+	"
+
+	eval $function_body
+end
+
+__generate_config_edit_function evim	'~/.config/nvim/init.lua'
+__generate_config_edit_function ebash   '~/.bash_profile'
+__generate_config_edit_function efish   '~/.config/fish/config.fish'
+__generate_config_edit_function efunc   "$FISH_FUNC_DIR"
+__generate_config_edit_function etmux   '~/.tmux.conf'
+__generate_config_edit_function egit    '~/.gitconfig'
+__generate_config_edit_function essh    '~/.ssh/config'
+__generate_config_edit_function estar   '~/.config/starship.toml'
+__generate_config_edit_function eghost  '~/.config/ghostty/config'
+__generate_config_edit_function ework   '~/dotfiles/work_specific'
+__generate_config_edit_function ezellij '~/.config/zellij/config.kdl'
+
 abbr rld     'source ~/.config/fish/config.fish'
 
 #General
@@ -61,10 +84,10 @@ alias fzf 'fzf --height=15 --reverse -m --bind ctrl-a:toggle-all'
 
 #Tmux/Zellij
 abbr z    'zellij -l welcome'
-abbr tml  'zellij ls' # 'tmux list-sessions'
-abbr tma  'zellij attach' # 'tmux attach -t'
-abbr tmn  'zellij --session' # 'tmux new -s'
-abbr tmnp 'zellij --session (basename (pwd))' # 'tmux new -s (basename (pwd))'
+abbr zls  'zellij ls' # 'tmux list-sessions'
+abbr za   'zellij attach' # 'tmux attach -t'
+abbr zn   'zellij --session' # 'tmux new -s'
+abbr znp  'zellij --session (basename (pwd))' # 'tmux new -s (basename (pwd))'
 
 #Git
 abbr gs   'git status -s'
