@@ -1,4 +1,4 @@
-font-family = "Menlo" # "PragmataPro Mono Liga" # "MonoLisa Variable"
+font-family = "MonoLisa Variable" # "PragmataPro Mono Liga" # "MonoLisa Variable"
 font-size = 16
 scrollback-limit = 1000000
 

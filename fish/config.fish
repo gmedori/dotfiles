@@ -234,8 +234,3 @@ end
 ## Starship
 
 starship init fish | source
-
-
-## Swiftly
-
-source "/Users/jolteon/.swiftly/env.fish"

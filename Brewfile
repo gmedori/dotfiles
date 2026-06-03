@@ -16,6 +16,7 @@ brew "starship"
 brew "eza"
 brew "git-delta"
 brew "tree-sitter-cli"
+brew "zellij"
 
 # Utilities
 brew "tree"

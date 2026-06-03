@@ -181,7 +181,6 @@ return {
 			},
 			fish_lsp = {},
 			gopls = {},
-			openscad_lsp = {},
 		}
 
 		-- Ensure the servers and tools above are installed

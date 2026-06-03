@@ -19,8 +19,8 @@ my @fileList = (
     ["$directory/tmux/tmux.conf", "$HOME/.tmux.conf"],
     ["$directory/tmux/tmux", "$HOME/.tmux"],
     ["$directory/gitconfig", "$HOME/.gitconfig"],
-	["$directory/zed/settings.json", "$HOME/.config/zed/settings.json"],
-	["$directory/zed/keymap.json", "$HOME/.config/zed/keymap.json"],
+	# ["$directory/zed/settings.json", "$HOME/.config/zed/settings.json"],
+	# ["$directory/zed/keymap.json", "$HOME/.config/zed/keymap.json"],
 	["$directory/ghostty", "$HOME/.config/ghostty"],
 	["$directory/zellij", "$HOME/.config/zellij"]
 );
