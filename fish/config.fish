@@ -71,6 +71,7 @@ abbr  cdc 'cd ~/code'
 abbr  cds 'cd ~/scratchpad'
 abbr  cdw 'cd ~/dotfiles/work_specific'
 abbr  cdd 'cd ~/dotfiles'
+abbr  cdr 'cd (git root)'
 
 abbr cdsc 'cd ~/scripts'
 
@@ -83,11 +84,15 @@ alias show-path 'string join \n ">>> fish_user_paths" "" $fish_user_paths "" ">>
 alias fzf 'fzf --height=15 --reverse -m --bind ctrl-a:toggle-all'
 
 #Tmux/Zellij
+abbr tml  'tmux list-session'
+abbr tma  'tmux attach -t'
+abbr tmn  'tmux new -s'
+abbr tmnp 'tmux new -s (basename (pwd))'
 abbr z    'zellij -l welcome'
-abbr zls  'zellij ls' # 'tmux list-sessions'
-abbr za   'zellij attach' # 'tmux attach -t'
-abbr zn   'zellij --session' # 'tmux new -s'
-abbr znp  'zellij --session (basename (pwd))' # 'tmux new -s (basename (pwd))'
+abbr zls  'zellij ls'
+abbr za   'zellij attach'
+abbr zn   'zellij --session'
+abbr znp  'zellij --session (basename (pwd))'
 
 #Git
 abbr gs   'git status -s'

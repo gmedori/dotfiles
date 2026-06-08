@@ -1,4 +1,8 @@
 keybinds clear-defaults=true {
+	normal {
+		unbind "Ctrl h"
+		bind "Ctrl m" { SwitchToMode "move"; }
+	}
     locked {
         bind "Ctrl g" { SwitchToMode "normal"; }
     }
