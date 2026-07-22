@@ -1,7 +1,7 @@
 import ArgumentParser
-import Command
 import Escape
 import Foundation
+import Subprocess
 
 @main
 struct ChapterSplitter: AsyncParsableCommand {
@@ -52,10 +52,15 @@ struct ChapterSplitter: AsyncParsableCommand {
 
 		print("Running mkvmerge...")
 		let mkvmergeOutputFormat = "output-%03d.mkv"
-		let mkvmerge = Command("mkvmerge -o \(mkvmergeOutputFormat) --split chapters:\(chapterSplits) \(inputFile)")
-		try await mkvmerge.run(passthroughOutput: true)
+		let result = try await Subprocess.run(
+			.name("mkvmerge"),
+			arguments: ["-o", mkvmergeOutputFormat, "--split", "chapters:\(chapterSplits)", inputFile],
+			input: .standardInput,
+			output: .currentStandardOutput,
+			error: .currentStandardError
+		)
 
-		guard await mkvmerge.exitStatus == 0 else {
+		guard result.terminationStatus.isSuccess else {
 			print("❌ Failed to split file with mkvmerge".colorized(foreground: .red))
 			Self.exit(withError: ExitCode.failure)
 		}

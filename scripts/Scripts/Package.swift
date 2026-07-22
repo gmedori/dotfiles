@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -13,24 +13,24 @@ let package = Package(
 	],
 	dependencies: [
 		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
+		.package(url: "https://github.com/swiftlang/swift-subprocess.git", .upToNextMinor(from: "0.5.0")),
 		.package(name: "Escape", path: "../Escape"),
-		.package(name: "Command", path: "../Command"),
 	],
 	targets: [
 		.executableTarget(
 			name: "iosd",
 			dependencies: [
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+				.product(name: "Subprocess", package: "swift-subprocess"),
 				"Escape",
-				"Command",
 			]
 		),
 		.executableTarget(
 			name: "chapter-splitter",
 			dependencies: [
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+				.product(name: "Subprocess", package: "swift-subprocess"),
 				"Escape",
-				"Command",
 			]
 		),
 		.executableTarget(

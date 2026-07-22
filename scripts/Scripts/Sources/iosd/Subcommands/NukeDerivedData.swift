@@ -1,9 +1,9 @@
 import ArgumentParser
-import Command
 import Darwin
 import Foundation
 import System
 import Escape
+import Subprocess
 
 struct NukeDerivedData: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
@@ -43,10 +43,17 @@ struct NukeDerivedData: AsyncParsableCommand {
 	}
 
 	private func customDerivedDataDirectory() async -> FilePath? {
-		let command = Command("defaults read com.apple.dt.Xcode IDECustomDerivedDataLocation")
-
 		do {
-			guard let output = try await command.output() else {
+			let result = try await Subprocess.run(
+				.name("defaults"),
+				arguments: ["read", "com.apple.dt.Xcode", "IDECustomDerivedDataLocation"],
+				output: .string(limit: 4_096)
+			)
+			guard
+				result.terminationStatus.isSuccess,
+				let output = result.standardOutput?.trimmingCharacters(in: .whitespacesAndNewlines),
+				!output.isEmpty
+			else {
 				return nil
 			}
 			return FilePath(output)

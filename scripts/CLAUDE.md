@@ -6,12 +6,11 @@ This file is the source of truth for AI-assisted development in this repository.
 ## Repository Overview
 
 This repository contains local macOS command-line tools written in Swift 6. It
-is organized as three sibling SwiftPM packages:
+is organized as two sibling SwiftPM packages:
 
-- `Command/`: A library for launching and interacting with subprocesses.
 - `Escape/`: A library for terminal output, colors, and control sequences.
-- `Scripts/`: Executable tools that depend on the local `Command` and `Escape`
-  packages.
+- `Scripts/`: Executable tools that depend on the local `Escape` package and
+  `swift-subprocess`.
 
 `Scripts` currently builds `iosd`, `chapter-splitter`, and `notify`.
 
@@ -20,7 +19,7 @@ package directory.
 
 ## Platform and Tooling
 
-- Swift tools version: 6.0
+- Swift tools version: 6.0 for `Escape`, 6.2 for `Scripts`
 - Minimum platform: macOS 14
 - Command-line parsing: `swift-argument-parser`
 - Tests use Swift Testing syntax, but the existing test targets contain only
@@ -32,13 +31,12 @@ package directory.
 Build the affected package:
 
 ```sh
-swift build --package-path Command
 swift build --package-path Escape
 swift build --package-path Scripts
 ```
 
-After changing `Command` or `Escape`, also build `Scripts` to verify its
-integration with the shared library.
+After changing `Escape`, also build `Scripts` to verify its integration with
+the shared library.
 
 Do not claim that a change is covered by automated tests. If meaningful tests
 are added, run the relevant test target and report the result.
@@ -50,8 +48,8 @@ are added, run the relevant test target and report the result.
 - Use Swift concurrency for asynchronous process work where appropriate.
 - Keep command-line parsing and help text consistent with
   `swift-argument-parser`.
-- Prefer `Command(executable:arguments:)` when arguments may contain spaces or
-  user-provided values. The command-string initializer splits on whitespace.
+- Pass subprocess arguments as separate values to `Subprocess.run`, especially
+  when they may contain spaces or user-provided values.
 
 ## Dependencies
 
@@ -79,6 +77,6 @@ are added, run the relevant test target and report the result.
 ## Completion Checklist
 
 1. Build the affected package.
-2. After changing `Command` or `Escape`, build `Scripts`.
+2. After changing `Escape`, build `Scripts`.
 3. Review the diff for generated files and unrelated changes.
 4. Do not claim test coverage where none exists.
