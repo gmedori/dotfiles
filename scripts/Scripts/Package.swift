@@ -9,7 +9,6 @@ let package = Package(
 	products: [
 		.executable(name: "iosd", targets: ["iosd"]),
 		.executable(name: "chapter-splitter", targets: ["chapter-splitter"]),
-		.executable(name: "dia", targets: ["dia"]),
 		.executable(name: "notify", targets: ["notify"]),
 	],
 	dependencies: [
@@ -28,14 +27,6 @@ let package = Package(
 		),
 		.executableTarget(
 			name: "chapter-splitter",
-			dependencies: [
-				.product(name: "ArgumentParser", package: "swift-argument-parser"),
-				"Escape",
-				"Command",
-			]
-		),
-		.executableTarget(
-			name: "dia",
 			dependencies: [
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				"Escape",
