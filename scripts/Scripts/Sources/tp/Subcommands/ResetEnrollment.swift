@@ -8,7 +8,9 @@ struct ResetEnrollment: AsyncParsableCommand {
 		abstract: "Remove pending mobile-device enrollment pairings from a local Teleport cluster"
 	)
 
-	private static let databasePath = "data/teleport/backend/sqlite.db"
+	@OptionGroup var globalOptions: GlobalOptions
+
+	private static let databasePath = "backend/sqlite.db"
 	private static let deletePairingsSQL = """
 		BEGIN IMMEDIATE;
 		DELETE FROM kv
@@ -19,8 +21,7 @@ struct ResetEnrollment: AsyncParsableCommand {
 		"""
 
 	func run() async throws {
-		let workingDirectory = FileManager.default.currentDirectoryPath
-		try validateClusterRoot(workingDirectory)
+		let databasePath = try resolveDatabasePath()
 
 		let result = try await Subprocess.run(
 			.name("sqlite3"),
@@ -28,7 +29,7 @@ struct ResetEnrollment: AsyncParsableCommand {
 				"-batch",
 				"-bail",
 				"-cmd", ".timeout 5000",
-				Self.databasePath,
+				databasePath,
 				Self.deletePairingsSQL,
 			],
 			output: .string(limit: 4_096),
@@ -55,19 +56,22 @@ struct ResetEnrollment: AsyncParsableCommand {
 		}
 	}
 
-	private func validateClusterRoot(_ path: String) throws {
+	private func resolveDatabasePath() throws -> String {
 		let fileManager = FileManager.default
-		guard fileExists(at: path + "/config.yaml", using: fileManager) else {
+		let workingDirectory = URL(fileURLWithPath: fileManager.currentDirectoryPath, isDirectory: true)
+		let dataDirectory = URL(
+			fileURLWithPath: globalOptions.dataDirectory,
+			relativeTo: workingDirectory
+		).standardizedFileURL
+		let database = dataDirectory.appendingPathComponent(Self.databasePath)
+
+		guard fileExists(at: database.path, using: fileManager) else {
 			throw ValidationError(
-				"tp reset-enrollment must be run from a Teleport cluster working-directory root containing config.yaml."
+				"No Teleport SQLite backend found at \(database.path)."
 			)
 		}
 
-		guard fileExists(at: path + "/" + Self.databasePath, using: fileManager) else {
-			throw ValidationError(
-				"No Teleport SQLite backend found at ./\(Self.databasePath)."
-			)
-		}
+		return database.path
 	}
 
 	private func fileExists(at path: String, using fileManager: FileManager) -> Bool {

@@ -7,4 +7,6 @@ struct TP: AsyncParsableCommand {
 		abstract: "A utility for commonly performed tasks while developing Teleport",
 		subcommands: [ResetEnrollment.self]
 	)
+
+	@OptionGroup var globalOptions: GlobalOptions
 }
