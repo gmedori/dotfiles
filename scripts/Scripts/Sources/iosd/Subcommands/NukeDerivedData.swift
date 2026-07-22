@@ -2,8 +2,7 @@ import ArgumentParser
 import Darwin
 import Foundation
 import System
-import Escape
-import Subprocess
+import CommandKit
 
 struct NukeDerivedData: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
@@ -14,7 +13,7 @@ struct NukeDerivedData: AsyncParsableCommand {
 		let derivedDataDirectory = await getDerivedDataDirectory()
 		print("Are you sure you want to delete the DerivedData directory?\n\(derivedDataDirectory)\n\nAnything except 'yes' will abort.")
 		guard let input = readLine() else {
-			exit(error: "❌ Failed to read any input")
+			throw RuntimeError("❌ Failed to read any input")
 		}
 
 		if input.trimmingCharacters(in: .whitespacesAndNewlines) == "yes" {
@@ -24,11 +23,11 @@ struct NukeDerivedData: AsyncParsableCommand {
 				loadingTask.cancel()
 				print("\n✅ Successfully nuked \(derivedDataDirectory.string, foreground: .green)")
 			} catch {
-                loadingTask.cancel()
-				exit(error: "❌ Failed to nuke derived data: \(error.localizedDescription)")
+				loadingTask.cancel()
+				throw RuntimeError("❌ Failed to nuke derived data: \(error.localizedDescription)")
 			}
 		} else {
-			exit(error: "❌ Aborting...")
+			throw RuntimeError("❌ Aborting...")
 		}
 	}
 
@@ -60,10 +59,5 @@ struct NukeDerivedData: AsyncParsableCommand {
 		} catch {
 			return nil
 		}
-	}
-
-	private func exit(error string: String) -> Never {
-		print(string.colorized(foreground: .red))
-		Self.exit(withError: ExitCode.failure)
 	}
 }
