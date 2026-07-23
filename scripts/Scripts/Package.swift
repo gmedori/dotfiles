@@ -9,6 +9,7 @@ let package = Package(
 	products: [
 		.executable(name: "iosd", targets: ["iosd"]),
 		.executable(name: "chapter-splitter", targets: ["chapter-splitter"]),
+		.executable(name: "github-permalink", targets: ["github-permalink"]),
 		.executable(name: "notify", targets: ["notify"]),
 		.executable(name: "tp", targets: ["tp"]),
 	],
@@ -23,14 +24,14 @@ let package = Package(
 			dependencies: [
 				.product(name: "Subprocess", package: "swift-subprocess"),
 				"Escape",
-			]
+			],
 		),
 		.executableTarget(
 			name: "iosd",
 			dependencies: [
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				"CommandKit",
-			]
+			],
 		),
 		.executableTarget(
 			name: "chapter-splitter",
@@ -38,20 +39,27 @@ let package = Package(
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				.product(name: "Subprocess", package: "swift-subprocess"),
 				"Escape",
-			]
+			],
+		),
+		.executableTarget(
+			name: "github-permalink",
+			dependencies: [
+				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+				"CommandKit",
+			],
 		),
 		.executableTarget(
 			name: "notify",
 			dependencies: [
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
-			]
+			],
 		),
 		.executableTarget(
 			name: "tp",
 			dependencies: [
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				"CommandKit",
-			]
+			],
 		),
-	]
+	],
 )
