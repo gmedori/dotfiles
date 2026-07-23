@@ -5,7 +5,7 @@ import Foundation
 struct ResetEnrollment: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "reset-enrollment",
-		abstract: "Remove pending mobile-device enrollment pairings from a local Teleport cluster"
+		abstract: "Remove pending mobile-device enrollment pairings from a local Teleport cluster",
 	)
 
 	@OptionGroup var globalOptions: GlobalOptions
@@ -32,8 +32,8 @@ struct ResetEnrollment: AsyncParsableCommand {
 				databasePath,
 				Self.deletePairingsSQL,
 			],
-			output: .string(limit: 4_096),
-			error: .string(limit: 4_096)
+			output: .string(limit: 4096),
+			error: .string(limit: 4096),
 		)
 
 		guard result.terminationStatus.isSuccess else {
@@ -42,7 +42,7 @@ struct ResetEnrollment: AsyncParsableCommand {
 		}
 
 		let deletedCount = Int(
-			result.standardOutput?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+			result.standardOutput?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
 		)
 
 		guard let deletedCount else {
@@ -61,13 +61,13 @@ struct ResetEnrollment: AsyncParsableCommand {
 		let workingDirectory = URL(fileURLWithPath: fileManager.currentDirectoryPath, isDirectory: true)
 		let dataDirectory = URL(
 			fileURLWithPath: globalOptions.dataDirectory,
-			relativeTo: workingDirectory
+			relativeTo: workingDirectory,
 		).standardizedFileURL
 		let database = dataDirectory.appendingPathComponent(Self.databasePath)
 
 		guard fileExists(at: database.path, using: fileManager) else {
 			throw ValidationError(
-				"No Teleport SQLite backend found at \(database.path)."
+				"No Teleport SQLite backend found at \(database.path).",
 			)
 		}
 

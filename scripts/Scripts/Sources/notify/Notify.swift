@@ -5,7 +5,7 @@ import Foundation
 struct Notify: ParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "notify",
-		abstract: "Display a macOS notification"
+		abstract: "Display a macOS notification",
 	)
 
 	@Argument(help: "The message to display")

@@ -1,17 +1,19 @@
 import ArgumentParser
+import CommandKit
 import Darwin
 import Foundation
 import System
-import CommandKit
 
 struct NukeDerivedData: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
-		abstract: "Forcefully deletes the derived data directory where Xcode stores many intermediate products."
+		abstract: "Forcefully deletes the derived data directory where Xcode stores many intermediate products.",
 	)
 
 	func run() async throws {
 		let derivedDataDirectory = await getDerivedDataDirectory()
-		print("Are you sure you want to delete the DerivedData directory?\n\(derivedDataDirectory)\n\nAnything except 'yes' will abort.")
+		print(
+			"Are you sure you want to delete the DerivedData directory?\n\(derivedDataDirectory)\n\nAnything except 'yes' will abort.",
+		)
 		guard let input = readLine() else {
 			throw RuntimeError("❌ Failed to read any input")
 		}
@@ -46,7 +48,7 @@ struct NukeDerivedData: AsyncParsableCommand {
 			let result = try await Subprocess.run(
 				.name("defaults"),
 				arguments: ["read", "com.apple.dt.Xcode", "IDECustomDerivedDataLocation"],
-				output: .string(limit: 4_096)
+				output: .string(limit: 4096),
 			)
 			guard
 				result.terminationStatus.isSuccess,

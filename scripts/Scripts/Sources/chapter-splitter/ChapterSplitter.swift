@@ -7,37 +7,37 @@ import Subprocess
 struct ChapterSplitter: AsyncParsableCommand {
 	@Option(
 		name: [.short, .customLong("input")],
-		help: "The input MKV file to split"
+		help: "The input MKV file to split",
 	)
 	var inputFile: String
 
 	@Option(
 		name: [.short, .customLong("output")],
-		help: "The format of the output files; use %n to indicate where to place the number"
+		help: "The format of the output files; use %n to indicate where to place the number",
 	)
 	var outputFileFormat: String
 
 	@Option(
 		name: .shortAndLong,
-		help: "The chapter number to begin splitting on, 1-indexed; any chapters before this are ignored"
+		help: "The chapter number to begin splitting on, 1-indexed; any chapters before this are ignored",
 	)
 	var firstChapter: UInt
 
 	@Option(
 		name: [.customShort("s"), .customLong("step")],
-		help: "The number of chapters to include in each video"
+		help: "The number of chapters to include in each video",
 	)
 	var chapterStep: UInt
 
 	@Option(
 		name: .shortAndLong,
-		help: "The number of videos/episodes to make"
+		help: "The number of videos/episodes to make",
 	)
 	var numberOfEpisodes: UInt
 
 	@Option(
 		name: [.customShort("e"), .long],
-		help: "The episode number to start with when labeling the output files"
+		help: "The episode number to start with when labeling the output files",
 	)
 	var startingEpisodeNumber: UInt
 
@@ -57,7 +57,7 @@ struct ChapterSplitter: AsyncParsableCommand {
 			arguments: ["-o", mkvmergeOutputFormat, "--split", "chapters:\(chapterSplits)", inputFile],
 			input: .standardInput,
 			output: .currentStandardOutput,
-			error: .currentStandardError
+			error: .currentStandardError,
 		)
 
 		guard result.terminationStatus.isSuccess else {
@@ -78,7 +78,7 @@ struct ChapterSplitter: AsyncParsableCommand {
 			let formattedIntermediateFileNumber = i.formatted(
 				.number
 					.precision(.integerLength(3))
-					.grouping(.never)
+					.grouping(.never),
 			)
 			let intermediateTitle = "output-\(formattedIntermediateFileNumber).mkv"
 
@@ -86,7 +86,7 @@ struct ChapterSplitter: AsyncParsableCommand {
 			let formattedOutputNumber = episodeNumber.formatted(
 				.number
 					.precision(.integerLength(integerLength))
-					.grouping(.never)
+					.grouping(.never),
 			)
 			let episodeTitle = outputFileFormat.replacingOccurrences(of: "%n", with: formattedOutputNumber)
 			echo("Renaming \(intermediateTitle) to \(episodeTitle)... ")
