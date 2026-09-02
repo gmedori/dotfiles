@@ -89,22 +89,33 @@ public func echoLoadingText(
 	foregroundColor: Color = .reset,
 	backgroundColor: Color = .reset
 ) -> Task<Void, Never> {
-	return Task {
+	echoLoadingText(loop: loop) { symbol in
+		colorize(
+			"\(prefix ?? "")\(symbol)\(suffix ?? "")",
+			foreground: foregroundColor,
+			background: backgroundColor
+		)
+	}
+}
+
+@discardableResult
+public func echoLoadingText(
+	loop: LoadingLoop = .weeee,
+	writesNewlineOnCancellation: Bool = true,
+	content: @escaping @Sendable (_ symbol: String) async -> String
+) -> Task<Void, Never> {
+	Task {
 		var cursor = loop.symbols.startIndex
 		while true {
 			if Task.isCancelled {
-				echo("\n")
+				if writesNewlineOnCancellation {
+					echo("\n")
+				}
 				break
 			}
 			clearLine()
 			let symbol = loop.symbols[cursor]
-			echo(
-				colorize(
-					"\(prefix ?? "")\(symbol)\(suffix ?? "")",
-					foreground: foregroundColor,
-					background: backgroundColor
-				)
-			)
+			echo(await content(symbol))
 			fflush(stdout)
 			try? await Task.sleep(for: loop.durationPerSymbol)
 			loop.symbols.formIndex(after: &cursor)

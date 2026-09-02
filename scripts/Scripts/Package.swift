@@ -11,6 +11,7 @@ let package = Package(
 		.executable(name: "chapter-splitter", targets: ["chapter-splitter"]),
 		.executable(name: "github-permalink", targets: ["github-permalink"]),
 		.executable(name: "notify", targets: ["notify"]),
+		.executable(name: "pr-watch", targets: ["pr-watch"]),
 		.executable(name: "tp", targets: ["tp"]),
 	],
 	dependencies: [
@@ -52,6 +53,13 @@ let package = Package(
 			name: "notify",
 			dependencies: [
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+			],
+		),
+		.executableTarget(
+			name: "pr-watch",
+			dependencies: [
+				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+				"CommandKit",
 			],
 		),
 		.executableTarget(
