@@ -69,5 +69,9 @@ let package = Package(
 				"CommandKit",
 			],
 		),
+		.testTarget(
+			name: "tpTests",
+			dependencies: ["tp"],
+		),
 	],
 )
