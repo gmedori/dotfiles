@@ -63,10 +63,11 @@ abbr rld     'source ~/.config/fish/config.fish'
 #alias ls  'ls -G'
 #alias l   'ls -Flh'
 #alias la  'ls -AFlh'
-alias l   'eza --icons -s type'
-alias la  'eza --icons -s type --all'
-alias ll  'eza --long --icons -s type'
-alias lla 'eza --long --icons -s type --all'
+alias l    'eza --icons -s type'
+alias la   'eza --icons -s type --all'
+alias ll   'eza --long --icons -s type'
+alias lla  'eza --long --icons -s type --all'
+alias tree 'eza --icons -s type --tree'
 
 abbr  cdc 'cd ~/code'
 abbr  cds 'cd ~/scratchpad'
@@ -225,11 +226,19 @@ end
 ## GOPATH
 set -gx GOPATH $HOME/go
 
+## Perl local::lib (static equivalent of `perl -Mlocal::lib`, kept static for fast startup)
+## CPAN modules install to ~/perl5 instead of Homebrew's Cellar, so they survive `brew upgrade perl`
+set -gx PERL_LOCAL_LIB_ROOT $HOME/perl5
+set -gx PERL5LIB $HOME/perl5/lib/perl5
+set -gx PERL_MB_OPT "--install_base \"$HOME/perl5\""
+set -gx PERL_MM_OPT "INSTALL_BASE=$HOME/perl5"
+
 fish_add_path /opt/homebrew/bin #.................... Homebrew
 fish_add_path $HOME/scripts/bin #.................... Scripts
 fish_add_path (brew --prefix go@1.24)/bin #.......... Golang binary
 fish_add_path $GOPATH/bin #.......................... GOPATH
 fish_add_path $HOME/.cargo/bin #..................... Rust
+fish_add_path $HOME/perl5/bin #...................... Perl (local::lib)
 fish_add_path $HOME/.local/bin #..................... Misc. local installs (e.g. Claude installs itself here)
 
 ## Work Specific Stuff

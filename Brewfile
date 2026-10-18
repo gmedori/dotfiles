@@ -6,6 +6,11 @@ brew "lolcat"
 # Because macOS versions are dated
 brew "git"
 brew "node"
+brew "perl"
+# cpanm: standard CPAN installer, runs tests; fallback when cpm fails, and install.sh uses it to bootstrap local::lib
+brew "cpanminus"
+# cpm: faster parallel cpanm, skips tests; everyday installs via `cpm install -g Module` (-g = ~/perl5, not ./local)
+brew "cpm"
 
 # Dev Environment
 brew "fish"
