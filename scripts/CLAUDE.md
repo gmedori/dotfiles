@@ -12,7 +12,10 @@ is organized as two sibling SwiftPM packages:
 - `Scripts/`: Executable tools that depend on the local `Escape` package and
   `swift-subprocess`.
 
-`Scripts` currently builds `iosd`, `chapter-splitter`, and `notify`.
+`Scripts` currently builds `iosd`, `chapter-splitter`, `github-permalink`,
+`notify`, `pr-watch`, `tp`, and `ths`. `ths` publishes The Honking Smith blog
+posts from the Obsidian vault to the website repo; its post states are
+documented on `PostState`.
 
 There is no root `Package.swift`. Run SwiftPM commands against the relevant
 package directory.
@@ -22,8 +25,8 @@ package directory.
 - Swift tools version: 6.0 for `Escape`, 6.2 for `Scripts`
 - Minimum platform: macOS 14
 - Command-line parsing: `swift-argument-parser`
-- Tests use Swift Testing syntax, but the existing test targets contain only
-  placeholders and provide no meaningful automated coverage.
+- Tests use Swift Testing syntax. `tpTests` and `thsTests` cover parts of `tp`
+  and `ths`; run them with `swift test --package-path Scripts`.
 - No formatter or linter is currently configured.
 
 ## Build and Validation
