@@ -38,6 +38,7 @@ struct Status: AsyncParsableCommand {
 			print(reporter.line(
 				entry.state.label,
 				color: entry.state.color,
+				wordWidth: Reporter.labelWidth,
 				slug: entry.slug,
 				detail: reporter.location(of: entry),
 				slugWidth: width,
@@ -78,7 +79,7 @@ struct SlugSelection {
 
 	var unknownSlugMessages: [Message] {
 		unknownSlugs.map {
-			Message(kind: .error, headline: "No post or bundle has the slug \($0)", details: [])
+			Message(kind: .error, headline: "no post or bundle has the slug \($0)", details: [])
 		}
 	}
 }

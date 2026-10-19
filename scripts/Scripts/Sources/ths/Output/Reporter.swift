@@ -33,9 +33,9 @@ struct Reporter: Sendable {
 		useColor ? text.colorized(foreground: color) : text
 	}
 
-	/// A line in the list of posts: a colored word, the slug, and where the post or bundle is.
-	func line(_ word: String, color: Color, slug: String?, detail: String, slugWidth: Int) -> String {
-		let paddedWord = word.padding(toLength: Self.labelWidth, withPad: " ", startingAt: 0)
+	/// A line in the list of posts: a colored word, the slug, and a detail like where the post is.
+	func line(_ word: String, color: Color, wordWidth: Int, slug: String?, detail: String, slugWidth: Int) -> String {
+		let paddedWord = word.padding(toLength: wordWidth, withPad: " ", startingAt: 0)
 		let slug = (slug ?? "(no slug)").padding(toLength: slugWidth, withPad: " ", startingAt: 0)
 		return "\(paint(paddedWord, color))  \(slug)  \(detail)".trimmingTrailingWhitespace()
 	}

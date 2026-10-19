@@ -48,6 +48,11 @@ struct SitePaths: ParsableArguments {
 			variable: Self.siteVariable,
 			setCommand: Self.siteSetCommand,
 		)
+
+		let blog = siteDirectory.appending(path: "content/blog")
+		guard FileManager.default.fileExists(atPath: blog.path(percentEncoded: false)) else {
+			throw ValidationError("\(siteDirectory.path(percentEncoded: false)) has no content/blog folder, so it isn't the site repo.")
+		}
 	}
 
 	private static func validateDirectory(
