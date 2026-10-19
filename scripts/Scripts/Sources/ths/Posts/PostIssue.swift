@@ -30,6 +30,10 @@ enum PostIssue: Equatable, Sendable {
 	/// The slug becomes the URL, so it's kept to characters that never need escaping.
 	case invalidSlug(String)
 
+	/// Another post with a status uses the same slug. Usually a note duplicated to start a new post
+	/// without changing its slug. Both posts are blocked, since either could own the bundle.
+	case duplicateSlug(otherPath: String)
+
 	/// The post is published but has no `date`. The date is the publication date shown on the post
 	/// and used to order the blog, so a public post needs one. Drafts can leave it empty.
 	case missingDate
@@ -90,8 +94,8 @@ enum PostIssue: Equatable, Sendable {
 	var blocksDrafts: Bool {
 		switch self {
 			case .invalidFrontmatter, .invalidStatus, .invalidProperty, .missingSlug, .invalidSlug,
-			     .missingDate, .invalidDate, .missingTitle, .missingImage, .duplicateImageName, .wikiLink,
-			     .callout, .highlight, .html:
+			     .duplicateSlug, .missingDate, .invalidDate, .missingTitle, .missingImage, .duplicateImageName,
+			     .wikiLink, .callout, .highlight, .html:
 				true
 			case .extraTitle, .remoteImage, .missingAltText, .todo:
 				false
@@ -102,7 +106,7 @@ enum PostIssue: Equatable, Sendable {
 	var line: Int? {
 		switch self {
 			case .invalidFrontmatter, .invalidStatus, .invalidProperty, .missingSlug, .invalidSlug,
-			     .missingDate, .invalidDate, .missingTitle:
+			     .duplicateSlug, .missingDate, .invalidDate, .missingTitle:
 				nil
 			case let .extraTitle(line), let .missingImage(_, line), let .duplicateImageName(_, line),
 			     let .remoteImage(_, line), let .missingAltText(_, line), let .wikiLink(_, line),
@@ -124,6 +128,8 @@ enum PostIssue: Equatable, Sendable {
 				"There's no `slug`."
 			case let .invalidSlug(value):
 				"The slug \"\(value)\" has characters a URL slug can't use."
+			case let .duplicateSlug(otherPath):
+				"\(otherPath) has the same slug."
 			case .missingDate:
 				"The post is published but has no `date`."
 			case let .invalidDate(value):
@@ -166,6 +172,8 @@ enum PostIssue: Equatable, Sendable {
 				"Add a `slug`, like the title in lowercase with hyphens between words."
 			case .invalidSlug:
 				"Use only lowercase letters, digits, and hyphens, like `my-first-post`."
+			case .duplicateSlug:
+				"Give one of the posts a different slug."
 			case .missingDate:
 				"Add the publication date as `date`, written as YYYY-MM-DD."
 			case .invalidDate:
@@ -181,7 +189,7 @@ enum PostIssue: Equatable, Sendable {
 			case .remoteImage:
 				"Download the image into the note's assets folder and embed that copy."
 			case .missingAltText:
-				"Describe the image after a pipe, like `![[photo.png|A goose on a pond]]`."
+				"Describe the image in its alt text. In an embed it goes after a pipe: `![[photo.png|A goose on a pond]]`."
 			case .wikiLink:
 				"Replace it with a Markdown link to a public URL, or with plain text."
 			case .callout:
