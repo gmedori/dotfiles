@@ -15,15 +15,15 @@ enum PostIssue: Equatable, Sendable {
 	/// missing closing `---`. Obsidian's property editor doesn't produce it.
 	case invalidFrontmatter(String)
 
-	/// `status` has a value other than `draft` or `published`. Usually a typo, or a status copied from
-	/// another kind of note, like a quest's `active`.
+	/// `status` has a value other than `draft`, `published`, or `canceled`. Usually a typo, like
+	/// `cancelled`, or a status copied from another kind of note, like a quest's `active`.
 	case invalidStatus(String)
 
 	/// A property has the wrong kind of value, like a list where one piece of text belongs.
 	case invalidProperty(name: String, expected: String)
 
-	/// The post has a status but no `slug`. Every post on the site needs one, because the slug is its
-	/// URL and the name of its bundle.
+	/// The post is a draft or published but has no `slug`. Every post on the site needs one, because
+	/// the slug is its URL and the name of its bundle.
 	case missingSlug
 
 	/// The slug has characters other than lowercase letters, digits, and single hyphens between them.
@@ -121,7 +121,7 @@ enum PostIssue: Equatable, Sendable {
 			case let .invalidFrontmatter(reason):
 				"The frontmatter can't be read: \(reason)"
 			case let .invalidStatus(value):
-				"`status` is \"\(value)\", which isn't draft or published."
+				"`status` is \"\(value)\", which isn't draft, published, or canceled."
 			case let .invalidProperty(name, expected):
 				"`\(name)` should be \(expected)."
 			case .missingSlug:
@@ -165,7 +165,7 @@ enum PostIssue: Equatable, Sendable {
 			case .invalidFrontmatter:
 				"Open the note's properties in source mode and fix the YAML."
 			case .invalidStatus:
-				"Set `status` to draft or published, or remove it to keep the post in the vault."
+				"Set `status` to draft, published, or canceled, or remove it to keep the post in the vault."
 			case .invalidProperty:
 				"Change the property's value in the note."
 			case .missingSlug:

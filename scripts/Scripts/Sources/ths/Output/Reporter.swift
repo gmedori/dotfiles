@@ -63,6 +63,14 @@ struct Reporter: Sendable {
 		switch entry.state {
 			case .vaultOnly, .new, .upToDate, .stale, .orphanedDraft:
 				break
+			case .canceled:
+				if entry.existing?.isDraft == false {
+					messages.append(Message(
+						kind: .warning,
+						headline: "\(bundlePath) is published, so deleting it takes /blog/\(slug)/ off the site",
+						details: ["Add a redirect from /blog/\(slug)/ before deploying, so links to the post still lead somewhere."],
+					))
+				}
 			case .invalid:
 				messages += entry.issues.map { issueMessage($0, kind: .error, notePath: notePath) }
 			case .edited:
@@ -88,7 +96,7 @@ struct Reporter: Sendable {
 					headline: "\(bundlePath) is published, but no post in the vault has the slug \(slug)",
 					details: [
 						"Restore the post's slug, status, or note.",
-						"If the URL should go, add a redirect from /blog/\(slug)/ and delete the bundle by hand.",
+						"If the post should come down, restore it and set its status to canceled.",
 					],
 				))
 			case .retracted:
@@ -97,7 +105,7 @@ struct Reporter: Sendable {
 					headline: "\(notePath) is a draft, but \(bundlePath) is published",
 					details: [
 						"Set its status back to published.",
-						"To take the post down, add a redirect from /blog/\(slug)/ and delete the bundle by hand. The next sync recreates it as a draft.",
+						"To take the post down, set its status to canceled instead.",
 					],
 				))
 		}

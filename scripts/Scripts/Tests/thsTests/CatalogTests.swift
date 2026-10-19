@@ -142,6 +142,47 @@ struct CatalogTests {
 		#expect(try states(posts: [draft], bundles: [bundle(for: published)]) == ["Blog Posts/a.md": .retracted])
 	}
 
+	@Test("A canceled post with a bundle is canceled, whatever its body says")
+	func canceled() throws {
+		let published = try post("a")
+		let draft = try post("b", status: "draft")
+		let canceledPublished = try post("a", status: "canceled", body: "No title, TODO, [[link]].")
+		let canceledDraft = try post("b", status: "canceled")
+
+		#expect(try states(
+			posts: [canceledPublished, canceledDraft],
+			bundles: [bundle(for: published), bundle(for: draft)],
+		) == ["Blog Posts/a.md": .canceled, "Blog Posts/b.md": .canceled])
+	}
+
+	@Test("A canceled post whose bundle is gone stays in the vault")
+	func canceledAndDeleted() throws {
+		#expect(try states(posts: [post("a", status: "canceled")]) == ["Blog Posts/a.md": .vaultOnly])
+	}
+
+	@Test("A canceled post never deletes a bundle ths didn't make")
+	func canceledConflict() throws {
+		let handMade = bundle("a", files: ["index.md": Data()], vaultSource: nil, isDraft: false)
+		#expect(try states(posts: [post("a", status: "canceled")], bundles: [handMade]) == ["Blog Posts/a.md": .conflict])
+	}
+
+	@Test("Canceling a published post warns about its URL, and sync deletes the bundle")
+	func canceledWarnsAndDeletes() throws {
+		let published = try post("a")
+		let catalog = try Catalog.classify(
+			posts: [post("a", status: "canceled")],
+			bundles: ["a": bundle(for: published)],
+			source: source,
+		)
+		let entry = try #require(catalog.entries.first)
+		let messages = Reporter(siteDirectory: URL(filePath: "/site")).messages(for: entry)
+
+		#expect(SyncAction(entry) == .delete)
+		#expect(messages.map(\.kind) == [.warning])
+		#expect(messages.first?.headline.contains("/blog/a/") == true)
+		#expect(!catalog.hasProblems)
+	}
+
 	@Test("An invalid post still claims its slug, so its bundle isn't orphaned")
 	func invalidClaimsSlug() throws {
 		let valid = try post("a")

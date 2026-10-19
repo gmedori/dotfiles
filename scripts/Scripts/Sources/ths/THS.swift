@@ -11,6 +11,7 @@ struct THS: AsyncParsableCommand {
 		Posts are vault notes with `type: blog post` in their frontmatter, anywhere
 		under the source directory. Each one with a `status` of `draft` or
 		`published` becomes a page bundle at content/blog/<slug>/ in the site repo.
+		A `canceled` post has its bundle deleted.
 
 		ENVIRONMENT
 		  THS_SOURCE_DIR  The Honking Smith folder in the vault, used when --source

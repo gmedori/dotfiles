@@ -114,6 +114,29 @@ struct Catalog: Sendable {
 		bundles: [String: ExistingBundle],
 		source: URL,
 	) throws -> CatalogEntry {
+		let existing = post.slug.flatMap { bundles[$0] }
+
+		// A canceled post's slug only finds its bundle. Without one, there's nothing to take down. Its
+		// body isn't checked or converted, since nothing from it will be written.
+		if post.status == .canceled {
+			let state: PostState = if !issues.isEmpty {
+				.invalid
+			} else if let existing {
+				existing.isManaged ? .canceled : .conflict
+			} else {
+				.vaultOnly
+			}
+			return CatalogEntry(
+				state: state,
+				slug: post.slug,
+				post: post,
+				existing: existing,
+				generated: nil,
+				issues: state == .invalid ? issues : [],
+				warnings: [],
+			)
+		}
+
 		let noteDirectory = source.appending(path: post.relativePath).deletingLastPathComponent()
 		let body = BodyConverter(noteDirectory: noteDirectory).convert(post.body, startLine: post.bodyStartLine)
 		let readable = !issues.contains { if case .invalidFrontmatter = $0 { true } else { false } }
@@ -122,7 +145,6 @@ struct Catalog: Sendable {
 		// A post whose status can't be read is held to everything a published post is.
 		let blocking = allIssues.filter { post.status != .draft || $0.blocksDrafts }
 		let warnings = allIssues.filter { post.status == .draft && !$0.blocksDrafts }
-		let existing = post.slug.flatMap { bundles[$0] }
 
 		func entry(_ state: PostState, generated: PageBundle? = nil) -> CatalogEntry {
 			CatalogEntry(

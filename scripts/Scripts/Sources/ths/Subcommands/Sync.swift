@@ -12,7 +12,8 @@ struct Sync: AsyncParsableCommand {
 		discussion: """
 		Without --write, sync only shows what it would do. With --write, it creates
 		new bundles, rewrites stale ones, deletes orphaned drafts, and then runs the
-		production build, which has to finish with no warnings.
+		production build, which has to finish with no warnings. Bundles of canceled
+		posts are deleted too.
 
 		Problems, like a bundle edited by hand, are skipped and listed with what to
 		change, and the rest of the posts are still synced. Any problem makes sync
@@ -99,7 +100,7 @@ enum SyncAction: Hashable {
 	case create
 	/// Rewrites a `stale` bundle, or an `upToDate` one whose stored hash needs refreshing.
 	case update
-	/// Deletes an `orphanedDraft` bundle.
+	/// Deletes the bundle of a `canceled` post, or an `orphanedDraft` bundle.
 	case delete
 	/// Leaves an `upToDate` bundle as it is.
 	case keep
@@ -111,7 +112,7 @@ enum SyncAction: Hashable {
 			case .new: self = .create
 			case .stale: self = .update
 			case .upToDate: self = entry.needsHashRefresh ? .update : .keep
-			case .orphanedDraft: self = .delete
+			case .canceled, .orphanedDraft: self = .delete
 			case .vaultOnly: self = .keep
 			case .edited, .conflict, .invalid, .orphanedPublished, .retracted: self = .skip
 		}
@@ -145,6 +146,8 @@ enum SyncAction: Hashable {
 				entry.state.label
 			case .update where entry.state == .upToDate:
 				"hash only"
+			case .delete where entry.state == .canceled:
+				"canceled"
 			case .create, .update, .delete, .keep:
 				entry.post?.status == .draft || (entry.post == nil && entry.existing?.isDraft == true) ? "draft" : ""
 		}

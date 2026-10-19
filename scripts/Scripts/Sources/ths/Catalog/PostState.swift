@@ -10,14 +10,15 @@ import Escape
 /// `generatedHash` stored in the bundle on disk, which is the hash of the bundle as `ths` last wrote
 /// it.
 ///
-/// Five states are fine and only say what `sync` will do. The other five are problems: `sync` skips
+/// Six states are fine and only say what `sync` will do. The other five are problems: `sync` skips
 /// them, reports them, and exits 1, but still handles every other post. Every `switch` over this
 /// enum is exhaustive, so a new state has to be handled everywhere.
 enum PostState: CaseIterable, Sendable {
 	/// The note is a blog post with no `status`, so it stays in the vault. Ideas and unfinished
-	/// posts sit here until they get a status. It isn't checked for anything the site needs, and
-	/// `sync` leaves it alone. If a bundle `ths` manages has the same slug, that bundle shows up
-	/// separately as orphaned.
+	/// posts sit here until they get a status, and canceled posts end up here once their bundle is
+	/// deleted. It isn't checked for anything the site needs, and `sync` leaves it alone. If a bundle
+	/// `ths` manages has the same slug as a post with no status, that bundle shows up separately as
+	/// orphaned.
 	case vaultOnly
 
 	/// The post has a status and passes every check, but its bundle doesn't exist yet. This is a
@@ -34,6 +35,13 @@ enum PostState: CaseIterable, Sendable {
 	/// still matches its stored hash, but generating it now gives different files. Editing the post
 	/// in the vault, or moving or renaming its note, does this. `sync` rewrites the bundle.
 	case stale
+
+	/// The note's status is `canceled`, and its bundle is still in the site repo. Setting a post's
+	/// status to `canceled` is how it's taken down. `sync` deletes the bundle, and the post is then
+	/// `vaultOnly`. Deleting a published bundle takes its URL off the site, so `status` and `sync`
+	/// warn that the URL needs a redirect, but the deletion goes ahead: the canceled status says the
+	/// post should come down.
+	case canceled
 
 	/// A draft bundle `ths` manages whose slug no post with a status claims anymore. Removing a
 	/// draft's status, changing its slug, or deleting its note does this. A draft has no public URL,
@@ -63,21 +71,20 @@ enum PostState: CaseIterable, Sendable {
 	/// Problem. A published bundle `ths` manages whose slug no post with a status claims anymore.
 	/// Changing a published post's slug, removing its status, removing its `type`, or deleting or
 	/// moving its note out of the source directory does this. Deleting the bundle would break a
-	/// public URL, so `sync` never does. Restoring the old slug, status, or note clears it. If the URL
-	/// really should go, add a redirect from it, then delete the bundle by hand.
+	/// public URL, so `sync` never does. Restoring the old slug, status, or note clears it. If the post
+	/// should come down, restore its note and slug and set its status to `canceled`.
 	case orphanedPublished
 
 	/// Problem. The note's status is `draft`, but its bundle is published. Setting a published post
 	/// back to draft does this. Rewriting the bundle as a draft would take the post off the site and
 	/// break its URL, so `sync` skips it. Setting the status back to `published` clears it. If the post
-	/// really should come down, add a redirect from its URL, delete the bundle by hand, and the next
-	/// sync recreates it as a draft.
+	/// should come down, set its status to `canceled` instead.
 	case retracted
 
 	/// Whether the state is a problem, which makes `status` and `sync` exit 1.
 	var isProblem: Bool {
 		switch self {
-			case .vaultOnly, .new, .upToDate, .stale, .orphanedDraft:
+			case .vaultOnly, .new, .upToDate, .stale, .canceled, .orphanedDraft:
 				false
 			case .edited, .conflict, .invalid, .orphanedPublished, .retracted:
 				true
@@ -91,6 +98,7 @@ enum PostState: CaseIterable, Sendable {
 			case .new: "new"
 			case .upToDate: "up to date"
 			case .stale: "stale"
+			case .canceled: "canceled"
 			case .orphanedDraft: "orphaned draft"
 			case .edited: "edited"
 			case .conflict: "conflict"
@@ -107,7 +115,7 @@ enum PostState: CaseIterable, Sendable {
 			case .vaultOnly, .upToDate: .brightBlack
 			case .new: .green
 			case .stale: .cyan
-			case .orphanedDraft: .magenta
+			case .canceled, .orphanedDraft: .magenta
 			case .edited, .conflict, .invalid, .orphanedPublished, .retracted: .red
 		}
 	}
@@ -115,10 +123,11 @@ enum PostState: CaseIterable, Sendable {
 	/// One line on what the state means, for the `status` help.
 	var summary: String {
 		switch self {
-			case .vaultOnly: "Has no status, so it stays in the vault."
+			case .vaultOnly: "Has no status, or was canceled. Stays in the vault."
 			case .new: "Has a status but no bundle yet. sync creates it."
 			case .upToDate: "The bundle matches the vault. Nothing to do."
 			case .stale: "The vault changed since the last sync. sync rewrites it."
+			case .canceled: "Canceled, and its bundle still exists. sync deletes it."
 			case .orphanedDraft: "A draft bundle no post claims. sync deletes it."
 			case .edited: "The bundle was changed outside ths. Skipped."
 			case .conflict: "A bundle ths didn't make has the post's slug. Skipped."

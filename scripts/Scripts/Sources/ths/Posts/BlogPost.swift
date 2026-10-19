@@ -7,7 +7,7 @@ import Foundation
 ///
 /// Notes are found by their `type`, not by their folder, so posts can live anywhere under the source
 /// directory. A post with no `status` stays in the vault. A post with a status of `draft` or
-/// `published` belongs on the site.
+/// `published` belongs on the site, and a `canceled` post has been taken down.
 ///
 /// Properties that can't be read are left `nil` and recorded in `issues`. Parsing never throws, so
 /// one broken note never hides the others.
@@ -19,6 +19,8 @@ struct BlogPost: Equatable, Sendable {
 		case draft
 		/// Public on the site.
 		case published
+		/// Taken down. Its bundle is deleted from the site repo, and the note stays in the vault.
+		case canceled
 	}
 
 	/// The note's path relative to the source directory, like `Blog Posts/My Post.md`.
@@ -64,7 +66,7 @@ struct BlogPost: Equatable, Sendable {
 			}
 		} else if frontmatter.isNonScalar("status") {
 			status = nil
-			issues.append(.invalidProperty(name: "status", expected: "draft or published"))
+			issues.append(.invalidProperty(name: "status", expected: "draft, published, or canceled"))
 		} else {
 			status = nil
 		}
@@ -93,8 +95,9 @@ struct BlogPost: Equatable, Sendable {
 			issues.append(.invalidProperty(name: "tags", expected: "a list of tags"))
 		}
 
-		// A post that stays in the vault isn't checked for what the site needs.
-		if status != nil {
+		// A post that stays in the vault isn't checked for what the site needs. A canceled post without
+		// a slug was never on the site, so it has nothing to take down.
+		if status == .draft || status == .published {
 			if slug == nil, !frontmatter.isNonScalar("slug") {
 				issues.append(.missingSlug)
 			}

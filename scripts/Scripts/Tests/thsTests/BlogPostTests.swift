@@ -61,6 +61,14 @@ struct BlogPostTests {
 		#expect(published.issues == [.missingDate])
 	}
 
+	@Test("Reads canceled, which doesn't need a slug")
+	func readsCanceled() throws {
+		let post = try #require(BlogPost.parse("---\ntype: blog post\nstatus: canceled\n---\n", relativePath: "C.md"))
+
+		#expect(post.status == .canceled)
+		#expect(post.issues.isEmpty)
+	}
+
 	@Test("Rejects bad values")
 	func rejectsBadValues() throws {
 		let post = try #require(BlogPost.parse(
