@@ -8,6 +8,8 @@ fish_vi_key_bindings
 
 set -gx FZF_DEFAULT_COMMAND 'rg --files --no-ignore --hidden --follow --glob "!.git/*"'
 set -gx MANPAGER 'nvim +Man!'
+set -gx THS_SOURCE_DIR "$HOME/Obsidian/gooseOS/The Honking Smith"
+set -gx THS_SITE_DIR "$HOME/code/the-honking-smith-dot-com"
 
 
 #################################
