@@ -1,0 +1,1 @@
+@~/gooseOS/AGENTS.md

@@ -22,6 +22,8 @@ my @fileList = (
     ["$directory/gitconfig", "$HOME/.gitconfig"],
     ["$directory/jjconfig.toml", "$HOME/.config/jj/config.toml"],
     ["$directory/codex/global_agents.md", "$HOME/.codex/AGENTS.md"],
+    ["$directory/claude/CLAUDE.md", "$HOME/.claude/CLAUDE.md"],
+    ["$directory/claude/settings.json", "$HOME/.claude/settings.json"],
 	# ["$directory/zed/settings.json", "$HOME/.config/zed/settings.json"],
 	# ["$directory/zed/keymap.json", "$HOME/.config/zed/keymap.json"],
 	["$directory/ghostty", "$HOME/.config/ghostty"],
