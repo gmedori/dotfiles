@@ -1,40 +1,83 @@
-# A function which filters options which starts with "-" from $argv.
-function _swift_pr-watch_preprocessor
-    set -l results
-    for i in (seq (count $argv))
-        switch (echo $argv[$i] | string sub -l 1)
-            case '-'
-            case '*'
-                echo $argv[$i]
+function __pr-watch_should_offer_completions_for_flags_or_options -a expected_commands
+    set -l non_repeating_flags_or_options $argv[2..]
+    set -l non_repeating_flags_or_options_absent 0
+    set -l positional_index 0
+    set -l commands
+    __pr-watch_parse_tokens
+    test "$commands" = "$expected_commands"; and return $non_repeating_flags_or_options_absent
+end
+
+function __pr-watch_should_offer_completions_for_positional -a expected_commands positional_index_comparison expected_positional_index
+    set -l non_repeating_flags_or_options
+    set -l non_repeating_flags_or_options_absent 0
+    set -l positional_index 0
+    set -l commands
+    __pr-watch_parse_tokens
+    test "$commands" = "$expected_commands" -a \( "$positional_index" "$positional_index_comparison" "$expected_positional_index" \)
+end
+
+function __pr-watch_parse_tokens -S
+    set -l unparsed_tokens (__pr-watch_tokens -pc)
+    switch $unparsed_tokens[1]
+    case 'pr-watch'
+        __pr-watch_parse_subcommand 1 'R/repo=' 'i/interval=' 'h/help'
+        switch $unparsed_tokens[1]
+        case 'help'
+            __pr-watch_parse_subcommand -r 1 
         end
     end
 end
 
-function _swift_pr-watch_using_command
-    set -l currentCommands (_swift_pr-watch_preprocessor (commandline -opc))
-    set -l expectedCommands (string split " " $argv[1])
-    set -l subcommands (string split " " $argv[2])
-    if [ (count $currentCommands) -ge (count $expectedCommands) ]
-        for i in (seq (count $expectedCommands))
-            if [ $currentCommands[$i] != $expectedCommands[$i] ]
-                return 1
-            end
-        end
-        if [ (count $currentCommands) -eq (count $expectedCommands) ]
-            return 0
-        end
-        if [ (count $subcommands) -gt 1 ]
-            for i in (seq (count $subcommands))
-                if [ $currentCommands[(math (count $expectedCommands) + 1)] = $subcommands[$i] ]
-                    return 1
-                end
-            end
-        end
-        return 0
+function __pr-watch_tokens
+    if test (string split -m 1 -f 1 -- . "$FISH_VERSION") -gt 3
+        commandline --tokens-raw $argv
+    else
+        commandline -o $argv
     end
-    return 1
 end
 
-complete -c pr-watch -n '_swift_pr-watch_using_command "pr-watch"' -s R -l repo -d 'Select another repository using the [HOST/]OWNER/REPO format'
-complete -c pr-watch -n '_swift_pr-watch_using_command "pr-watch"' -s i -l interval -d 'The number of seconds between polls'
-complete -c pr-watch -n '_swift_pr-watch_using_command "pr-watch"' -s h -l help -d 'Show help information.'
+function __pr-watch_parse_subcommand -S -a positional_count
+    argparse -s r -- $argv
+    set -l option_specs $argv[2..]
+    set -l is_repeating_positional $_flag_r
+    set -el _flag_r
+    set -a commands $unparsed_tokens[1]
+    set positional_index 0
+    while true
+        set -e unparsed_tokens[1]
+        argparse -sn "$commands" $option_specs -- $unparsed_tokens 2> /dev/null
+        set unparsed_tokens $argv
+        set positional_index (math $positional_index + 1)
+        for non_repeating_flag_or_option in $non_repeating_flags_or_options
+            if set -ql "_flag_$(string replace -a - _ -- $non_repeating_flag_or_option)"
+                set non_repeating_flags_or_options_absent 1
+                break
+            end
+        end
+        test (count $unparsed_tokens) -eq 0 -o \( -z "$is_repeating_positional" -a "$positional_index" -gt "$positional_count" \) && break
+    end
+end
+
+function __pr-watch_complete_directories
+    set -l token (commandline -t)
+    string match -- '*/' $token
+    set -l subdirs $token*/
+    printf %s\n $subdirs
+end
+
+function __pr-watch_custom_completion
+    set -x SAP_SHELL fish
+    set -x SAP_SHELL_VERSION $FISH_VERSION
+    set -l tokens (__pr-watch_tokens -p)
+    if test -z "$(__pr-watch_tokens -t)"
+        set -l index (count (__pr-watch_tokens -pc))
+        set tokens $tokens[..$index] \'\' $tokens[(math $index + 1)..]
+    end
+    command $tokens[1] $argv $tokens
+end
+
+complete -c 'pr-watch' -f
+complete -c 'pr-watch' -n '__pr-watch_should_offer_completions_for_flags_or_options "pr-watch" R repo' -s 'R' -l 'repo' -d 'Select another repository using the [HOST/]OWNER/REPO format' -rfka ''
+complete -c 'pr-watch' -n '__pr-watch_should_offer_completions_for_flags_or_options "pr-watch" i interval' -s 'i' -l 'interval' -d 'The number of seconds between polls' -rfka ''
+complete -c 'pr-watch' -n '__pr-watch_should_offer_completions_for_flags_or_options "pr-watch" h help' -s 'h' -l 'help' -d 'Show help information.'
+complete -c 'pr-watch' -n '__pr-watch_should_offer_completions_for_positional "pr-watch" -eq 1' -fa 'help' -d 'Show subcommand help information.'
