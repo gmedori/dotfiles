@@ -242,6 +242,7 @@ fish_add_path $GOPATH/bin #.......................... GOPATH
 fish_add_path $HOME/.cargo/bin #..................... Rust
 fish_add_path $HOME/perl5/bin #...................... Perl (local::lib)
 fish_add_path $HOME/.local/bin #..................... Misc. local installs (e.g. Claude installs itself here)
+fish_add_path -a $HOME/.docker/bin #................. Docker Desktop CLI (appended, lowest priority)
 
 ## Work Specific Stuff
 set WORK_SPECIFIC_DIR $HOME/dotfiles/work_specific
