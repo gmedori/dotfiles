@@ -45,7 +45,9 @@
     colorMoved = default
 
 [alias]
-	lg = log --graph --abbrev-commit --format=format:'%C(blue)%h%C(reset) | %C(green)%ar%C(reset) - %C(dim white)%an%C(reset) %C(auto)%d%C(reset)%n         | %s%n'
+	# The part of the format that reads "%x1b[8m%h%x1b[28m" is a commit SHA that uses the ANSI conceal escape sequence 
+	# so it's always invisible. It's just here to provide the right amount of padding.
+	lg = log --graph --abbrev-commit --format=format:'%C(blue)%h%C(reset) | %C(green)%ar%C(reset) - %C(dim white)%an%C(reset) %C(auto)%d%C(reset)%n%x1b[8m%h%x1b[28m | %s%n'
 	here = lg -1
 	root = rev-parse --show-toplevel
 
