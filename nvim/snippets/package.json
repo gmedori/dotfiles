@@ -1,0 +1,11 @@
+{
+  "name": "honedge-snippets",
+  "contributes": {
+    "snippets": [
+      {
+        "language": ["go"],
+        "path": "./go.jsonc"
+      }
+    ]
+  }
+}

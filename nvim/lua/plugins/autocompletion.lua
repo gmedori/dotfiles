@@ -20,7 +20,9 @@ return { -- Autocompletion
 				{
 					'rafamadriz/friendly-snippets',
 					config = function()
-						require('luasnip.loaders.from_vscode').lazy_load()
+						local vscode_loader = require 'luasnip.loaders.from_vscode'
+						vscode_loader.lazy_load()
+						vscode_loader.lazy_load { paths = { './snippets' } }
 					end,
 				},
 			},

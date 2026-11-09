@@ -18,6 +18,7 @@ return { -- Highlight, edit, and navigate code
 			'c',
 			'cmake',
 			'diff',
+			'go',
 			'html',
 			'lua',
 			'luadoc',

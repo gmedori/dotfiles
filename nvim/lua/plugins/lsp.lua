@@ -1,3 +1,5 @@
+local golangci_config_files = { '.golangci.yml', '.golangci.yaml', '.golangci.toml', '.golangci.json' }
+
 return {
 	'neovim/nvim-lspconfig',
 	dependencies = {
@@ -136,13 +138,6 @@ return {
 			end,
 		})
 
-		vim.api.nvim_create_autocmd('BufWritePre', {
-			pattern = '*.go',
-			callback = function()
-				vim.lsp.buf.format()
-			end,
-		})
-
 		-- LSP servers and clients are able to communicate to each other what features they support.
 		-- By default, Neovim doesn't support everything that is in the LSP specification.
 		-- When you add nvim-cmp, luasnip, etc. Neovim now has *more* capabilities.
@@ -180,6 +175,15 @@ return {
 				},
 			},
 			fish_lsp = {},
+			golangci_lint_ls = {
+				-- Only attach when the project explicitly opts in to golangci-lint.
+				root_dir = function(bufnr, on_dir)
+					local root = vim.fs.root(bufnr, golangci_config_files)
+					if root then
+						on_dir(root)
+					end
+				end,
+			},
 			gopls = {},
 		}
 
@@ -187,6 +191,8 @@ return {
 		local ensure_installed = vim.tbl_keys(servers or {})
 		vim.list_extend(ensure_installed, {
 			'stylua', -- Used to format Lua code
+			'goimports', -- Used to format Go code and organize imports
+			'golangci-lint', -- Uses each project's lint and formatter configuration
 		})
 		require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
