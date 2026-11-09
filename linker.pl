@@ -25,6 +25,8 @@ my @fileList = (
     ["$directory/claude/CLAUDE.md", "$HOME/.claude/CLAUDE.md"],
     ["$directory/claude/settings.json", "$HOME/.claude/settings.json"],
     ["$HOME/gooseOS/AGENTS.md", "$HOME/.pi/agent/AGENTS.md"],
+    ["$HOME/gooseOS/Pi Extensions", "$HOME/.pi/agent/extensions"],
+    ["$HOME/gooseOS/Skills", "$HOME/.pi/agent/skills"],
 	# ["$directory/zed/settings.json", "$HOME/.config/zed/settings.json"],
 	# ["$directory/zed/keymap.json", "$HOME/.config/zed/keymap.json"],
 	["$directory/ghostty", "$HOME/.config/ghostty"],
