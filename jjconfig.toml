@@ -1,0 +1,46 @@
+#:schema https://docs.jj-vcs.dev/latest/config-schema.json
+
+[colors]
+change_id = "blue"
+commit_id = { fg = "bright black", dim = true }
+timestamp = "green"
+author = { fg = "white", dim = true }
+separator = "bright black"
+bookmark = "green"
+bookmarks = "green"
+local_bookmarks = "green"
+remote_bookmarks = "#ff9f1c"
+"bookmarks remote" = "#ff9f1c"
+"working_copy bookmarks" = "green"
+"working_copy bookmarks remote" = "#ff9f1c"
+
+[templates]
+draft_commit_description = "builtin_draft_commit_description_with_diff"
+
+log = '''
+label("change_id", change_id.shortest(8)) ++
+label("separator", " | ") ++
+label("timestamp", author.timestamp().ago()) ++
+" - " ++
+separate(" ",
+  label("author", author.name()),
+  surround("(",
+    ")",
+    separate(", ",
+      label("working_copies", working_copies.join(", ")),
+      label("local_bookmarks", local_bookmarks.join(", ")),
+      label("remote_bookmarks", remote_bookmarks.join(", ")),
+      label("tags", tags.join(", ")),
+    )
+  ),
+  label("commit_id", commit_id.short(8)),
+) ++
+"\n" ++
+label("separator", "         | ") ++
+description.first_line() ++
+"\n\n"
+'''
+
+[user]
+name = "Gustavo Medori"
+email = "mail@gustavo.sh"

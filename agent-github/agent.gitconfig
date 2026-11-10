@@ -1,0 +1,28 @@
+# Git settings for agents' shell commands, included through GIT_CONFIG_* by
+# activate.sh. They make agents commit and push as defective-talos, except in
+# repos with a gravitational remote, which teleport.gitconfig hands back to the
+# user. Git checks the remote of the repo each command works on, so this holds
+# for `git -C <repo>` and for git run by scripts and other tools.
+
+[user]
+	name = defective-talos
+	email = 354719947+defective-talos@users.noreply.github.com
+
+# Reach GitHub over HTTPS with the bot's token instead of the user's SSH key.
+# gravitational URLs map to themselves, and the longer match wins, so they stay
+# on SSH as the user.
+[url "https://github.com/"]
+	insteadOf = git@github.com:
+[url "git@github.com:gravitational/"]
+	insteadOf = git@github.com:gravitational/
+
+# The empty helper clears any helper set elsewhere, so bin/gh answers with the
+# bot's token.
+[credential "https://github.com"]
+	helper =
+	helper = !gh auth git-credential
+
+[includeIf "hasconfig:remote.*.url:git@github.com:gravitational/**"]
+	path = teleport.gitconfig
+[includeIf "hasconfig:remote.*.url:https://github.com/gravitational/**"]
+	path = teleport.gitconfig

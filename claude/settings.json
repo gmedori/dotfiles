@@ -1,0 +1,77 @@
+{
+  "model": "opus",
+  "enabledPlugins": {
+    "swift-lsp@claude-plugins-official": true,
+    "gopls-lsp@claude-plugins-official": true,
+    "cloudflare@cloudflare": true
+  },
+  "extraKnownMarketplaces": {
+    "cloudflare": {
+      "source": {
+        "source": "github",
+        "repo": "cloudflare/skills"
+      }
+    }
+  },
+  "effortLevel": "medium",
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "effortLevel": "high"
+    }
+  },
+  "tui": "fullscreen",
+  "theme": "auto",
+  "agentPushNotifEnabled": false,
+  "inputNeededNotifEnabled": true,
+  "env": {
+    "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1"
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/dotfiles/agent-github/claude-hook.sh\""
+          }
+        ]
+      }
+    ],
+    "CwdChanged": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/dotfiles/agent-github/claude-hook.sh\""
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "additionalDirectories": [
+      "~/gooseOS"
+    ],
+    "allow": [
+      "Bash(xcodebuild build *)",
+      "Bash(xcodebuild test *)",
+      "Bash(xcodebuild -list *)",
+      "Bash(swift build *)",
+      "Bash(swift test *)",
+      "Bash(swiftformat *)",
+      "Bash(xcrun simctl list *)",
+      "Bash(gh pr view *)",
+      "Bash(gh pr list *)",
+      "Bash(gh pr checks *)",
+      "mcp__xcode__*",
+      "WebFetch(domain:developer.apple.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:swiftpackageindex.com)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(git -C * push *)"
+    ]
+  }
+}

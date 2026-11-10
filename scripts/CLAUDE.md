@@ -13,9 +13,11 @@ is organized as two sibling SwiftPM packages:
   `swift-subprocess`.
 
 `Scripts` currently builds `iosd`, `chapter-splitter`, `github-permalink`,
-`notify`, `pr-watch`, `tp`, and `ths`. `ths` publishes The Honking Smith blog
-posts from the Obsidian vault to the website repo; its post states are
-documented on `PostState`.
+`notify`, `pr-watch`, `tp`, `ths`, and `is-work-mac`. `ths` publishes The
+Honking Smith blog posts from the Obsidian vault to the website repo; its post
+states are documented on `PostState`. `is-work-mac` tells the work Mac from
+personal Macs by MDM enrollment, and `$HOME/dotfiles/agent-github/activate.sh`
+relies on its exit codes, so keep them as documented in its help.
 
 There is no root `Package.swift`. Run SwiftPM commands against the relevant
 package directory.
@@ -26,7 +28,8 @@ package directory.
 - Minimum platform: macOS 14
 - Command-line parsing: `swift-argument-parser`
 - Tests use Swift Testing syntax. `tpTests` and `thsTests` cover parts of `tp`
-  and `ths`; run them with `swift test --package-path Scripts`.
+  and `ths`, and `is-work-macTests` covers the parsing in `is-work-mac`. Run
+  them with `swift test --package-path Scripts`.
 - No formatter or linter is currently configured.
 
 ## Build and Validation

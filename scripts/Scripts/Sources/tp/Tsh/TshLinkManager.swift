@@ -38,7 +38,7 @@ struct TshLinkManager {
 	}
 
 	var linkURL: URL {
-		homeDirectory.appending(path: "scripts/bin/tsh")
+		homeDirectory.appending(path: "dotfiles/scripts/bin/tsh")
 	}
 
 	// MARK: - State
@@ -67,13 +67,13 @@ struct TshLinkManager {
 	func link(to targetURL: URL) throws -> Bool {
 		let targetURL = targetURL.resolvingSymlinksInPath().standardizedFileURL
 		guard targetURL.path != linkURL.path else {
-			throw RuntimeError("Cannot link ~/scripts/bin/tsh to itself.")
+			throw RuntimeError("Cannot link ~/dotfiles/scripts/bin/tsh to itself.")
 		}
 
 		switch state() {
 			case .occupied:
 				throw RuntimeError(
-					"~/scripts/bin/tsh exists but is not a symbolic link; refusing to replace it."
+					"~/dotfiles/scripts/bin/tsh exists but is not a symbolic link; refusing to replace it."
 				)
 			case .linked(let currentTargetURL)
 				where currentTargetURL.resolvingSymlinksInPath().path == targetURL.path:
@@ -99,7 +99,7 @@ struct TshLinkManager {
 
 		guard rename(temporaryLinkURL.path, linkURL.path) == 0 else {
 			throw RuntimeError(
-				"Could not update ~/scripts/bin/tsh: \(String(cString: strerror(errno)))"
+				"Could not update ~/dotfiles/scripts/bin/tsh: \(String(cString: strerror(errno)))"
 			)
 		}
 
@@ -113,7 +113,7 @@ struct TshLinkManager {
 				return false
 			case .occupied:
 				throw RuntimeError(
-					"~/scripts/bin/tsh exists but is not a symbolic link; refusing to remove it."
+					"~/dotfiles/scripts/bin/tsh exists but is not a symbolic link; refusing to remove it."
 				)
 			case .broken, .linked:
 				try fileManager.removeItem(at: linkURL)
@@ -129,7 +129,7 @@ struct TshLinkManager {
 		}
 
 		guard let path = environment["PATH"] else {
-			return "~/scripts/bin is not in PATH."
+			return "~/dotfiles/scripts/bin is not in PATH."
 		}
 
 		let workingDirectory = URL(
@@ -149,9 +149,9 @@ struct TshLinkManager {
 				return nil
 			}
 			return TshPathFormatter.display(candidateURL)
-				+ " appears before ~/scripts/bin/tsh in PATH."
+				+ " appears before ~/dotfiles/scripts/bin/tsh in PATH."
 		}
 
-		return "~/scripts/bin is not in PATH."
+		return "~/dotfiles/scripts/bin is not in PATH."
 	}
 }

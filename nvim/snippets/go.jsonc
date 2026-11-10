@@ -1,0 +1,11 @@
+{
+  "If error is not nil": {
+    "prefix": "errn",
+    "body": [
+      "if err != nil {",
+      "\t$0",
+      "}"
+    ],
+    "description": "Handle a non-nil error"
+  }
+}

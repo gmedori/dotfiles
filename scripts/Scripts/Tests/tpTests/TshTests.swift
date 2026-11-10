@@ -183,7 +183,7 @@ private struct Fixture {
 	func manager() -> TshLinkManager {
 		TshLinkManager(
 			homeDirectory: root,
-			environment: ["PATH": root.appending(path: "scripts/bin").path]
+			environment: ["PATH": root.appending(path: "dotfiles/scripts/bin").path]
 		)
 	}
 

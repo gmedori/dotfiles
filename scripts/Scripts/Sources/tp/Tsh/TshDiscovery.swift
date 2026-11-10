@@ -48,11 +48,11 @@ struct TshDiscovery {
 	func installation(at suppliedPath: String) async throws -> TshInstallation {
 		let suppliedURL = url(for: suppliedPath)
 		let managedLinkURL = homeDirectory
-			.appending(path: "scripts/bin/tsh")
+			.appending(path: "dotfiles/scripts/bin/tsh")
 			.standardizedFileURL
 
 		guard suppliedURL != managedLinkURL else {
-			throw ValidationError("Select the tsh executable itself, not ~/scripts/bin/tsh.")
+			throw ValidationError("Select the tsh executable itself, not ~/dotfiles/scripts/bin/tsh.")
 		}
 		guard let candidate = candidate(at: suppliedURL, suggestedSource: .other) else {
 			throw ValidationError(
@@ -222,7 +222,7 @@ struct TshDiscovery {
 
 	private func candidate(at url: URL, suggestedSource: TshSource) -> TshCandidate? {
 		let managedLinkURL = homeDirectory
-			.appending(path: "scripts/bin/tsh")
+			.appending(path: "dotfiles/scripts/bin/tsh")
 			.standardizedFileURL
 		let suppliedURL = url.standardizedFileURL
 		guard suppliedURL != managedLinkURL else {

@@ -1,0 +1,9 @@
+fish_history
+fishd*
+plugged
+resurrect
+.DS_Store
+*.lock*
+fish_variables
+work_specific
+packer_compiled.lua

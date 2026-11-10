@@ -1,0 +1,6 @@
+[submodule "qmk/qmk_firmware"]
+	path = qmk/qmk_firmware
+	url = https://github.com/qmk/qmk_firmware.git
+[submodule "tmux/tmux/plugins/tmux-yank"]
+	path = tmux/tmux/plugins/tmux-yank
+	url = https://github.com/tmux-plugins/tmux-yank

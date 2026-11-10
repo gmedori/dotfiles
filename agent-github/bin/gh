@@ -1,0 +1,38 @@
+#!/bin/sh
+# Runs gh as defective-talos for agents. activate.sh puts this folder first on
+# the agent's PATH, so every gh an agent runs comes here, including gh run by
+# scripts and other tools, and the `gh auth git-credential` that git asks for
+# credentials through agent.gitconfig.
+#
+# The token exists only in the environment of the gh process this starts and its
+# children, such as gh extensions and the git processes gh runs. The agent's own
+# shell never has it, so `env` there shows nothing secret.
+#
+# Teleport work runs as the user, gmedori, because defective-talos has no access
+# to the gravitational org. It asks for gmedori's token by name, since signing
+# defective-talos in again makes it gh's active account. That covers these calls:
+#
+# - A call whose arguments name `gravitational/`, as `gh -R gravitational/core`
+#   and `gh api repos/gravitational/...` do
+# - A call made in a repo with a gravitational remote
+# - A call with AGENT_GITHUB_AS_USER set, as teleport.gitconfig's credential
+#   helper makes
+
+self_dir=$(cd "$(dirname "$0")" && pwd)
+real_gh=$(PATH=$(printf '%s' "$PATH" | tr ':' '\n' | grep -vxF "$self_dir" | paste -sd: -) command -v gh)
+
+account=defective-talos
+if [ -n "$AGENT_GITHUB_AS_USER" ]; then
+  account=gmedori
+else
+  case " $* " in
+    *gravitational/*) account=gmedori ;;
+  esac
+  if git config --get-regexp '^remote\..*\.url$' 2>/dev/null | grep -q 'github\.com[:/]gravitational/'; then
+    account=gmedori
+  fi
+fi
+
+GH_TOKEN=$("$real_gh" auth token --user "$account" 2>/dev/null) || exec "$real_gh" "$@"
+export GH_TOKEN
+exec "$real_gh" "$@"

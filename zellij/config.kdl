@@ -1,0 +1,219 @@
+// ============================================================================
+// tmux-style Zellij config
+// ----------------------------------------------------------------------------
+// Interaction model: tmux-faithful, single-shot prefix.
+//   - Default mode is `normal`, which passes ALL typing straight to the shell.
+//     The only keys captured in normal mode are the prefix (Ctrl+Space) and the
+//     keyboard lock (Ctrl+g).
+//   - Press the prefix (Ctrl+Space), then ONE key: the action runs and you drop
+//     straight back to typing. No Esc needed.
+//   - The two persistent exceptions are `resize` and `scroll`/copy modes, which
+//     stay active (repeatable) until you press Esc/Enter, matching tmux's
+//     copy-mode and resize behaviour.
+//
+// tmux -> zellij vocabulary: tmux "window" == zellij "tab".
+//
+// Prefix cheatsheet (all preceded by Ctrl+Space):
+//   Panes    - split down    |  split right   h/j/k/l focus   o next pane
+//            x close pane     z zoom (fullscreen)   > / < swap pane
+//            S stacked pane   ! break pane to new window
+//   Windows  c new   n next   p prev   Ctrl+h prev   Ctrl+l next
+//            Tab last   1-9 select   , rename   & close
+//   Session  s session tree (all sessions)   w tabs+panes tree   d detach
+//   Misc     r resize mode   [ copy/scroll mode   e edit scrollback in $EDITOR
+//            Ctrl+Space send a literal Ctrl+Space to the program
+//   Global   Ctrl+g lock/unlock keyboard (pass everything through)
+// ============================================================================
+
+keybinds clear-defaults=true {
+    // --- normal: everything falls through to the shell -----------------------
+    normal {
+        bind "Ctrl Space" { SwitchToMode "tmux"; }
+        bind "Ctrl g" { SwitchToMode "locked"; }
+    }
+
+    // --- locked: pass every key to the program (e.g. nested multiplexers) -----
+    locked {
+        bind "Ctrl g" { SwitchToMode "normal"; }
+    }
+
+    // --- tmux: the prefix mode. Single key -> action -> back to normal --------
+    tmux {
+        bind "esc" { SwitchToMode "normal"; }
+        // tmux send-prefix: forward a literal Ctrl+Space (null byte) to the app
+        bind "Ctrl Space" { Write 0; SwitchToMode "normal"; }
+
+        // Splits (tmux: - below, | right; keep tmux defaults " and % too)
+        bind "-" { NewPane "down"; SwitchToMode "normal"; }
+        bind "|" { NewPane "right"; SwitchToMode "normal"; }
+        bind "\"" { NewPane "down"; SwitchToMode "normal"; }
+        bind "%" { NewPane "right"; SwitchToMode "normal"; }
+        // Stacked pane (zellij feature): accordion-style stack in place
+        bind "S" { NewPane "stacked"; SwitchToMode "normal"; }
+
+        // Pane focus (tmux -r h/j/k/l) + next-pane (tmux o)
+        bind "h" { MoveFocus "left"; SwitchToMode "normal"; }
+        bind "j" { MoveFocus "down"; SwitchToMode "normal"; }
+        bind "k" { MoveFocus "up"; SwitchToMode "normal"; }
+        bind "l" { MoveFocus "right"; SwitchToMode "normal"; }
+        bind "o" { FocusNextPane; SwitchToMode "normal"; }
+
+        // Swap pane with next/previous (tmux > / <)
+        bind ">" { MovePane; SwitchToMode "normal"; }
+        bind "<" { MovePaneBackwards; SwitchToMode "normal"; }
+
+        // Pane actions
+        bind "x" { CloseFocus; SwitchToMode "normal"; }
+        bind "z" { ToggleFocusFullscreen; SwitchToMode "normal"; }
+        bind "!" { BreakPane; SwitchToMode "normal"; }
+
+        // Windows/tabs
+        bind "c" { NewTab; SwitchToMode "normal"; }
+        bind "n" { GoToNextTab; SwitchToMode "normal"; }
+        bind "p" { GoToPreviousTab; SwitchToMode "normal"; }
+        bind "Ctrl h" { GoToPreviousTab; SwitchToMode "normal"; }
+        bind "Ctrl l" { GoToNextTab; SwitchToMode "normal"; }
+        bind "tab" { ToggleTab; SwitchToMode "normal"; }
+        bind "," { SwitchToMode "renametab"; TabNameInput 0; }
+        bind "&" { CloseTab; SwitchToMode "normal"; }
+        bind "1" { GoToTab 1; SwitchToMode "normal"; }
+        bind "2" { GoToTab 2; SwitchToMode "normal"; }
+        bind "3" { GoToTab 3; SwitchToMode "normal"; }
+        bind "4" { GoToTab 4; SwitchToMode "normal"; }
+        bind "5" { GoToTab 5; SwitchToMode "normal"; }
+        bind "6" { GoToTab 6; SwitchToMode "normal"; }
+        bind "7" { GoToTab 7; SwitchToMode "normal"; }
+        bind "8" { GoToTab 8; SwitchToMode "normal"; }
+        bind "9" { GoToTab 9; SwitchToMode "normal"; }
+
+        // Session / tree mode (tmux choose-tree). s: all sessions, w: this
+        // session's tabs & panes -- the session-manager is the unified tree.
+        bind "s" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            }
+            SwitchToMode "normal"
+        }
+        bind "w" {
+            LaunchOrFocusPlugin "session-manager" {
+                floating true
+                move_to_focused_tab true
+            }
+            SwitchToMode "normal"
+        }
+        bind "d" { Detach; }
+
+        // Enter persistent sub-modes
+        bind "r" { SwitchToMode "resize"; }
+        bind "[" { SwitchToMode "scroll"; }
+        bind "e" { EditScrollback; SwitchToMode "normal"; }
+    }
+
+    // --- resize: persistent, repeatable (tmux prefix + arrows) ---------------
+    resize {
+        bind "esc" "enter" { SwitchToMode "normal"; }
+        bind "h" "left"  { Resize "Increase left"; }
+        bind "j" "down"  { Resize "Increase down"; }
+        bind "k" "up"    { Resize "Increase up"; }
+        bind "l" "right" { Resize "Increase right"; }
+        bind "H" { Resize "Decrease left"; }
+        bind "J" { Resize "Decrease down"; }
+        bind "K" { Resize "Decrease up"; }
+        bind "L" { Resize "Decrease right"; }
+        bind "+" "=" { Resize "Increase"; }
+        bind "-" { Resize "Decrease"; }
+    }
+
+    // --- scroll / copy mode (tmux copy-mode, entered with prefix [) ----------
+    scroll {
+        bind "esc" "q" { SwitchToMode "normal"; }
+        bind "Ctrl c" { ScrollToBottom; SwitchToMode "normal"; }
+        bind "j" "down" { ScrollDown; }
+        bind "k" "up" { ScrollUp; }
+        bind "d" "Ctrl d" { HalfPageScrollDown; }
+        bind "u" "Ctrl u" { HalfPageScrollUp; }
+        bind "Ctrl f" "PageDown" { PageScrollDown; }
+        bind "Ctrl b" "PageUp" { PageScrollUp; }
+        bind "G" { ScrollToBottom; }
+        bind "e" { EditScrollback; SwitchToMode "normal"; }
+        bind "/" { SwitchToMode "entersearch"; SearchInput 0; }
+    }
+    entersearch {
+        bind "esc" { SwitchToMode "scroll"; }
+        bind "enter" { SwitchToMode "search"; }
+    }
+    search {
+        bind "esc" "q" { SwitchToMode "normal"; }
+        bind "Ctrl c" { ScrollToBottom; SwitchToMode "normal"; }
+        bind "n" { Search "down"; }
+        bind "N" { Search "up"; }
+        bind "j" "down" { ScrollDown; }
+        bind "k" "up" { ScrollUp; }
+        bind "Ctrl f" "PageDown" { PageScrollDown; }
+        bind "Ctrl b" "PageUp" { PageScrollUp; }
+        bind "c" { SearchToggleOption "CaseSensitivity"; }
+        bind "w" { SearchToggleOption "WholeWord"; }
+        bind "o" { SearchToggleOption "Wrap"; }
+    }
+
+    // --- rename tab (tmux prefix ,) ------------------------------------------
+    renametab {
+        bind "esc" { UndoRenameTab; SwitchToMode "normal"; }
+        bind "enter" { SwitchToMode "normal"; }
+    }
+}
+
+// Plugin aliases
+plugins {
+    about location="zellij:about"
+    compact-bar location="zellij:compact-bar"
+    configuration location="zellij:configuration"
+    filepicker location="zellij:strider" {
+        cwd "/"
+    }
+    plugin-manager location="zellij:plugin-manager"
+    session-manager location="zellij:session-manager"
+    status-bar location="zellij:status-bar"
+    strider location="zellij:strider"
+    tab-bar location="zellij:tab-bar"
+    welcome-screen location="zellij:session-manager" {
+        welcome_screen true
+    }
+}
+
+load_plugins {
+    zellij:link
+}
+
+web_client {
+    font "monospace"
+}
+
+ui {
+    pane_frames {
+        rounded_corners true
+    }
+}
+
+// Start in normal mode so the prefix (Ctrl+Space) is live and typing falls
+// through to the shell.
+default_mode "normal"
+
+theme "badwolf"
+
+// Stack panes when they are resized past a threshold (needed for the S
+// stacked-pane workflow to feel right). Default is already true; set here so
+// it survives future zellij default changes.
+stacked_resize true
+
+scroll_buffer_size 20000
+
+copy_command "pbcopy"
+
+// Disable zellij's advanced ctrl-modified mouse actions. Primarily this kills
+// Ctrl+scroll pane resizing; it also disables Ctrl+click pane grouping,
+// Ctrl+drag pane moving, and hover highlights (all bundled under one flag).
+advanced_mouse_actions false
+
+show_startup_tips false

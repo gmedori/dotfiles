@@ -1,0 +1,70 @@
+[user]
+	name = Gustavo Medori
+	email = mail@gustavo.sh
+	signingkey = key::ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICe4grs0BTn06c7NIdENzJxnfV/Ytw9IYkRQXOkHITcI GitHub SSH Key
+[diff]
+	tool = Kaleidoscope
+[difftool "Kaleidoscope"]
+	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+[difftool]
+	prompt = false
+	trustExitCode = true
+[merge]
+	tool = Kaleidoscope
+[mergetool "Kaleidoscope"]
+	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+	trustExitCode = true
+[mergetool "nvim"]
+  cmd = nvim -f -c \"Gdiffsplit!\" \"$MERGED\"
+[mergetool]
+	prompt = false
+[rerere]
+	enabled = true
+
+# Delta configs
+[core]
+    pager = delta
+[interactive]
+    diffFilter = delta --color-only
+[add.interactive]
+    useBuiltin = false # required for git 2.37.0
+[delta]
+    navigate = true    # use n and N to move between diff sections
+    light = false      # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+	# minus-style = "syntax #700000"
+	# minus-emph-style = "normal #a00000"
+    # minus-empty-line-marker-style = "normal #700000"
+    # plus-style = "syntax #005000"
+    # plus-emph-style = "normal #008c00"
+    # plus-empty-line-marker-style = "normal #005000"
+    side-by-side = false
+    tabs = 2
+[merge]
+    conflictstyle = diff3
+[diff]
+    colorMoved = default
+
+[alias]
+	# The part of the format that reads "%x1b[8m%h%x1b[28m" is a commit SHA that uses the ANSI conceal escape sequence 
+	# so it's always invisible. It's just here to provide the right amount of padding.
+	lg = log --graph --abbrev-commit --format=format:'%C(blue)%h%C(reset) | %C(green)%ar%C(reset) - %C(dim white)%an%C(reset) %C(auto)%d%C(reset)%n%x1b[8m%h%x1b[28m | %s%n'
+	here = lg -1
+	root = rev-parse --show-toplevel
+
+# Personal git settings
+# [includeIf "hasconfig:remote.*.url:git@github.com:gposcidonio/**"]
+#     path = "~/dotfiles/personal.gitconfig"
+# [url "git@github.com:"]
+#     insteadOf = https://github.com/
+[init]
+	defaultBranch = main
+[pull]
+	rebase = false
+
+[includeIf "gitdir:/Users/honedge/"]
+    path = "~/dotfiles/work_specific/gitconfig"
+
+[commit]
+	gpgsign = false
+[gpg]
+	format = ssh

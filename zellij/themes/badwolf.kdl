@@ -1,0 +1,128 @@
+// Badwolf — matches the Ghostty `badwolf` theme.
+// Advanced component format (RGB triples) so the status/tab bar background
+// matches the terminal bg (#1b1b1a) instead of ANSI black.
+// RGB values from these Badwolf hex colors (see ghostty/themes/badwolf):
+//   bg #1b1b1a=27 27 26 · fg #f7f6f1=247 246 241 · sel #44413a=68 65 58
+//   green #b8ea55=184 234 85 · yellow #e6cf90=230 207 144
+//   cyan #6bdbf9=107 219 249 · pink #e89db1=232 157 177
+//   red #e74553=231 69 83 · blue #4c9cf4=76 156 244 · gray #4c4c4c=76 76 76
+themes {
+    badwolf {
+        text_unselected {
+            base 107 219 249
+            background 27 27 26
+            emphasis_0 230 207 144
+            emphasis_1 107 219 249
+            emphasis_2 184 234 85
+            emphasis_3 107 219 249
+        }
+        text_selected {
+            base 107 219 249
+            background 68 65 58
+            emphasis_0 230 207 144
+            emphasis_1 107 219 249
+            emphasis_2 184 234 85
+            emphasis_3 232 157 177
+        }
+        ribbon_selected {
+            base 27 27 26
+            background 184 234 85
+            emphasis_0 231 69 83
+            emphasis_1 230 207 144
+            emphasis_2 232 157 177
+            emphasis_3 76 76 76
+        }
+        ribbon_unselected {
+            base 27 27 26
+            background 247 246 241
+            emphasis_0 231 69 83
+            emphasis_1 247 246 241
+            emphasis_2 76 76 76
+            emphasis_3 232 157 177
+        }
+        table_title {
+            base 184 234 85
+            background 0
+            emphasis_0 230 207 144
+            emphasis_1 107 219 249
+            emphasis_2 184 234 85
+            emphasis_3 232 157 177
+        }
+        table_cell_selected {
+            base 247 246 241
+            background 68 65 58
+            emphasis_0 230 207 144
+            emphasis_1 107 219 249
+            emphasis_2 184 234 85
+            emphasis_3 232 157 177
+        }
+        table_cell_unselected {
+            base 247 246 241
+            background 27 27 26
+            emphasis_0 230 207 144
+            emphasis_1 107 219 249
+            emphasis_2 184 234 85
+            emphasis_3 232 157 177
+        }
+        list_selected {
+            base 247 246 241
+            background 68 65 58
+            emphasis_0 230 207 144
+            emphasis_1 107 219 249
+            emphasis_2 184 234 85
+            emphasis_3 232 157 177
+        }
+        list_unselected {
+            base 247 246 241
+            background 27 27 26
+            emphasis_0 230 207 144
+            emphasis_1 107 219 249
+            emphasis_2 184 234 85
+            emphasis_3 232 157 177
+        }
+        frame_selected {
+            base 184 234 85
+            background 0
+            emphasis_0 230 207 144
+            emphasis_1 107 219 249
+            emphasis_2 232 157 177
+            emphasis_3 0
+        }
+        frame_highlight {
+            base 230 207 144
+            background 0
+            emphasis_0 232 157 177
+            emphasis_1 230 207 144
+            emphasis_2 230 207 144
+            emphasis_3 230 207 144
+        }
+        exit_code_success {
+            base 184 234 85
+            background 0
+            emphasis_0 107 219 249
+            emphasis_1 0 0 0
+            emphasis_2 232 157 177
+            emphasis_3 76 76 76
+        }
+        exit_code_error {
+            base 231 69 83
+            background 0
+            emphasis_0 230 207 144
+            emphasis_1 0
+            emphasis_2 0
+            emphasis_3 0
+        }
+        multiplayer_user_colors {
+            player_1 232 157 177
+            player_2 76 76 76
+            player_3 0
+            player_4 230 207 144
+            player_5 107 219 249
+            player_6 0
+            player_7 231 69 83
+            player_8 0
+            player_9 0
+            player_10 0
+        }
+    }
+}
