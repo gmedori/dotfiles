@@ -20,6 +20,9 @@ Main areas:
 - `zed/`, `xcode/`, `keyboards/`, `whitefox/`: editor, IDE, and keyboard config.
 - `Brewfile`: Homebrew dependencies for a new machine.
 - `install.sh` and `linker.pl`: bootstrap and symlink scripts.
+- `scripts/`: Swift command-line tools such as `tp`, `ths`, and `is-work-mac`.
+  It has its own AGENTS.md. Its install script puts the binaries in
+  `scripts/bin`, which `fish/config.fish` adds to `PATH`.
 
 ## Safety Rules
 
@@ -56,6 +59,8 @@ Use the narrowest relevant checks after changes:
   `NVIM_LOG_FILE=/tmp/nvim-dotfiles.log nvim --headless --clean '+lua for _, f in ipairs(vim.fn.glob("nvim/**/*.lua", false, true)) do local chunk, err = loadfile(f); if not chunk then error(err) end end' +quit`
 - Ghostty config: `ghostty +validate-config --config-file=ghostty/config`
 - Zellij config: `zellij --config zellij/config.kdl setup --check`
+- Swift tools: `swift build --package-path scripts/Scripts` and
+  `swift test --package-path scripts/Scripts`
 - Git sanity: `git diff --check`
 
 Some checks may read the live config location or start local helper processes.

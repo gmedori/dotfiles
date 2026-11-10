@@ -19,12 +19,12 @@
 # defective-talos is for personal Macs only and must never act on the work Mac.
 # This file does nothing and says nothing unless both of these hold:
 #
-# - `is-work-mac`, from the scripts repo, exits 1, meaning this Mac isn't
+# - `is-work-mac`, from `scripts/`, exits 1, meaning this Mac isn't
 #   enrolled in MDM. It exits 0 on the work Mac and 2 when it can't tell, and a
 #   missing binary exits 127, so anything but 1 counts as the work Mac.
 # - defective-talos is signed in to gh.
 
-"$HOME/scripts/bin/is-work-mac" >/dev/null 2>&1
+"$HOME/dotfiles/scripts/bin/is-work-mac" >/dev/null 2>&1
 if [ "$?" -eq 1 ] && gh auth token --user defective-talos >/dev/null 2>&1; then
   case ":$PATH:" in
     *":$HOME/dotfiles/agent-github/bin:"*) ;;

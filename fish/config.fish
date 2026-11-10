@@ -77,7 +77,7 @@ abbr  cdw 'cd ~/dotfiles/work_specific'
 abbr  cdd 'cd ~/dotfiles'
 abbr  cdr 'cd (git root)'
 
-abbr cdsc 'cd ~/scripts'
+abbr cdsc 'cd ~/dotfiles/scripts'
 
 abbr cl 'clear'
 
@@ -236,7 +236,7 @@ set -gx PERL_MB_OPT "--install_base \"$HOME/perl5\""
 set -gx PERL_MM_OPT "INSTALL_BASE=$HOME/perl5"
 
 fish_add_path /opt/homebrew/bin #.................... Homebrew
-fish_add_path $HOME/scripts/bin #.................... Scripts
+fish_add_path $HOME/dotfiles/scripts/bin #........... Scripts
 fish_add_path (brew --prefix go@1.24)/bin #.......... Golang binary
 fish_add_path $GOPATH/bin #.......................... GOPATH
 fish_add_path $HOME/.cargo/bin #..................... Rust

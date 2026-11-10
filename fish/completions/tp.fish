@@ -53,5 +53,5 @@ complete -c tp -n '_swift_tp_using_command "tp tsh" "list use current unlink"' -
 complete -c tp -n '_swift_tp_using_command "tp tsh" "list use current unlink"' -f -a 'unlink' -d 'Remove the managed tsh symbolic link'
 complete -c tp -n '_swift_tp_using_command "tp" "deploy tsh help"' -s h -l help -d 'Show help information.'
 complete -c tp -n '_swift_tp_using_command "tp" "deploy tsh help"' -f -a 'deploy' -d 'Deploy a local Teleport build to a Cloud staging tenant'
-complete -c tp -n '_swift_tp_using_command "tp" "deploy tsh help"' -f -a 'tsh' -d 'Manage the tsh executable available in ~/scripts/bin'
+complete -c tp -n '_swift_tp_using_command "tp" "deploy tsh help"' -f -a 'tsh' -d 'Manage the tsh executable available in ~/dotfiles/scripts/bin'
 complete -c tp -n '_swift_tp_using_command "tp" "deploy tsh help"' -f -a 'help' -d 'Show subcommand help information.'

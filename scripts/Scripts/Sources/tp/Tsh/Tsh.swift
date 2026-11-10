@@ -7,7 +7,7 @@ import Foundation
 struct Tsh: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "tsh",
-		abstract: "Manage the tsh executable available in ~/scripts/bin",
+		abstract: "Manage the tsh executable available in ~/dotfiles/scripts/bin",
 		subcommands: [ListInstallations.self, Use.self, Current.self, Unlink.self],
 	)
 
@@ -48,9 +48,9 @@ struct Tsh: AsyncParsableCommand {
 		private func printLinkProblem(for state: TshLinkState) {
 			switch state {
 				case .broken(let targetURL):
-					print("\nWarning: ~/scripts/bin/tsh points to missing file \(targetURL.path).")
+					print("\nWarning: ~/dotfiles/scripts/bin/tsh points to missing file \(targetURL.path).")
 				case .occupied:
-					print("\nWarning: ~/scripts/bin/tsh exists but is not a symbolic link.")
+					print("\nWarning: ~/dotfiles/scripts/bin/tsh exists but is not a symbolic link.")
 				case .missing, .linked:
 					break
 			}
@@ -110,7 +110,7 @@ struct Tsh: AsyncParsableCommand {
 			} else {
 				print("tsh \(installation.version) is already selected.")
 			}
-			print("~/scripts/bin/tsh -> \(installation.displayPath)")
+			print("~/dotfiles/scripts/bin/tsh -> \(installation.displayPath)")
 
 			if let warning = linkManager.pathWarning() {
 				print("Warning: \(warning)")
@@ -133,9 +133,9 @@ struct Tsh: AsyncParsableCommand {
 				case .missing:
 					print("No tsh installation is selected.")
 				case .occupied:
-					throw RuntimeError("~/scripts/bin/tsh exists but is not a symbolic link.")
+					throw RuntimeError("~/dotfiles/scripts/bin/tsh exists but is not a symbolic link.")
 				case .broken(let targetURL):
-					throw RuntimeError("~/scripts/bin/tsh points to missing file \(targetURL.path).")
+					throw RuntimeError("~/dotfiles/scripts/bin/tsh points to missing file \(targetURL.path).")
 				case .linked(let targetURL):
 					let installation = try await TshDiscovery().installation(at: targetURL.path)
 					print("Version: \(installation.version)")
@@ -166,7 +166,7 @@ struct Tsh: AsyncParsableCommand {
 
 		func run() throws {
 			let removed = try TshLinkManager().unlink()
-			print(removed ? "Removed ~/scripts/bin/tsh." : "No tsh installation was selected.")
+			print(removed ? "Removed ~/dotfiles/scripts/bin/tsh." : "No tsh installation was selected.")
 		}
 	}
 }
