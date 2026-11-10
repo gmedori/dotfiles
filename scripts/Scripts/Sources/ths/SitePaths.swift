@@ -10,7 +10,7 @@ import Foundation
 struct SitePaths: ParsableArguments {
 	static let sourceVariable = "THS_SOURCE_DIR"
 	static let siteVariable = "THS_SITE_DIR"
-	static let sourceSetCommand = #"set -Ux THS_SOURCE_DIR "$HOME/Obsidian/gooseOS/The Honking Smith""#
+	static let sourceSetCommand = #"set -Ux THS_SOURCE_DIR "$HOME/gooseOS/The Honking Smith""#
 	static let siteSetCommand = "set -Ux THS_SITE_DIR $HOME/code/the-honking-smith-dot-com"
 
 	@Option(help: ArgumentHelp(
