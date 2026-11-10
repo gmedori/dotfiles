@@ -12,10 +12,12 @@ is organized as two sibling SwiftPM packages:
 - `Scripts/`: Executable tools that depend on the local `Escape` package and
   `swift-subprocess`.
 
-`Scripts` currently builds `iosd`, `chapter-splitter`, `notify`, and
-`is-work-mac`. `is-work-mac` tells the work Mac from personal Macs by MDM
-enrollment, and `$HOME/dotfiles/agent-github/activate.sh` relies on its exit
-codes, so keep them as documented in its help.
+`Scripts` currently builds `iosd`, `chapter-splitter`, `github-permalink`,
+`notify`, `pr-watch`, `tp`, `ths`, and `is-work-mac`. `ths` publishes The
+Honking Smith blog posts from the Obsidian vault to the website repo. Its post
+states are documented on `PostState`. `is-work-mac` tells the work Mac from
+personal Macs by MDM enrollment, and `$HOME/dotfiles/agent-github/activate.sh`
+relies on its exit codes, so keep them as documented in its help.
 
 There is no root `Package.swift`. Run SwiftPM commands against the relevant
 package directory.
@@ -25,10 +27,9 @@ package directory.
 - Swift tools version: 6.0 for `Escape`, 6.2 for `Scripts`
 - Minimum platform: macOS 14
 - Command-line parsing: `swift-argument-parser`
-- Tests use Swift Testing syntax. `is-work-macTests` covers the parsing in
-  `is-work-mac`. The other test targets contain only placeholders and provide
-  no meaningful automated coverage. Run them with
-  `swift test --package-path Scripts`.
+- Tests use Swift Testing syntax. `tpTests` and `thsTests` cover parts of `tp`
+  and `ths`, and `is-work-macTests` covers the parsing in `is-work-mac`. Run
+  them with `swift test --package-path Scripts`.
 - No formatter or linter is currently configured.
 
 ## Build and Validation
