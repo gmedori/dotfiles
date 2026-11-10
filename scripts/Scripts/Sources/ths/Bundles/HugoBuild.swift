@@ -4,7 +4,7 @@ import System
 
 // MARK: - Hugo Build
 
-/// Runs the site's production build, the same one the site repo's AGENTS.md requires before a
+/// Runs the site's production build, the same one the AGENTS.md in the site repo requires before a
 /// change is done. The build has to finish with no warnings, so any `WARN` or `ERROR` line counts as
 /// a failure.
 enum HugoBuild {
@@ -30,7 +30,7 @@ enum HugoBuild {
 		} catch {
 			return Message(
 				kind: .error,
-				headline: "Couldn't run \(command): \(error)",
+				headline: "Couldn't run `\(command)`: \(error)",
 				details: ["Install Hugo's extended edition with `brew install hugo`."],
 			)
 		}
@@ -43,7 +43,7 @@ enum HugoBuild {
 
 		return Message(
 			kind: .error,
-			headline: "The production build (\(command)) didn't finish cleanly",
+			headline: "The production build (`\(command)`) didn't finish cleanly",
 			details: problems.isEmpty ? [output.trimmingCharacters(in: .whitespacesAndNewlines)] : problems.map(String.init),
 		)
 	}

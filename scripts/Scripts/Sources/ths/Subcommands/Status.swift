@@ -2,7 +2,7 @@ import ArgumentParser
 
 // MARK: - Status
 
-/// Reports every post's state without changing anything.
+/// Reports the state of every post without changing anything.
 struct Status: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		abstract: "Shows where each post stands between the vault and the site, without changing anything.",
@@ -12,7 +12,7 @@ struct Status: AsyncParsableCommand {
 			"  " + state.label.padding(toLength: Reporter.labelWidth, withPad: " ", startingAt: 0) + "  " + state.summary
 		}.joined(separator: "\n"))
 
-		Problems are listed after the posts with what to change, and make status
+		Problems are listed after the posts with what to change, and make `status`
 		exit 1. Pending changes, like new or stale posts, don't.
 		""",
 	)
@@ -59,8 +59,8 @@ struct Status: AsyncParsableCommand {
 
 // MARK: - Slug Selection
 
-/// The catalog entries a command acts on: all of them, or only those with the slugs given on the
-/// command line. A slug that matches nothing is reported as an error.
+/// The catalog entries a command acts on. That's all of them, or only those with the slugs given on
+/// the command line. A slug that matches nothing is reported as an error.
 struct SlugSelection {
 	let entries: [CatalogEntry]
 	let unknownSlugs: [String]

@@ -3,28 +3,28 @@ import Escape
 
 // MARK: - Sync
 
-/// Brings the site repo in line with the vault: creates, rewrites, and deletes bundles according to
-/// each post's state. Problems are skipped and reported without stopping the run, so one run
-/// surfaces every problem.
+/// Brings the site repo in line with the vault. It creates, rewrites, and deletes bundles according
+/// to the state of each post. Problems are skipped and reported without stopping the run, so one
+/// run surfaces every problem.
 struct Sync: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		abstract: "Writes the vault's blog posts into the site repo.",
 		discussion: """
-		Without --write, sync only shows what it would do. With --write, it creates
-		new bundles, rewrites stale ones, deletes orphaned drafts, and then runs the
-		production build, which has to finish with no warnings. Bundles of canceled
-		posts are deleted too.
+		Without `--write`, `sync` only shows what it would do. With `--write`, it
+		creates bundles for new posts, rewrites stale bundles, and deletes orphaned
+		drafts along with the bundles of canceled posts. Then it runs the production
+		build, which has to finish with no warnings.
 
 		Problems, like a bundle edited by hand, are skipped and listed with what to
-		change, and the rest of the posts are still synced. Any problem makes sync
-		exit 1. Run `ths status --help` for what each state means. sync never
+		change, and the rest of the posts are still synced. Any problem makes `sync`
+		exit 1. Run `ths status --help` for what each state means. `sync` never
 		commits.
 		""",
 	)
 
 	@OptionGroup var paths: SitePaths
 
-	@Flag(help: "Apply the changes. Without it, sync only shows what it would do.")
+	@Flag(help: "Apply the changes. Without it, `sync` only shows what it would do.")
 	var write = false
 
 	@Argument(help: "Only sync posts and bundles with these slugs. The build still covers the whole site.")
@@ -88,7 +88,7 @@ struct Sync: AsyncParsableCommand {
 			phrases = ["Nothing to change"]
 		}
 		let changes = phrases.joined(separator: ", ") + "."
-		return write ? changes : changes + " Dry run, so nothing was written. Run with --write to apply."
+		return write ? changes : changes + " Dry run, so nothing was written. Run with `--write` to apply."
 	}
 
 	/// The note printed after the slug, like `draft` or `hash only`.

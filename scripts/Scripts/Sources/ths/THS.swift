@@ -14,11 +14,11 @@ struct THS: AsyncParsableCommand {
 		A `canceled` post has its bundle deleted.
 
 		ENVIRONMENT
-		  THS_SOURCE_DIR  The Honking Smith folder in the vault, used when --source
+		  THS_SOURCE_DIR  The Honking Smith folder in the vault, used when `--source`
 		                  isn't given.
-		  THS_SITE_DIR    The website repo, used when --site isn't given.
+		  THS_SITE_DIR    The website repo, used when `--site` isn't given.
 
-		  To set both for every fish session:
+		  To set both for every `fish` session:
 
 		    \(SitePaths.sourceSetCommand)
 		    \(SitePaths.siteSetCommand)

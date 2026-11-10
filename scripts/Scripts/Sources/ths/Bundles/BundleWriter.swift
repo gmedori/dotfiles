@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Bundle Writer
 
-/// Writes and deletes bundles in the site repo's `content/blog/`. Nothing outside a bundle's own
+/// Writes and deletes bundles under `content/blog/` in the site repo. Nothing outside a bundle's own
 /// folder is ever touched.
 struct BundleWriter {
 	let siteDirectory: URL
@@ -11,9 +11,9 @@ struct BundleWriter {
 		siteDirectory.appending(path: "content/blog", directoryHint: .isDirectory)
 	}
 
-	/// Makes the bundle's folder hold exactly `bundle`'s files: writes the ones that are missing or
-	/// different, and removes the ones `bundle` doesn't have. Files the operating system adds, like
-	/// `.DS_Store`, are left alone.
+	/// Makes the folder for `slug` hold exactly the files in `bundle`. It writes the ones that are
+	/// missing or different, and removes the ones `bundle` doesn't have. Files the operating system
+	/// adds, like `.DS_Store`, are left alone.
 	func write(_ bundle: PageBundle, slug: String) throws {
 		let directory = blogDirectory.appending(path: slug, directoryHint: .isDirectory)
 		let fileManager = FileManager.default

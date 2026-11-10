@@ -4,8 +4,8 @@ import Foundation
 
 // MARK: - Message
 
-/// An error or warning printed after the list of posts: a line saying what's wrong, then lines saying
-/// how to fix it.
+/// An error or warning printed after the list of posts. It's a line saying what's wrong, then lines
+/// saying how to fix it.
 struct Message: Equatable, Sendable {
 	enum Kind: Sendable {
 		case error
@@ -33,14 +33,14 @@ struct Reporter: Sendable {
 		useColor ? text.colorized(foreground: color) : text
 	}
 
-	/// A line in the list of posts: a colored word, the slug, and a detail like where the post is.
+	/// A line in the list of posts, with a colored word, the slug, and a detail like where the post is.
 	func line(_ word: String, color: Color, wordWidth: Int, slug: String?, detail: String, slugWidth: Int) -> String {
 		let paddedWord = word.padding(toLength: wordWidth, withPad: " ", startingAt: 0)
 		let slug = (slug ?? "(no slug)").padding(toLength: slugWidth, withPad: " ", startingAt: 0)
 		return "\(paint(paddedWord, color))  \(slug)  \(detail)".trimmingTrailingWhitespace()
 	}
 
-	/// Where an entry is: its note, or its bundle when it has no note.
+	/// Where an entry is. That's its note, or its bundle when it has no note.
 	func location(of entry: CatalogEntry) -> String {
 		entry.post?.relativePath ?? entry.bundlePath ?? ""
 	}
@@ -76,18 +76,18 @@ struct Reporter: Sendable {
 			case .edited:
 				messages.append(Message(
 					kind: .error,
-					headline: "\(bundlePath) was changed outside ths since the last sync",
+					headline: "\(bundlePath) was changed outside `ths` since the last sync",
 					details: [
 						"Move the changes into \(notePath), or delete the bundle so the next sync regenerates it.",
-						"To discard uncommitted changes instead: git -C \(displayPath(siteDirectory)) restore \(bundlePath)",
+						"To discard uncommitted changes instead, run `git -C \(displayPath(siteDirectory)) restore \(bundlePath)`.",
 					],
 				))
 			case .conflict:
 				messages.append(Message(
 					kind: .error,
-					headline: "\(bundlePath) already exists and isn't managed by ths",
+					headline: "\(bundlePath) already exists and isn't managed by `ths`",
 					details: [
-						"If it's an older copy of \(notePath), delete it and sync again. Otherwise change the post's slug.",
+						"If it's an older copy of \(notePath), delete it and sync again. Otherwise change the slug of the post.",
 					],
 				))
 			case .orphanedPublished:
@@ -95,7 +95,7 @@ struct Reporter: Sendable {
 					kind: .error,
 					headline: "\(bundlePath) is published, but no post in the vault has the slug \(slug)",
 					details: [
-						"Restore the post's slug, status, or note.",
+						"Restore the slug, status, or note of the post.",
 						"If the post should come down, restore it and set its status to canceled.",
 					],
 				))

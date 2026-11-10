@@ -48,7 +48,7 @@ struct BodyConverter {
 	/// The folder the note is in. Images are looked up here and in its `assets/` folder, which is
 	/// where Obsidian saves attachments in this vault.
 	let noteDirectory: URL
-	/// Whether a file exists. Swapped out in tests.
+	/// Whether a file exists. Tests swap it out.
 	var fileExists: (URL) -> Bool = { FileManager.default.fileExists(atPath: $0.path(percentEncoded: false)) }
 
 	func convert(_ body: String, startLine: Int) -> ConvertedBody {
@@ -169,7 +169,7 @@ struct BodyConverter {
 		let prose = Self.blankingInlineCode(in: text)
 		check(prose, line: line, state: &state)
 
-		// Markdown images first: their pattern never matches an embed, while an embed's output is a
+		// Markdown images go first. Their pattern never matches an embed, while an embed's output is a
 		// Markdown image that mustn't be converted twice.
 		return Self.replacingOutsideInlineCode(in: text) { segment in
 			var segment = segment
@@ -302,8 +302,8 @@ struct BodyConverter {
 		return name
 	}
 
-	/// The image's file name in the bundle: lowercase, with runs of spaces and underscores turned into
-	/// hyphens, so `Pre-order Badge.png` becomes `pre-order-badge.png`.
+	/// The image's file name in the bundle. It's lowercase, with runs of spaces and underscores turned
+	/// into hyphens, so `Pre-order Badge.png` becomes `pre-order-badge.png`.
 	static func bundleName(for fileName: String) -> String {
 		fileName.lowercased().replacing(/[\s_]+/, with: "-")
 	}

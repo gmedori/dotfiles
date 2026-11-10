@@ -3,10 +3,10 @@ import Foundation
 
 // MARK: - Path Options
 
-/// The two directories every `ths` subcommand works between: the source directory, which is The
-/// Honking Smith folder in the vault, and the website repo. Each comes from its flag, or from its
-/// environment variable when the flag isn't given. When neither is set, validation fails with the
-/// fish command that sets the variable, so the fix is in the error itself.
+/// The two directories every `ths` subcommand works between. One is the source directory, The
+/// Honking Smith folder in the vault, and the other is the website repo. Each comes from its flag,
+/// or from its environment variable when the flag isn't given. When neither is set, validation
+/// fails with the `fish` command that sets the variable, so the fix is in the error itself.
 struct SitePaths: ParsableArguments {
 	static let sourceVariable = "THS_SOURCE_DIR"
 	static let siteVariable = "THS_SITE_DIR"
@@ -14,13 +14,13 @@ struct SitePaths: ParsableArguments {
 	static let siteSetCommand = "set -Ux THS_SITE_DIR $HOME/code/the-honking-smith-dot-com"
 
 	@Option(help: ArgumentHelp(
-		"The Honking Smith folder in the vault. Defaults to $\(Self.sourceVariable).",
+		"The Honking Smith folder in the vault. Defaults to `$\(Self.sourceVariable)`.",
 		valueName: "path",
 	))
 	var source: String?
 
 	@Option(help: ArgumentHelp(
-		"The website repo. Defaults to $\(Self.siteVariable).",
+		"The website repo. Defaults to `$\(Self.siteVariable)`.",
 		valueName: "path",
 	))
 	var site: String?
@@ -63,7 +63,7 @@ struct SitePaths: ParsableArguments {
 	) throws {
 		guard let url = resolve(flagValue, variable: variable) else {
 			throw ValidationError("""
-			No \(flag.dropFirst(2)) directory. Pass \(flag), or set $\(variable) once for every fish session:
+			No \(flag.dropFirst(2)) directory. Pass `\(flag)`, or set `$\(variable)` once for every `fish` session:
 
 			  \(setCommand)
 			""")

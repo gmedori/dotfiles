@@ -84,9 +84,13 @@ struct PageBundle: Equatable, Sendable {
 	// MARK: Hashing
 
 	/// A SHA-256 over every file in the bundle, sorted by path, with the `generatedHash` line removed
-	/// from `index.md` so the hash can be stored in the file it covers. Each file contributes its
-	/// path, a NUL byte, its size as 8 big-endian bytes, and its contents, so no two different
-	/// bundles hash the same.
+	/// from `index.md` so the hash can be stored in the file it covers. Each file contributes these,
+	/// in order, so no two different bundles hash the same:
+	///
+	/// - Its path
+	/// - A NUL byte
+	/// - Its size as 8 big-endian bytes
+	/// - Its contents
 	static func contentHash(of files: [String: Data]) -> String {
 		var hasher = SHA256()
 		for path in files.keys.sorted() {

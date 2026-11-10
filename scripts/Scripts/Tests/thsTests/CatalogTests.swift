@@ -106,7 +106,7 @@ struct CatalogTests {
 		#expect(catalog.entries[0].needsHashRefresh)
 	}
 
-	@Test("A bundle ths didn't make is a conflict")
+	@Test("A bundle `ths` didn't make is a conflict")
 	func conflict() throws {
 		let post = try post("a")
 		let handMade = bundle("a", files: ["index.md": Data("---\ntitle: A\n---\n".utf8)], vaultSource: nil, isDraft: false)
@@ -160,13 +160,13 @@ struct CatalogTests {
 		#expect(try states(posts: [post("a", status: "canceled")]) == ["Blog Posts/a.md": .vaultOnly])
 	}
 
-	@Test("A canceled post never deletes a bundle ths didn't make")
+	@Test("A canceled post never deletes a bundle `ths` didn't make")
 	func canceledConflict() throws {
 		let handMade = bundle("a", files: ["index.md": Data()], vaultSource: nil, isDraft: false)
 		#expect(try states(posts: [post("a", status: "canceled")], bundles: [handMade]) == ["Blog Posts/a.md": .conflict])
 	}
 
-	@Test("Canceling a published post warns about its URL, and sync deletes the bundle")
+	@Test("Canceling a published post warns about its URL, and `sync` deletes the bundle")
 	func canceledWarnsAndDeletes() throws {
 		let published = try post("a")
 		let catalog = try Catalog.classify(

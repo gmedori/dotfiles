@@ -38,8 +38,8 @@ struct BlogPost: Equatable, Sendable {
 	let bodyStartLine: Int
 	let issues: [PostIssue]
 
-	/// Parses a note. Returns `nil` when the note isn't a blog post: when it has no frontmatter, or its
-	/// `type` isn't `blog post`. A note whose frontmatter can't be read isn't a blog post either,
+	/// Parses a note. Returns `nil` when the note isn't a blog post, because it has no frontmatter or
+	/// its `type` isn't `blog post`. A note whose frontmatter can't be read isn't a blog post either,
 	/// since its type can't be known, unless the type line itself says it's one.
 	static func parse(_ text: String, relativePath: String) -> BlogPost? {
 		let frontmatter: Frontmatter?

@@ -14,7 +14,7 @@ is organized as two sibling SwiftPM packages:
 
 `Scripts` currently builds `iosd`, `chapter-splitter`, `github-permalink`,
 `notify`, `pr-watch`, `tp`, `ths`, and `is-work-mac`. `ths` publishes The
-Honking Smith blog posts from the Obsidian vault to the website repo; its post
+Honking Smith blog posts from the Obsidian vault to the website repo. Its post
 states are documented on `PostState`. `is-work-mac` tells the work Mac from
 personal Macs by MDM enrollment, and `$HOME/dotfiles/agent-github/activate.sh`
 relies on its exit codes, so keep them as documented in its help.

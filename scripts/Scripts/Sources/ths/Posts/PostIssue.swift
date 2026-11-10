@@ -4,7 +4,7 @@
 ///
 /// Every case has a `message`, which says what's wrong, and a `fix`, which says what to change in
 /// the note. Issues found in the body carry the line number in the note. Most issues block a post
-/// whatever its status. A few only matter once a post is public: they block published posts and are
+/// whatever its status. A few only matter once a post is public. They block published posts and are
 /// only warnings on drafts, so a draft can still be previewed with `hugo server -D`. `blocksDrafts`
 /// says which kind a case is.
 enum PostIssue: Equatable, Sendable {
@@ -15,7 +15,7 @@ enum PostIssue: Equatable, Sendable {
 	/// missing closing `---`. Obsidian's property editor doesn't produce it.
 	case invalidFrontmatter(String)
 
-	/// `status` has a value other than `draft`, `published`, or `canceled`. Usually a typo, like
+	/// `status` has a value other than `draft`, `published`, or `canceled`. It's usually a typo, like
 	/// `cancelled`, or a status copied from another kind of note, like a quest's `active`.
 	case invalidStatus(String)
 
@@ -30,16 +30,17 @@ enum PostIssue: Equatable, Sendable {
 	/// The slug becomes the URL, so it's kept to characters that never need escaping.
 	case invalidSlug(String)
 
-	/// Another post with a status uses the same slug. Usually a note duplicated to start a new post
-	/// without changing its slug. Both posts are blocked, since either could own the bundle.
+	/// Another post with a status uses the same slug. This usually happens when a note is duplicated
+	/// to start a new post and its slug isn't changed. Both posts are blocked, since either could own
+	/// the bundle.
 	case duplicateSlug(otherPath: String)
 
 	/// The post is published but has no `date`. The date is the publication date shown on the post
 	/// and used to order the blog, so a public post needs one. Drafts can leave it empty.
 	case missingDate
 
-	/// `date` isn't a calendar date written as YYYY-MM-DD. Often a date with a time attached, which
-	/// Obsidian writes when the property's type is Date & time instead of Date.
+	/// `date` isn't a calendar date written as YYYY-MM-DD. It's often a date with a time attached,
+	/// which Obsidian writes when the property's type is Date & time instead of Date.
 	case invalidDate(String)
 
 	// MARK: Body
@@ -50,7 +51,7 @@ enum PostIssue: Equatable, Sendable {
 	case missingTitle
 
 	/// An H1 after the title. The site's template renders the title as the page's only H1, so section
-	/// headings start at H2. Drafts written with `#` sections hit this. A warning on drafts.
+	/// headings start at H2. Drafts written with `#` sections hit this. It's only a warning on drafts.
 	case extraTitle(line: Int)
 
 	/// An image the note refers to isn't in the note's folder or its `assets/` folder. Usually the
@@ -58,16 +59,17 @@ enum PostIssue: Equatable, Sendable {
 	case missingImage(name: String, line: Int)
 
 	/// Two images in the post would get the same file name in the bundle, which lowercases names and
-	/// turns spaces into hyphens. Happens with images of the same name in different folders, or names
-	/// that differ only in case or spacing.
+	/// turns spaces into hyphens. This happens with images of the same name in different folders, or
+	/// names that differ only in case or spacing.
 	case duplicateImageName(name: String, line: Int)
 
 	/// An image loads from another site. The site never makes requests to third parties at runtime,
-	/// so every image is self-hosted. Usually an image pasted from the web. A warning on drafts.
+	/// so every image is self-hosted. It's usually an image pasted from the web. It's only a warning
+	/// on drafts.
 	case remoteImage(url: String, line: Int)
 
 	/// An image has no alt text. The site requires alt text on every image for accessibility. Obsidian
-	/// embeds have none until it's added after a `|`. A warning on drafts.
+	/// embeds have none until it's added after a `|`. It's only a warning on drafts.
 	case missingAltText(name: String, line: Int)
 
 	/// A wiki link, like `[[Another Note]]`, or an embed of something that isn't an image. Notes
@@ -85,8 +87,8 @@ enum PostIssue: Equatable, Sendable {
 	/// the page, so it would silently disappear.
 	case html(tag: String, line: Int)
 
-	/// A line with TODO in it. A draft can carry notes to self, but a published post can't. A warning
-	/// on drafts.
+	/// A line with TODO in it. A draft can carry notes to self, but a published post can't. It's only
+	/// a warning on drafts.
 	case todo(line: Int)
 
 	/// Whether the issue keeps a draft from being synced. Issues that return `false` are warnings on
@@ -189,7 +191,7 @@ enum PostIssue: Equatable, Sendable {
 			case .remoteImage:
 				"Download the image into the note's assets folder and embed that copy."
 			case .missingAltText:
-				"Describe the image in its alt text. In an embed it goes after a pipe: `![[photo.png|A goose on a pond]]`."
+				"Describe the image in its alt text. In an embed it goes after a pipe, as in `![[photo.png|A goose on a pond]]`."
 			case .wikiLink:
 				"Replace it with a Markdown link to a public URL, or with plain text."
 			case .callout:

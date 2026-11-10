@@ -35,12 +35,12 @@ function _swift_ths_using_command
     return 1
 end
 
-complete -c ths -n '_swift_ths_using_command "ths status"' -l source -d 'The Honking Smith folder in the vault. Defaults to $THS_SOURCE_DIR.'
-complete -c ths -n '_swift_ths_using_command "ths status"' -l site -d 'The website repo. Defaults to $THS_SITE_DIR.'
+complete -c ths -n '_swift_ths_using_command "ths status"' -l source -d 'The Honking Smith folder in the vault. Defaults to `$THS_SOURCE_DIR`.'
+complete -c ths -n '_swift_ths_using_command "ths status"' -l site -d 'The website repo. Defaults to `$THS_SITE_DIR`.'
 complete -c ths -n '_swift_ths_using_command "ths status"' -s h -l help -d 'Show help information.'
-complete -c ths -n '_swift_ths_using_command "ths sync"' -l source -d 'The Honking Smith folder in the vault. Defaults to $THS_SOURCE_DIR.'
-complete -c ths -n '_swift_ths_using_command "ths sync"' -l site -d 'The website repo. Defaults to $THS_SITE_DIR.'
-complete -c ths -n '_swift_ths_using_command "ths sync"' -l write -d 'Apply the changes. Without it, sync only shows what it would do.'
+complete -c ths -n '_swift_ths_using_command "ths sync"' -l source -d 'The Honking Smith folder in the vault. Defaults to `$THS_SOURCE_DIR`.'
+complete -c ths -n '_swift_ths_using_command "ths sync"' -l site -d 'The website repo. Defaults to `$THS_SITE_DIR`.'
+complete -c ths -n '_swift_ths_using_command "ths sync"' -l write -d 'Apply the changes. Without it, `sync` only shows what it would do.'
 complete -c ths -n '_swift_ths_using_command "ths sync"' -s h -l help -d 'Show help information.'
 complete -c ths -n '_swift_ths_using_command "ths" "status sync help"' -s h -l help -d 'Show help information.'
 complete -c ths -n '_swift_ths_using_command "ths" "status sync help"' -f -a 'status' -d 'Shows where each post stands between the vault and the site, without changing anything.'

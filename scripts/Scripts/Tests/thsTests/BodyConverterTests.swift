@@ -189,7 +189,7 @@ struct BodyConverterTests {
 		#expect(result.issues == [.duplicateImageName(name: "photo.png", line: 4)])
 	}
 
-	@Test("Only TODOs, extra H1s, alt text, and remote images are warnings on drafts")
+	@Test("Only issues that matter once a post is public are warnings on drafts")
 	func draftWarnings() {
 		#expect(!PostIssue.todo(line: 1).blocksDrafts)
 		#expect(!PostIssue.extraTitle(line: 1).blocksDrafts)
