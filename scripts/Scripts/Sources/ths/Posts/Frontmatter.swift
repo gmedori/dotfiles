@@ -1,14 +1,15 @@
+import Foundation
 import Yams
 
 // MARK: - Frontmatter
 
 /// A Markdown file split into its YAML frontmatter and its body.
 ///
-/// The YAML is composed into a `Node` instead of decoded, so every value stays the text it was
+/// The YAML is composed into a `Yams.Node` instead of decoded, so every value stays the text it was
 /// written as. Decoding would turn `date: 2025-03-31` into a `Date` at midnight UTC and lose what the
 /// author typed.
 struct Frontmatter {
-	let properties: Node.Mapping
+	let properties: Yams.Node.Mapping
 	let body: String
 	/// The 1-based line number in the file where `body` starts.
 	let bodyStartLine: Int
@@ -19,6 +20,16 @@ struct Frontmatter {
 		/// The block isn't YAML, or isn't a mapping of keys to values.
 		case invalidYAML(String)
 	}
+
+	/// The default resolver from Yams, with booleans read the way YAML 1.2 reads them. Only `true` and
+	/// `false` are booleans, in lowercase, capitalized, or all caps. The default follows YAML 1.1,
+	/// which also reads `yes`, `on`, and their opposites as booleans. Hugo doesn't.
+	///
+	/// Yams doesn't mark `Resolver` as `Sendable`, but its rules are constants, so one instance is
+	/// safe to share.
+	nonisolated(unsafe) private static let resolver = Yams.Resolver.default.replacing(
+		try! Yams.Resolver.Rule(.bool, "^(?:true|True|TRUE|false|False|FALSE)$")
+	)
 
 	/// Splits `text` into frontmatter and body. Returns `nil` when the file has no frontmatter, which
 	/// is any file whose first line isn't `---`.
@@ -34,17 +45,17 @@ struct Frontmatter {
 		let yaml = lines[1 ..< closingIndex].joined(separator: "\n")
 		let body = lines[(closingIndex + 1)...].joined(separator: "\n")
 
-		let node: Node?
+		let node: Yams.Node?
 		do {
-			node = try Yams.compose(yaml: yaml)
+			node = try Yams.compose(yaml: yaml, resolver)
 		} catch {
 			throw .invalidYAML(String(describing: error))
 		}
 
-		let properties: Node.Mapping
+		let properties: Yams.Node.Mapping
 		switch node {
 			case nil:
-				properties = Node.Mapping([])
+				properties = Yams.Node.Mapping([])
 			case let .mapping(mapping)?:
 				properties = mapping
 			default:
@@ -60,6 +71,18 @@ struct Frontmatter {
 			return nil
 		}
 		return scalar.string
+	}
+
+	/// The value of `key` as a boolean, or `nil` when it's missing or isn't one. `resolver` decides
+	/// which spellings are booleans, and a quoted value is always text.
+	///
+	/// The `bool` property in Yams reads the YAML 1.1 spellings whatever the resolver says, so the
+	/// resolved tag is checked first.
+	func bool(_ key: String) -> Bool? {
+		guard let node = properties[key], node.tag == Yams.Tag(.bool) else {
+			return nil
+		}
+		return node.bool
 	}
 
 	/// Whether `key` has a value that isn't a single piece of text, like a list.
@@ -96,10 +119,10 @@ struct Frontmatter {
 		line.trimmingTrailingWhitespace() == "---"
 	}
 
-	/// An empty value, `~`, or `null` written without quotes. Obsidian writes an empty property as
-	/// `key:` with nothing after it.
-	private static func isNull(_ scalar: Node.Scalar) -> Bool {
-		scalar.style == .plain && ["", "~", "null", "Null", "NULL"].contains(scalar.string)
+	/// Whether the value is null as Yams reads it, which is an empty value, `~`, or `null` written
+	/// without quotes. Obsidian writes an empty property as `key:` with nothing after it.
+	private static func isNull(_ scalar: Yams.Node.Scalar) -> Bool {
+		NSNull.construct(from: scalar) != nil
 	}
 }
 

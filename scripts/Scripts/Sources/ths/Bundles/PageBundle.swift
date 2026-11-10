@@ -129,8 +129,9 @@ struct ExistingBundle: Equatable, Sendable {
 	let vaultSource: String?
 	/// `params.generatedHash`, as stored in the front matter.
 	let storedHash: String?
-	/// Whether the front matter says `draft: true`. A bundle without the field is published, which
-	/// matches Hugo.
+	/// Whether the front matter sets `draft` to `true`, `True`, or `TRUE`, the only spellings that YAML
+	/// 1.2 and Hugo both read as true. Any other value counts as published, since `sync` never deletes
+	/// a published bundle. A bundle without the field is published, which matches Hugo.
 	let isDraft: Bool
 
 	var isManaged: Bool {
@@ -191,7 +192,7 @@ struct ExistingBundle: Equatable, Sendable {
 			bundle: PageBundle(files: files),
 			vaultSource: params?["vaultSource"]?.string,
 			storedHash: params?["generatedHash"]?.string,
-			isDraft: frontmatter?.string("draft") == "true",
+			isDraft: frontmatter?.bool("draft") == true,
 		)
 	}
 }
