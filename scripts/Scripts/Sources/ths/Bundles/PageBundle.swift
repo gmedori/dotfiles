@@ -48,6 +48,10 @@ struct PageBundle: Equatable, Sendable {
 	/// The bundle's `index.md`. Values are written as JSON strings, which are also valid YAML
 	/// double-quoted strings, so any text survives. The `generatedHash` line is left out when `hash`
 	/// is `nil`, which is how `contentHash` sees the file.
+	///
+	/// The front matter is written by hand rather than serialized with Yams, so the `generatedHash`
+	/// line always has the exact form `removingHashLine` looks for, and the bytes that get hashed
+	/// don't depend on how Yams formats YAML.
 	static func index(for post: BlogPost, body: ConvertedBody, hash: String?) -> String {
 		var lines = ["---"]
 		lines.append("title: \(quoted(body.title ?? ""))")
