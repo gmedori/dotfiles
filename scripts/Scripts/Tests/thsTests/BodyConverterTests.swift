@@ -20,12 +20,12 @@ struct BodyConverterTests {
 	@Test("Lifts the H1 into the title and passes the rest through")
 	func liftsTitle() {
 		let result = converter().convert(
-			"# Announcing: One Is Not None\n\nI'm really excited.\n\n## Why?\n\n1. Reliable\n",
+			"# Introducing: The Goose Tracker\n\nA made-up post about geese.\n\n## Why?\n\n1. Honking\n",
 			startLine: 5,
 		)
 
-		#expect(result.title == "Announcing: One Is Not None")
-		#expect(result.markdown == "I'm really excited.\n\n## Why?\n\n1. Reliable\n")
+		#expect(result.title == "Introducing: The Goose Tracker")
+		#expect(result.markdown == "A made-up post about geese.\n\n## Why?\n\n1. Honking\n")
 		#expect(result.issues.isEmpty)
 	}
 
@@ -39,15 +39,15 @@ struct BodyConverterTests {
 
 	@Test("Converts an embed and folds the italic line under it into a caption")
 	func convertsEmbedWithCaption() {
-		let result = converter(assets: ["4-Player Layout Horizontal.png"]).convert(
+		let result = converter(assets: ["3-Goose Pond Map.png"]).convert(
 			"""
 			# Title
 
 			Intro.
 
-			![[4-Player Layout Horizontal.png|Four life counters]]
+			![[3-Goose Pond Map.png|A map of the pond]]
 
-			_The standard four-player layout for a game of Commander._
+			_The pond where the geese gather in spring._
 
 			## Next
 			""",
@@ -57,14 +57,14 @@ struct BodyConverterTests {
 		#expect(result.markdown == """
 		Intro.
 
-		![Four life counters](4-player-layout-horizontal.png "The standard four-player layout for a game of Commander.")
+		![A map of the pond](3-goose-pond-map.png "The pond where the geese gather in spring.")
 
 		## Next
 
 		""")
 		#expect(result.images == [BundleImage(
-			source: noteDirectory.appending(path: "assets/4-Player Layout Horizontal.png"),
-			name: "4-player-layout-horizontal.png",
+			source: noteDirectory.appending(path: "assets/3-Goose Pond Map.png"),
+			name: "3-goose-pond-map.png",
 		)])
 		#expect(result.issues.isEmpty)
 	}
@@ -79,21 +79,21 @@ struct BodyConverterTests {
 
 	@Test("Converts a linked HTML image into a linked Markdown image")
 	func convertsLinkedImage() {
-		let result = converter(assets: ["Pre-order Badge.png"]).convert(
+		let result = converter(assets: ["Download Badge.png"]).convert(
 			"""
-			# Preorder
+			# Download
 
-			<a href="https://apps.apple.com/us/app/one-is-not-none/id6742521253"><img src="assets/Pre-order%20Badge.png" alt="Pre-order on the App Store"></a>
+			<a href="https://example.com/goose-tracker"><img src="assets/Download%20Badge.png" alt="Download the Goose Tracker"></a>
 
-			The title says it all.
+			A made-up closing line.
 			""",
 			startLine: 1,
 		)
 
 		#expect(result.markdown == """
-		[![Pre-order on the App Store](pre-order-badge.png)](https://apps.apple.com/us/app/one-is-not-none/id6742521253)
+		[![Download the Goose Tracker](download-badge.png)](https://example.com/goose-tracker)
 
-		The title says it all.
+		A made-up closing line.
 
 		""")
 		#expect(result.issues.isEmpty)
@@ -142,7 +142,7 @@ struct BodyConverterTests {
 	@Test("Keeps autolinks, which look like HTML but aren't")
 	func keepsAutolinks() {
 		let result = converter().convert(
-			"# T\n\nJoin at <https://testflight.apple.com/join/bRxMengR> or email <feedback@thehonkingsmith.com>.\n",
+			"# T\n\nJoin at <https://example.com/join> or email <someone@example.com>.\n",
 			startLine: 1,
 		)
 

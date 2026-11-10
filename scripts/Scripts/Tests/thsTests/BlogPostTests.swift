@@ -10,26 +10,26 @@ struct BlogPostTests {
 			---
 			type: blog post
 			status: published
-			slug: one-is-not-none-preorder-is-live
-			date: 2025-03-31
-			description: "Preorders are live: the app ships April 7."
+			slug: a-field-guide-to-geese
+			date: 2026-01-15
+			description: "Geese: a field guide in one post."
 			tags:
-			  - App Development
-			  - One Is Not None
+			  - Birds
+			  - Field Notes
 			---
-			# One Is Not None Preorder Is Live!
+			# A Field Guide to Geese
 
-			The title says it all.
+			Honk.
 			""",
-			relativePath: "Blog Posts/Preorder.md",
+			relativePath: "Blog Posts/Geese.md",
 		))
 
 		#expect(post.status == .published)
-		#expect(post.slug == "one-is-not-none-preorder-is-live")
-		#expect(post.date == "2025-03-31")
-		#expect(post.description == "Preorders are live: the app ships April 7.")
-		#expect(post.tags == ["App Development", "One Is Not None"])
-		#expect(post.body == "# One Is Not None Preorder Is Live!\n\nThe title says it all.")
+		#expect(post.slug == "a-field-guide-to-geese")
+		#expect(post.date == "2026-01-15")
+		#expect(post.description == "Geese: a field guide in one post.")
+		#expect(post.tags == ["Birds", "Field Notes"])
+		#expect(post.body == "# A Field Guide to Geese\n\nHonk.")
 		#expect(post.bodyStartLine == 11)
 		#expect(post.issues.isEmpty)
 	}
