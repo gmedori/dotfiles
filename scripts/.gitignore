@@ -1,0 +1,5 @@
+target
+*.fish
+!install.fish
+bin
+.DS_Store
