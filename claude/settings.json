@@ -26,6 +26,28 @@
   "env": {
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1"
   },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/dotfiles/agent-github/claude-hook.sh\""
+          }
+        ]
+      }
+    ],
+    "CwdChanged": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/dotfiles/agent-github/claude-hook.sh\""
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "additionalDirectories": [
       "~/gooseOS"

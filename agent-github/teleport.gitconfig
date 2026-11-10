@@ -1,0 +1,12 @@
+# Included by agent.gitconfig in repos with a gravitational remote, so agents
+# commit and push Teleport work as the user. defective-talos has no access to
+# the gravitational org. The identity matches the [user] section of ../gitconfig.
+
+[user]
+	name = Gustavo Medori
+	email = mail@gustavo.sh
+
+# An HTTPS remote authenticates with the active gh account instead of GH_TOKEN.
+[credential "https://github.com"]
+	helper =
+	helper = !env -u GH_TOKEN gh auth git-credential
