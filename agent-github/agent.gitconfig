@@ -16,7 +16,8 @@
 [url "git@github.com:gravitational/"]
 	insteadOf = git@github.com:gravitational/
 
-# The empty helper clears any helper set elsewhere, so gh answers with GH_TOKEN.
+# The empty helper clears any helper set elsewhere, so bin/gh answers with the
+# bot's token.
 [credential "https://github.com"]
 	helper =
 	helper = !gh auth git-credential

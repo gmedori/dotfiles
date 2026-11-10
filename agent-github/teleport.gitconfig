@@ -6,7 +6,9 @@
 	name = Gustavo Medori
 	email = mail@gustavo.sh
 
-# An HTTPS remote authenticates with the active gh account instead of GH_TOKEN.
+# An HTTPS remote authenticates with the user's active gh account. bin/gh skips
+# the bot's token when AGENT_GITHUB_AS_USER is set, which holds wherever git runs
+# the helper.
 [credential "https://github.com"]
 	helper =
-	helper = !env -u GH_TOKEN gh auth git-credential
+	helper = !AGENT_GITHUB_AS_USER=1 gh auth git-credential
