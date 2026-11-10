@@ -23,6 +23,6 @@ struct THS: AsyncParsableCommand {
 		    \(SitePaths.sourceSetCommand)
 		    \(SitePaths.siteSetCommand)
 		""",
-		subcommands: [Status.self, Sync.self, Deploy.self],
+		subcommands: [Status.self, Sync.self],
 	)
 }
