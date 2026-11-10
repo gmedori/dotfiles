@@ -16,7 +16,9 @@
 # because Claude Code runs zsh and Pi runs bash.
 #
 # The token comes from the Keychain, where `gh auth login` stored it, so reading
-# it never prompts while the user is logged in.
+# it never prompts while the user is logged in. defective-talos is signed in only
+# on the personal Mac. The work Mac must never have it, so where it isn't signed
+# in, this file does nothing and says nothing.
 
 if agent_github_token=$(gh auth token --user defective-talos 2>/dev/null); then
   export GIT_CONFIG_COUNT=1
@@ -33,8 +35,6 @@ if agent_github_token=$(gh auth token --user defective-talos 2>/dev/null); then
       esac
     }
   fi
-else
-  echo "agent-github: no gh token for defective-talos, so this command runs as you. Run \`gh auth login\` as defective-talos, then \`gh auth switch --user gmedori\`." >&2
 fi
 
 unset agent_github_token
