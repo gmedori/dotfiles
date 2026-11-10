@@ -10,6 +10,7 @@ struct ConvertedBody: Equatable, Sendable {
 	let markdown: String
 	/// Every image the post uses, in the order they first appear.
 	let images: [BundleImage]
+	/// Everything in the body the site can't show, each with its line in the note.
 	let issues: [PostIssue]
 }
 
@@ -78,7 +79,9 @@ struct BodyConverter {
 
 	/// A line of the body, with its line number in the note.
 	struct Line: Equatable {
+		/// The text of the line, without its newline.
 		var text: String
+		/// The line's number in the note, counting from 1.
 		let number: Int
 		/// Whether the line is part of a fenced code block, fences included.
 		let isCode: Bool
@@ -155,9 +158,13 @@ struct BodyConverter {
 
 	// MARK: Line Conversion
 
+	/// What a conversion has found so far.
 	private struct ConversionState {
+		/// The text of the leading H1, once it's found.
 		var title: String?
+		/// The images found so far, in the order they first appear.
 		var images: [BundleImage] = []
+		/// The issues found so far.
 		var issues: [PostIssue] = []
 	}
 

@@ -18,10 +18,12 @@ import Yams
 /// A bundle with `vaultSource` is managed by `ths`. Any other bundle was made some other way, and
 /// `ths` never changes or deletes it.
 struct PageBundle: Equatable, Sendable {
+	/// The name of the Markdown file Hugo renders as the page.
 	static let indexName = "index.md"
 	/// Files the operating system drops into folders, which aren't part of a bundle.
 	static let ignoredNames: Set = [".DS_Store"]
 
+	/// The contents of every file in the bundle, keyed by its path in the folder.
 	let files: [String: Data]
 
 	// MARK: Generating
@@ -126,8 +128,11 @@ struct PageBundle: Equatable, Sendable {
 
 /// A bundle already in the site repo.
 struct ExistingBundle: Equatable, Sendable {
+	/// The slug, which is the name of the bundle's folder.
 	let slug: String
+	/// The bundle's folder in the site repo.
 	let directory: URL
+	/// The files in the folder, as they are on disk.
 	let bundle: PageBundle
 	/// `params.vaultSource`, or `nil` when `ths` didn't generate the bundle.
 	let vaultSource: String?
@@ -138,6 +143,8 @@ struct ExistingBundle: Equatable, Sendable {
 	/// a published bundle. A bundle without the field is published, which matches Hugo.
 	let isDraft: Bool
 
+	/// Whether `ths` generated the bundle, which it knows from `vaultSource`. `ths` never changes or
+	/// deletes a bundle it doesn't manage.
 	var isManaged: Bool {
 		vaultSource != nil
 	}

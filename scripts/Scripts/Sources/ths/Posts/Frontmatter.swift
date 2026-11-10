@@ -9,7 +9,9 @@ import Yams
 /// written as. Decoding would turn `date: 2025-03-31` into a `Date` at midnight UTC and lose what the
 /// author typed.
 struct Frontmatter {
+	/// The properties, composed but not decoded, so each value keeps the text it was written as.
 	let properties: Yams.Node.Mapping
+	/// Everything after the closing `---`.
 	let body: String
 	/// The 1-based line number in the file where `body` starts.
 	let bodyStartLine: Int

@@ -62,7 +62,9 @@ struct Status: AsyncParsableCommand {
 /// The catalog entries a command acts on. That's all of them, or only those with the slugs given on
 /// the command line. A slug that matches nothing is reported as an error.
 struct SlugSelection {
+	/// The entries to act on, in catalog order.
 	let entries: [CatalogEntry]
+	/// The slugs given on the command line that match no entry.
 	let unknownSlugs: [String]
 
 	init(slugs: [String], catalog: Catalog) {
@@ -77,6 +79,7 @@ struct SlugSelection {
 		unknownSlugs = slugs.filter { !found.contains($0) }
 	}
 
+	/// An error for each slug in `unknownSlugs`.
 	var unknownSlugMessages: [Message] {
 		unknownSlugs.map {
 			Message(kind: .error, headline: "no post or bundle has the slug \($0)", details: [])

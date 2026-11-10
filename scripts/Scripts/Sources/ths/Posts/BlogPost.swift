@@ -12,6 +12,7 @@ import Foundation
 /// Properties that can't be read are left `nil` and recorded in `issues`. Parsing never throws, so
 /// one broken note never hides the others.
 struct BlogPost: Equatable, Sendable {
+	/// The value of `type` that marks a note as a blog post.
 	static let type = "blog post"
 
 	enum Status: String, Equatable, Sendable {
@@ -25,17 +26,23 @@ struct BlogPost: Equatable, Sendable {
 
 	/// The note's path relative to the source directory, like `Blog Posts/My Post.md`.
 	let relativePath: String
+	/// The status, or `nil` when the note has none or has one that isn't valid.
 	let status: Status?
+	/// The slug, or `nil` when the note has none or it can't be read. It's the last part of the post's
+	/// URL and the name of its bundle.
 	let slug: String?
 	/// The publication date, written as YYYY-MM-DD.
 	let date: String?
+	/// The `description` written to the bundle's front matter, or `nil` when the note has none.
 	let description: String?
+	/// The tags written to the bundle's front matter. It's empty when the note has none.
 	let tags: [String]
 	/// The note's Markdown after the frontmatter.
 	let body: String
 	/// The 1-based line number in the note where `body` starts, so issues in the body can point at the
 	/// line in the note.
 	let bodyStartLine: Int
+	/// The issues found in the frontmatter. Issues in the body are found when it's converted.
 	let issues: [PostIssue]
 
 	/// Parses a note. Returns `nil` when the note isn't a blog post, because it has no frontmatter or
