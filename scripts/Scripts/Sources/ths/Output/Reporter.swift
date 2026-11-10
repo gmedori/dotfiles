@@ -60,19 +60,19 @@ struct Reporter: Sendable {
 		let slug = entry.slug ?? ""
 
 		var messages = entry.warnings.map { issueMessage($0, kind: .warning, notePath: notePath) }
-		switch entry.state {
+		switch entry {
 			case .vaultOnly, .new, .upToDate, .stale, .orphanedDraft:
 				break
-			case .canceled:
-				if entry.existing?.isDraft == false {
+			case let .canceled(_, bundle):
+				if !bundle.isDraft {
 					messages.append(Message(
 						kind: .warning,
 						headline: "\(bundlePath) is published, so deleting it takes /blog/\(slug)/ off the site",
 						details: ["Add a redirect from /blog/\(slug)/ before deploying, so links to the post still lead somewhere."],
 					))
 				}
-			case .invalid:
-				messages += entry.issues.map { issueMessage($0, kind: .error, notePath: notePath) }
+			case let .invalid(_, issues, _):
+				messages += issues.map { issueMessage($0, kind: .error, notePath: notePath) }
 			case .edited:
 				messages.append(Message(
 					kind: .error,

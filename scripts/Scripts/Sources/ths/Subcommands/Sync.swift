@@ -37,20 +37,20 @@ struct Sync: AsyncParsableCommand {
 		let selection = SlugSelection(slugs: slugs, catalog: catalog)
 		let entries = selection.entries.filter { $0.state != .vaultOnly }
 
-		var counts: [SyncAction: Int] = [:]
+		var counts: [SyncAction.Kind: Int] = [:]
 		let width = reporter.slugWidth(for: entries)
 		for entry in entries {
 			let action = SyncAction(entry)
-			counts[action, default: 0] += 1
+			counts[action.kind, default: 0] += 1
 			if write {
-				try action.apply(to: entry, with: writer)
+				try action.apply(with: writer)
 			}
 			print(reporter.line(
-				action.word,
-				color: action.color,
-				wordWidth: SyncAction.wordWidth,
+				action.kind.word,
+				color: action.kind.color,
+				wordWidth: SyncAction.Kind.wordWidth,
 				slug: entry.slug,
-				detail: action.detail(for: entry),
+				detail: detail(for: entry),
 				slugWidth: width,
 			))
 		}
@@ -74,8 +74,8 @@ struct Sync: AsyncParsableCommand {
 		}
 	}
 
-	private func summary(_ counts: [SyncAction: Int]) -> String {
-		let parts: [(SyncAction, String, String)] = [
+	private func summary(_ counts: [SyncAction.Kind: Int]) -> String {
+		let parts: [(SyncAction.Kind, String, String)] = [
 			(.create, "to create", "created"),
 			(.update, "to update", "updated"),
 			(.delete, "to delete", "deleted"),
@@ -90,83 +90,113 @@ struct Sync: AsyncParsableCommand {
 		let changes = phrases.joined(separator: ", ") + "."
 		return write ? changes : changes + " Dry run, so nothing was written. Run with --write to apply."
 	}
+
+	/// The note printed after the slug, like `draft` or `hash only`.
+	private func detail(for entry: CatalogEntry) -> String {
+		switch entry {
+			case .edited, .conflict, .invalid, .orphanedPublished, .retracted:
+				entry.state.label
+			case .upToDate where entry.needsHashRefresh:
+				"hash only"
+			case .canceled:
+				"canceled"
+			case .orphanedDraft:
+				"draft"
+			case let .vaultOnly(post), let .new(post, _, _, _), let .upToDate(post, _, _, _), let .stale(post, _, _, _):
+				post.status == .draft ? "draft" : ""
+		}
+	}
 }
 
 // MARK: - Sync Action
 
-/// What `sync` does with an entry, decided by its state.
-enum SyncAction: Hashable {
-	/// Writes a bundle for a `new` post.
-	case create
+/// What `sync` does with an entry, decided by its state. A case that writes or deletes a bundle
+/// carries the bundle and slug it needs.
+enum SyncAction: Sendable {
+	/// Writes the bundle for a `new` post.
+	case create(PageBundle, slug: String)
 	/// Rewrites a `stale` bundle, or an `upToDate` one whose stored hash needs refreshing.
-	case update
+	case update(PageBundle, slug: String)
 	/// Deletes the bundle of a `canceled` post, or an `orphanedDraft` bundle.
-	case delete
+	case delete(slug: String)
 	/// Leaves an `upToDate` bundle as it is.
 	case keep
 	/// Leaves a problem alone. It's reported after the list.
 	case skip
 
 	init(_ entry: CatalogEntry) {
-		switch entry.state {
-			case .new: self = .create
-			case .stale: self = .update
-			case .upToDate: self = entry.needsHashRefresh ? .update : .keep
-			case .canceled, .orphanedDraft: self = .delete
-			case .vaultOnly: self = .keep
-			case .edited, .conflict, .invalid, .orphanedPublished, .retracted: self = .skip
+		switch entry {
+			case let .new(_, slug, generated, _):
+				self = .create(generated, slug: slug)
+			case let .stale(_, bundle, generated, _):
+				self = .update(generated, slug: bundle.slug)
+			case let .upToDate(_, bundle, generated, _):
+				self = entry.needsHashRefresh ? .update(generated, slug: bundle.slug) : .keep
+			case let .canceled(_, bundle), let .orphanedDraft(bundle):
+				self = .delete(slug: bundle.slug)
+			case .vaultOnly:
+				self = .keep
+			case .edited, .conflict, .invalid, .orphanedPublished, .retracted:
+				self = .skip
 		}
 	}
 
-	static let wordWidth = [create, update, delete, keep, skip].map(\.word.count).max()!
-
-	var word: String {
+	/// The action without its bundle and slug, for printing and counting.
+	var kind: Kind {
 		switch self {
-			case .create: "create"
-			case .update: "update"
-			case .delete: "delete"
-			case .keep: "ok"
-			case .skip: "skip"
+			case .create: .create
+			case .update: .update
+			case .delete: .delete
+			case .keep: .keep
+			case .skip: .skip
 		}
 	}
 
-	var color: Color {
+	/// Writes or deletes the bundle. `keep` and `skip` do nothing.
+	func apply(with writer: BundleWriter) throws {
 		switch self {
-			case .create: .green
-			case .update: .cyan
-			case .delete: .magenta
-			case .keep: .brightBlack
-			case .skip: .red
-		}
-	}
-
-	func detail(for entry: CatalogEntry) -> String {
-		switch self {
-			case .skip:
-				entry.state.label
-			case .update where entry.state == .upToDate:
-				"hash only"
-			case .delete where entry.state == .canceled:
-				"canceled"
-			case .create, .update, .delete, .keep:
-				entry.post?.status == .draft || (entry.post == nil && entry.existing?.isDraft == true) ? "draft" : ""
-		}
-	}
-
-	func apply(to entry: CatalogEntry, with writer: BundleWriter) throws {
-		switch self {
-			case .create, .update:
-				guard let slug = entry.slug, let generated = entry.generated else {
-					return
-				}
-				try writer.write(generated, slug: slug)
-			case .delete:
-				guard let slug = entry.slug else {
-					return
-				}
+			case let .create(bundle, slug), let .update(bundle, slug):
+				try writer.write(bundle, slug: slug)
+			case let .delete(slug):
 				try writer.delete(slug: slug)
 			case .keep, .skip:
 				break
+		}
+	}
+
+	// MARK: Kind
+
+	/// A `SyncAction` without its bundle and slug.
+	enum Kind: CaseIterable, Hashable, Sendable {
+		case create
+		case update
+		case delete
+		case keep
+		case skip
+
+		/// The length of the longest word, so the list lines up.
+		static let wordWidth = allCases.map(\.word.count).max()!
+
+		/// The word `sync` prints for the action.
+		var word: String {
+			switch self {
+				case .create: "create"
+				case .update: "update"
+				case .delete: "delete"
+				case .keep: "ok"
+				case .skip: "skip"
+			}
+		}
+
+		/// The color the word is printed in.
+		var color: Color {
+			switch self {
+				case .create: .green
+				case .update: .cyan
+				case .delete: .magenta
+				case .keep: .brightBlack
+				case .skip: .red
+			}
 		}
 	}
 }

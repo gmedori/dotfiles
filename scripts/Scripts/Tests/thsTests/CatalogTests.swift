@@ -177,7 +177,7 @@ struct CatalogTests {
 		let entry = try #require(catalog.entries.first)
 		let messages = Reporter(siteDirectory: URL(filePath: "/site")).messages(for: entry)
 
-		#expect(SyncAction(entry) == .delete)
+		#expect(SyncAction(entry).kind == .delete)
 		#expect(messages.map(\.kind) == [.warning])
 		#expect(messages.first?.headline.contains("/blog/a/") == true)
 		#expect(!catalog.hasProblems)
@@ -209,5 +209,15 @@ struct CatalogTests {
 		#expect(catalog.entries.map(\.state) == [.new, .invalid])
 		#expect(catalog.entries[0].warnings == [.todo(line: 9)])
 		#expect(catalog.entries[1].issues == [.todo(line: 9)])
+	}
+}
+
+extension CatalogEntry {
+	/// The issues that block an `invalid` post, and none for any other entry.
+	var issues: [PostIssue] {
+		guard case let .invalid(_, issues, _) = self else {
+			return []
+		}
+		return issues
 	}
 }

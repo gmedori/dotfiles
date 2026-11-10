@@ -2,29 +2,110 @@ import Foundation
 
 // MARK: - Catalog Entry
 
-/// One post or bundle and its state. An entry has a post, a bundle on disk, or both: an orphaned
-/// bundle has no post, and a new post has no bundle yet.
-struct CatalogEntry: Sendable {
-	let state: PostState
-	/// The slug, or `nil` for a post that hasn't got one.
-	let slug: String?
-	let post: BlogPost?
-	let existing: ExistingBundle?
-	/// The bundle `ths` would write now. Present for every state `sync` writes: `new`, `stale`, and
-	/// `upToDate`.
-	let generated: PageBundle?
-	/// Issues that block the post. Only `invalid` entries have any.
-	let issues: [PostIssue]
-	/// Issues that don't block the post because it's a draft.
-	let warnings: [PostIssue]
+/// One post or bundle in its state. Each case carries what that state has and nothing more, so an
+/// orphaned bundle never has a post, and only an `invalid` post has issues that block it. See
+/// `PostState` for what each state means.
+///
+/// A post whose body was checked also carries its warnings, which are the issues that don't block it
+/// because it's a draft. The bodies of `vaultOnly` and `canceled` posts aren't checked, so those
+/// cases have no warnings.
+enum CatalogEntry: Sendable {
+	/// A post with no status, or a canceled post whose bundle is gone.
+	case vaultOnly(BlogPost)
 
-	/// Whether an `upToDate` bundle stores a hash other than its contents' hash, which happens when
+	/// A post that passes every check but has no bundle yet, with the bundle `sync` writes for it.
+	case new(BlogPost, slug: String, generated: PageBundle, warnings: [PostIssue])
+
+	/// A post whose bundle on disk is exactly what `ths` would generate now.
+	case upToDate(BlogPost, bundle: ExistingBundle, generated: PageBundle, warnings: [PostIssue])
+
+	/// A post that changed after the last sync, with the bundle `sync` rewrites for it.
+	case stale(BlogPost, bundle: ExistingBundle, generated: PageBundle, warnings: [PostIssue])
+
+	/// A canceled post whose bundle is still in the site repo.
+	case canceled(BlogPost, bundle: ExistingBundle)
+
+	/// A draft bundle that `ths` manages and no post claims.
+	case orphanedDraft(ExistingBundle)
+
+	/// A post whose bundle was changed outside `ths` after the last sync.
+	case edited(BlogPost, bundle: ExistingBundle, warnings: [PostIssue])
+
+	/// A post whose slug belongs to a bundle `ths` doesn't manage.
+	case conflict(BlogPost, bundle: ExistingBundle, warnings: [PostIssue])
+
+	/// A post with issues that block it.
+	case invalid(BlogPost, issues: [PostIssue], warnings: [PostIssue])
+
+	/// A published bundle that `ths` manages and no post claims.
+	case orphanedPublished(ExistingBundle)
+
+	/// A draft post whose bundle is published.
+	case retracted(BlogPost, bundle: ExistingBundle, warnings: [PostIssue])
+
+	/// The state the entry is in, without the post and bundle it carries.
+	var state: PostState {
+		switch self {
+			case .vaultOnly: .vaultOnly
+			case .new: .new
+			case .upToDate: .upToDate
+			case .stale: .stale
+			case .canceled: .canceled
+			case .orphanedDraft: .orphanedDraft
+			case .edited: .edited
+			case .conflict: .conflict
+			case .invalid: .invalid
+			case .orphanedPublished: .orphanedPublished
+			case .retracted: .retracted
+		}
+	}
+
+	/// The post, or `nil` for a bundle no post claims.
+	var post: BlogPost? {
+		switch self {
+			case let .vaultOnly(post), let .new(post, _, _, _), let .upToDate(post, _, _, _), let .stale(post, _, _, _),
+			     let .canceled(post, _), let .edited(post, _, _), let .conflict(post, _, _), let .invalid(post, _, _),
+			     let .retracted(post, _, _):
+				post
+			case .orphanedDraft, .orphanedPublished:
+				nil
+		}
+	}
+
+	/// The slug, or `nil` for a post that hasn't got one. Only `vaultOnly` and `invalid` posts can be
+	/// missing one.
+	var slug: String? {
+		switch self {
+			case let .vaultOnly(post), let .invalid(post, _, _):
+				post.slug
+			case let .new(_, slug, _, _):
+				slug
+			case let .upToDate(_, bundle, _, _), let .stale(_, bundle, _, _), let .canceled(_, bundle),
+			     let .edited(_, bundle, _), let .conflict(_, bundle, _), let .retracted(_, bundle, _),
+			     let .orphanedDraft(bundle), let .orphanedPublished(bundle):
+				bundle.slug
+		}
+	}
+
+	/// The issues that don't block the post because it's a draft.
+	var warnings: [PostIssue] {
+		switch self {
+			case let .new(_, _, _, warnings), let .upToDate(_, _, _, warnings), let .stale(_, _, _, warnings),
+			     let .edited(_, _, warnings), let .conflict(_, _, warnings), let .invalid(_, _, warnings),
+			     let .retracted(_, _, warnings):
+				warnings
+			case .vaultOnly, .canceled, .orphanedDraft, .orphanedPublished:
+				[]
+		}
+	}
+
+	/// Whether an `upToDate` bundle stores a hash other than the hash of its files. That happens when
 	/// a hand edit was copied into the vault. `sync` rewrites the bundle so the hash matches again.
 	var needsHashRefresh: Bool {
-		guard state == .upToDate, let existing, let generated else {
+		guard case let .upToDate(_, bundle, generated, _) = self else {
 			return false
 		}
-		return existing.storedHash != PageBundle.contentHash(of: generated.files)
+		return bundle.storedHash != PageBundle.contentHash(of: generated.files)
 	}
 
 	/// The bundle's folder in the site repo, like `content/blog/a-post/`.
@@ -38,8 +119,10 @@ struct CatalogEntry: Sendable {
 /// Every blog post in the source directory and every bundle in the site repo, each given a
 /// `PostState`. See `PostState` for what each state means.
 struct Catalog: Sendable {
+	/// The posts in path order, followed by the bundles no post claims in slug order.
 	let entries: [CatalogEntry]
 
+	/// Whether any entry is in a state that's a problem.
 	var hasProblems: Bool {
 		entries.contains { $0.state.isProblem }
 	}
@@ -68,15 +151,7 @@ struct Catalog: Sendable {
 		var entries: [CatalogEntry] = []
 		for post in posts {
 			if post.status == nil, post.issues.isEmpty {
-				entries.append(CatalogEntry(
-					state: .vaultOnly,
-					slug: post.slug,
-					post: post,
-					existing: nil,
-					generated: nil,
-					issues: [],
-					warnings: [],
-				))
+				entries.append(.vaultOnly(post))
 				continue
 			}
 
@@ -94,15 +169,7 @@ struct Catalog: Sendable {
 			guard !claimedSlugs.contains(bundle.slug) else {
 				continue
 			}
-			entries.append(CatalogEntry(
-				state: bundle.isDraft ? .orphanedDraft : .orphanedPublished,
-				slug: bundle.slug,
-				post: nil,
-				existing: bundle,
-				generated: nil,
-				issues: [],
-				warnings: [],
-			))
+			entries.append(bundle.isDraft ? .orphanedDraft(bundle) : .orphanedPublished(bundle))
 		}
 
 		return Catalog(entries: entries)
@@ -116,25 +183,16 @@ struct Catalog: Sendable {
 	) throws -> CatalogEntry {
 		let existing = post.slug.flatMap { bundles[$0] }
 
-		// A canceled post's slug only finds its bundle. Without one, there's nothing to take down. Its
-		// body isn't checked or converted, since nothing from it will be written.
+		// The slug of a canceled post only finds its bundle. Without one, there's nothing to take down.
+		// Its body isn't checked or converted, since nothing from it will be written.
 		if post.status == .canceled {
-			let state: PostState = if !issues.isEmpty {
-				.invalid
-			} else if let existing {
-				existing.isManaged ? .canceled : .conflict
-			} else {
-				.vaultOnly
+			guard issues.isEmpty else {
+				return .invalid(post, issues: issues, warnings: [])
 			}
-			return CatalogEntry(
-				state: state,
-				slug: post.slug,
-				post: post,
-				existing: existing,
-				generated: nil,
-				issues: state == .invalid ? issues : [],
-				warnings: [],
-			)
+			guard let existing else {
+				return .vaultOnly(post)
+			}
+			return existing.isManaged ? .canceled(post, bundle: existing) : .conflict(post, bundle: existing, warnings: [])
 		}
 
 		let noteDirectory = source.appending(path: post.relativePath).deletingLastPathComponent()
@@ -146,38 +204,30 @@ struct Catalog: Sendable {
 		let blocking = allIssues.filter { post.status != .draft || $0.blocksDrafts }
 		let warnings = allIssues.filter { post.status == .draft && !$0.blocksDrafts }
 
-		func entry(_ state: PostState, generated: PageBundle? = nil) -> CatalogEntry {
-			CatalogEntry(
-				state: state,
-				slug: post.slug,
-				post: post,
-				existing: existing,
-				generated: generated,
-				issues: state == .invalid ? blocking : [],
-				warnings: warnings,
-			)
-		}
-
 		guard blocking.isEmpty else {
-			return entry(.invalid)
+			return .invalid(post, issues: blocking, warnings: warnings)
+		}
+		// A missing slug always blocks a post, so a post that gets this far has one.
+		guard let slug = post.slug else {
+			return .invalid(post, issues: [.missingSlug], warnings: warnings)
 		}
 
 		let generated = try PageBundle.generate(for: post, body: body)
 		guard let existing else {
-			return entry(.new, generated: generated)
+			return .new(post, slug: slug, generated: generated, warnings: warnings)
 		}
 		guard existing.isManaged else {
-			return entry(.conflict)
+			return .conflict(post, bundle: existing, warnings: warnings)
 		}
 		if post.status == .draft, !existing.isDraft {
-			return entry(.retracted)
+			return .retracted(post, bundle: existing, warnings: warnings)
 		}
 		if existing.bundle.filesWithoutHash == generated.filesWithoutHash {
-			return entry(.upToDate, generated: generated)
+			return .upToDate(post, bundle: existing, generated: generated, warnings: warnings)
 		}
 		if existing.matchesStoredHash {
-			return entry(.stale, generated: generated)
+			return .stale(post, bundle: existing, generated: generated, warnings: warnings)
 		}
-		return entry(.edited)
+		return .edited(post, bundle: existing, warnings: warnings)
 	}
 }
