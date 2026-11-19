@@ -1,7 +1,6 @@
 import ArgumentParser
 import CommandKit
 import Foundation
-import System
 
 @main
 struct GitHubPermalink: AsyncParsableCommand {
@@ -40,33 +39,9 @@ struct GitHubPermalink: AsyncParsableCommand {
 			: "\(startLine)-\(lastLine)"
 		let location = "\(relativePath):\(lineSelection)"
 
-		let result: ExecutionResult<
-			Void,
-			StringOutput<Unicode.UTF8>,
-			StringOutput<Unicode.UTF8>,
-		>
-		do {
-			result = try await Subprocess.run(
-				.name("gh"),
-				arguments: ["browse", "--commit", "--no-browser", "--", location],
-				workingDirectory: FilePath(repositoryURL.path),
-				output: .string(limit: 64 * 1024),
-				error: .string(limit: 64 * 1024),
-			)
-		} catch {
-			throw RuntimeError(
-				"Could not run gh. Make sure GitHub CLI is installed and available in PATH: \(error)",
-			)
-		}
-
-		guard result.terminationStatus.isSuccess else {
-			let error = result.standardError?
-				.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-			throw RuntimeError(error.isEmpty ? "gh browse failed." : error)
-		}
-
-		let permalink = result.standardOutput?
-			.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+		let permalink = try await GitHubCLI()
+			.output(["browse", "--commit", "--no-browser", "--", location], in: repositoryURL)
+			.trimmingCharacters(in: .whitespacesAndNewlines)
 		guard !permalink.isEmpty else {
 			throw RuntimeError("gh browse did not return a permalink.")
 		}

@@ -116,7 +116,7 @@ struct PRWatch: AsyncParsableCommand {
 			"id,url",
 		])
 
-		let output = try await runGH(arguments: arguments)
+		let output = try await GitHubCLI().output(arguments)
 		do {
 			return try JSONDecoder().decode(PullRequestReference.self, from: Data(output.utf8))
 		} catch {
@@ -156,7 +156,7 @@ struct PRWatch: AsyncParsableCommand {
 		  }
 		}
 		"""
-		let output = try await runGH(arguments: [
+		let output = try await GitHubCLI().output([
 			"api",
 			"graphql",
 			"--hostname",
@@ -174,34 +174,6 @@ struct PRWatch: AsyncParsableCommand {
 		} catch {
 			throw RuntimeError("Could not decode gh api output: \(error)")
 		}
-	}
-
-	private func runGH(arguments: [String]) async throws -> String {
-		let result: ExecutionResult<
-			Void,
-			StringOutput<Unicode.UTF8>,
-			StringOutput<Unicode.UTF8>
-		>
-		do {
-			result = try await Subprocess.run(
-				.name("gh"),
-				arguments: Arguments(arguments),
-				output: .string(limit: 64 * 1024),
-				error: .string(limit: 64 * 1024)
-			)
-		} catch {
-			throw RuntimeError(
-				"Could not run gh. Make sure GitHub CLI is installed and available in PATH: \(error)"
-			)
-		}
-
-		guard result.terminationStatus.isSuccess else {
-			let error = result.standardError?
-				.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-			throw RuntimeError(error.isEmpty ? "gh failed." : error)
-		}
-
-		return result.standardOutput ?? ""
 	}
 
 	private func postNotification(message: String) async throws {
