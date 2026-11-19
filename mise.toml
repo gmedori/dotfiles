@@ -66,11 +66,11 @@ if [ "$(dscl . -read "/Users/$(id -un)" UserShell | awk '{print $2}')" != "$FISH
 fi
 '''
 
-# install.fish does a clean release build, so the task skips it when no Swift
-# source, package manifest, or toolchain pin has changed since the binaries
-# were last built. A task gets its tools from the file that defines it, so
-# install.fish runs through `mise exec` to get the Swift that scripts/mise.toml
-# pins.
+# The task skips install.fish when no Swift source, package manifest, or
+# toolchain pin has changed since the binaries were last built, and when it
+# runs, SwiftPM rebuilds only the targets a change affects. A task gets its
+# tools from the file that defines it, so install.fish runs through
+# `mise exec` to get the Swift that scripts/mise.toml pins.
 [tasks.scripts]
 description = "Build the Swift tools into scripts/bin and install their fish completions"
 dir = "scripts/Scripts"
@@ -84,3 +84,13 @@ sources = [
   "../Escape/Sources/**/*.swift",
 ]
 outputs = ["../bin/*"]
+
+# For when SwiftPM's build cache is the problem. The binaries in scripts/bin
+# still look up to date after the clean, so the rebuild has to be forced.
+[tasks."scripts:rebuild"]
+description = "Run `swift package clean`, then rebuild every Swift tool from scratch"
+dir = "scripts/Scripts"
+run = [
+  '"{{ mise_bin }}" exec -- swift package clean',
+  '"{{ mise_bin }}" run --force scripts',
+]

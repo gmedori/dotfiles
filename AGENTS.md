@@ -35,8 +35,10 @@ Main areas:
   It has its own AGENTS.md. Its install script, run by the `scripts` task,
   puts the binaries in `scripts/bin`, which `fish/config.fish` adds to `PATH`.
   The task skips the build when no Swift source, manifest, or toolchain pin
-  changed, and `mise run --force scripts` builds anyway. `scripts/mise.toml`
-  pins its toolchain to the newest installed swift.org Swift 6.4.x.
+  changed, and SwiftPM rebuilds only what a change affects.
+  `mise run scripts:rebuild` runs `swift package clean` first and rebuilds
+  everything. `scripts/mise.toml` pins its toolchain to the newest installed
+  swift.org Swift 6.4.x.
 
 ## Safety Rules
 

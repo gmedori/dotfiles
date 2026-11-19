@@ -4,7 +4,6 @@ if not test -f "Package.swift"
 	exit 1
 end
 
-swift package clean
 swift build -c release
 
 set -l binaries (cat Package.swift | rg -r '$1' '\s*\.executable\(name: "([^"]*)".*' | xargs printf "./.build/release/%s\n")
