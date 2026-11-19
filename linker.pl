@@ -21,6 +21,7 @@ my @fileList = (
     ["$directory/tmux/tmux", "$HOME/.tmux"],
     ["$directory/gitconfig", "$HOME/.gitconfig"],
     ["$directory/jjconfig.toml", "$HOME/.config/jj/config.toml"],
+    ["$directory/mise/config.toml", "$HOME/.config/mise/config.toml"],
     ["$directory/codex/global_agents.md", "$HOME/.codex/AGENTS.md"],
     ["$directory/claude/CLAUDE.md", "$HOME/.claude/CLAUDE.md"],
     ["$directory/claude/settings.json", "$HOME/.claude/settings.json"],

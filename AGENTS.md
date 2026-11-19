@@ -22,6 +22,10 @@ Main areas:
 - `mise.toml`: the setup tasks, run with `mise run <task>`. `setup` runs the
   rest in order. mise is installed from mise.run to `~/.local/bin/mise`, not
   from Homebrew.
+- `mise/config.toml`: the global mise config, linked to
+  `~/.config/mise/config.toml`. It sets the default version of every language
+  except Perl, which stays in the Brewfile, and Swift, which defaults to
+  Xcode's. Its comments say how a project opts into a swift.org toolchain.
 - `install.sh`: bootstrap that installs mise if it's missing and runs `setup`.
 - `linker.pl`: the symlink script behind the `link` task.
 - `scripts/`: Swift command-line tools such as `tp`, `ths`, and `is-work-mac`.
@@ -33,9 +37,10 @@ Main areas:
 ## Safety Rules
 
 - Do not run `install.sh`, the tasks in `mise.toml`, `linker.pl`,
-  `brew bundle`, `perlbrew install`, or curl-based installers unless the user
-  explicitly asks. These mutate the host machine and can replace files under
-  `$HOME`. Listing tasks and `mise run --dry-run` are fine.
+  `brew bundle`, `mise install`, `mise upgrade`, `perlbrew install`, or
+  curl-based installers unless the user explicitly asks. These mutate the host
+  machine and can replace files under `$HOME`. Listing tasks and
+  `mise run --dry-run` are fine.
 - Treat files under `work_specific/` as potentially local/private. Read only
   what is needed and do not expose contents in summaries unless relevant.
 - Do not edit submodules or vendored plugin directories unless the task is

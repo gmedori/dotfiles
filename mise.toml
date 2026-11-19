@@ -8,6 +8,7 @@ run = [
   { task = "brew" },
   { task = "perl" },
   { task = "link" },
+  { task = "tools" },
   { task = "scripts" },
 ]
 
@@ -39,6 +40,12 @@ fi
 description = "Symlink the configs in this repo into $HOME, replacing what's there"
 interactive = true
 run = "./linker.pl"
+
+# Runs after `link`, which puts the global config in ~/.config/mise. mise isn't
+# on PATH inside a task, so the task runs the mise that's running it.
+[tasks.tools]
+description = "Install the languages in mise/config.toml"
+run = '"{{ mise_bin }}" install'
 
 # install.fish does a clean release build, so the task skips it when no Swift
 # source or package manifest has changed since the binaries were last built.

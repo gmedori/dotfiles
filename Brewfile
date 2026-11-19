@@ -4,8 +4,8 @@ brew "fortune"
 brew "lolcat"
 
 # Because macOS versions are dated
+# Perl is the one language here. mise/config.toml sets up the others.
 brew "git"
-brew "node"
 brew "perl"
 # cpanm: standard CPAN installer, runs tests; fallback when cpm fails, and the perl task in mise.toml uses it to bootstrap local::lib
 brew "cpanminus"
@@ -26,7 +26,6 @@ brew "zellij"
 # Utilities
 brew "tree"
 brew "httpie"
-brew "python3"
 brew "ripgrep"
 brew "sd"
 brew "fd"
