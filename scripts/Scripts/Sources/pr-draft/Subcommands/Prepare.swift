@@ -4,7 +4,7 @@ import Foundation
 
 // MARK: - Prepare
 
-/// Stages a draft and prints what it found.
+/// Stages a draft for `create` and prints what it found.
 struct Prepare: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		abstract: "Stages a draft's images and videos and prints what it found as JSON.",
@@ -13,8 +13,8 @@ struct Prepare: AsyncParsableCommand {
 		staging folder under the system temp folder, with names that have no
 		spaces. It writes the body there as `body.md`, with each embed rewritten as
 		a Markdown image that points at its copy, like `![Alt text](./01-shot.png)`.
-		It saves what it found as `manifest.json`. Running it again replaces the
-		folder.
+		It saves what it found as `manifest.json` for `create`. Running it again
+		replaces the folder.
 
 		An embed is an Obsidian embed, like `![[shot.png]]` or
 		`![[shot.png|Alt text]]`, or a Markdown image, like
@@ -33,7 +33,7 @@ struct Prepare: AsyncParsableCommand {
 		  needs_alt           The numbers of images without alt text.
 		  gh_supports_attach  Whether `gh` has `--attach`, when there are
 		                      attachments.
-		  stage_dir           The staging folder.
+		  stage_dir           The staging folder, which `create` takes.
 		  body_file           The staged body.
 		""",
 	)

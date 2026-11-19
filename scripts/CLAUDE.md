@@ -20,9 +20,10 @@ publishes The Honking Smith blog posts from the Obsidian vault to the website
 repo. Its post states are documented on `PostState`. `is-work-mac` tells the
 work Mac from personal Macs by MDM enrollment, and
 `$HOME/dotfiles/agent-github/activate.sh` relies on its exit codes, so keep them
-as documented in its help. `pr-draft` stages a PR draft from the vault, with the
-images and videos it embeds, for `gh pr create --attach`. The vault's submit-pr
-skill reads the JSON it prints, as its help says, so keep the two in step.
+as documented in its help. `pr-draft` opens a pull request from a PR draft in
+the vault, uploading its images and videos with `gh pr create --attach`. The
+vault's submit-pr skill reads the JSON it prints, as its help says, so keep
+the two in step.
 
 There is no root `Package.swift`. Run SwiftPM commands against the relevant
 package directory.
@@ -34,8 +35,8 @@ package directory.
 - Command-line parsing: `swift-argument-parser`
 - Tests use Swift Testing syntax. `tpTests` and `thsTests` cover parts of `tp`
   and `ths`, `is-work-macTests` covers the parsing in `is-work-mac`,
-  `pr-draftTests` covers `pr-draft` against a throwaway vault, and
-  `CommandKitTests` covers `GitHubCLI`. Run them with
+  `pr-draftTests` covers `pr-draft` against a throwaway vault and a stand-in
+  `gh`, and `CommandKitTests` covers `GitHubCLI`. Run them with
   `swift test --package-path Scripts`.
 - No formatter or linter is currently configured.
 

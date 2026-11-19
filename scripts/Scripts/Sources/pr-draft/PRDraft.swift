@@ -6,18 +6,20 @@ import ArgumentParser
 struct PRDraft: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		commandName: "pr-draft",
-		abstract: "Stages a PR draft from the vault, with its images and videos, for `gh pr create`.",
+		abstract: "Opens a pull request from a PR draft in the vault, with its images and videos.",
 		discussion: """
 		A draft is a Markdown note with `repo`, `branch`, and `base` in its
 		frontmatter. Its first `# ` line is the pull request's title, and everything
 		after that line is the body. `prepare` stages the draft and the images and
-		videos it embeds for `gh pr create --attach`, which uploads them.
+		videos it embeds, and `create` opens the pull request with
+		`gh pr create --attach`, which uploads them.
 
 		SKILLS
-		  submit-pr  `Skills/submit-pr/SKILL.md` in the vault runs `prepare` and
-		             reads the JSON it prints, so update it along with any change
-		             to its options or output.
+		  submit-pr  `Skills/submit-pr/SKILL.md` in the vault runs `prepare`, shows
+		             the result for approval, and then runs `create`. It reads the
+		             JSON both print, so update it along with any change to their
+		             options or output.
 		""",
-		subcommands: [Prepare.self],
+		subcommands: [Prepare.self, Create.self],
 	)
 }

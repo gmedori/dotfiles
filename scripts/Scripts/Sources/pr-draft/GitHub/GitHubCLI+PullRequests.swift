@@ -10,4 +10,9 @@ extension GitHubCLI {
 		}
 		return (output.standardOutput + output.standardError).contains("--attach")
 	}
+
+	/// The body of the pull request at `url`.
+	func pullRequestBody(_ url: String) async throws -> String {
+		try await output(["pr", "view", url, "--json", "body", "-q", ".body"])
+	}
 }

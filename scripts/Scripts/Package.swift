@@ -110,7 +110,7 @@ let package = Package(
 		),
 		.testTarget(
 			name: "pr-draftTests",
-			dependencies: ["pr-draft"],
+			dependencies: ["pr-draft", "CommandKit"],
 		),
 		.testTarget(
 			name: "CommandKitTests",

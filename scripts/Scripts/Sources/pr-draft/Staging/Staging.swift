@@ -4,7 +4,7 @@ import Foundation
 // MARK: - Prepared Draft
 
 /// What `prepare` found in a draft. `prepare` prints it as JSON and saves it in the staging folder
-/// as `manifest.json`.
+/// as `manifest.json`, which `create` reads.
 struct PreparedDraft: Codable, Equatable, Sendable {
 	/// Whether `errors` is empty.
 	let ok: Bool
@@ -138,7 +138,7 @@ enum Staging {
 
 // MARK: - JSON
 
-/// The JSON that `prepare` prints, with snake_case keys.
+/// The JSON that `prepare` and `create` print, with snake_case keys.
 enum JSON {
 	static func encode(_ value: some Encodable) throws -> String {
 		let encoder = JSONEncoder()
