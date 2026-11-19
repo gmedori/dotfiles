@@ -15,6 +15,7 @@ let package = Package(
 		.executable(name: "tp", targets: ["tp"]),
 		.executable(name: "ths", targets: ["ths"]),
 		.executable(name: "is-work-mac", targets: ["is-work-mac"]),
+		.executable(name: "pr-draft", targets: ["pr-draft"]),
 	],
 	dependencies: [
 		.package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0"),
@@ -87,6 +88,14 @@ let package = Package(
 				"CommandKit",
 			],
 		),
+		.executableTarget(
+			name: "pr-draft",
+			dependencies: [
+				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+				"CommandKit",
+				"Yams",
+			],
+		),
 		.testTarget(
 			name: "tpTests",
 			dependencies: ["tp"],
@@ -98,6 +107,10 @@ let package = Package(
 		.testTarget(
 			name: "is-work-macTests",
 			dependencies: ["is-work-mac"],
+		),
+		.testTarget(
+			name: "pr-draftTests",
+			dependencies: ["pr-draft"],
 		),
 		.testTarget(
 			name: "CommandKitTests",
