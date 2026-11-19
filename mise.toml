@@ -10,6 +10,7 @@ run = [
   { task = "link" },
   { task = "tools" },
   { task = "scripts" },
+  { task = "shell" },
 ]
 
 [tasks.submodules]
@@ -48,6 +49,22 @@ run = "./linker.pl"
 description = "Install the languages in mise/config.toml and scripts/mise.toml"
 dir = "scripts"
 run = '"{{ mise_bin }}" install'
+
+# chsh only accepts a shell listed in /etc/shells, so Homebrew's fish goes there
+# first, through sudo. Each step skips when it's already done, and both ask for
+# a password, so the task gets the terminal.
+[tasks.shell]
+description = "Make Homebrew's fish the login shell"
+interactive = true
+run = '''
+FISH="$(brew --prefix)/bin/fish"
+if ! grep -qxF "$FISH" /etc/shells; then
+    echo "$FISH" | sudo tee -a /etc/shells >/dev/null
+fi
+if [ "$(dscl . -read "/Users/$(id -un)" UserShell | awk '{print $2}')" != "$FISH" ]; then
+    chsh -s "$FISH"
+fi
+'''
 
 # install.fish does a clean release build, so the task skips it when no Swift
 # source, package manifest, or toolchain pin has changed since the binaries
