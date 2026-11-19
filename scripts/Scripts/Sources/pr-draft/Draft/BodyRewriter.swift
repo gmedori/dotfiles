@@ -52,6 +52,10 @@ struct Attachment: Codable, Equatable, Sendable {
 /// above it, like `**Share sheet, dark mode**`, which is how the pr-description skill labels
 /// attachments. An image embedded more than once reuses the alt text it was first given when none
 /// of those apply.
+///
+/// GitHub shows a video as a player only when its link is a paragraph of its own. Under a label
+/// line, it's a plain link. So when a video's embed is alone on its line, the rewriter puts blank
+/// lines around it. Images show either way.
 struct BodyRewriter {
 	static let imageExtensions: Set = ["png", "jpg", "jpeg", "gif", "svg"]
 	static let videoExtensions: Set = ["mp4", "mov", "webm"]
@@ -89,8 +93,14 @@ struct BodyRewriter {
 		var state = State()
 		var output: [String] = []
 		var fence: Substring?
+		var needsBlankLine = false
 
 		for (offset, line) in lines.enumerated() {
+			if needsBlankLine, !Self.isBlank(line) {
+				output.append("")
+			}
+			needsBlankLine = false
+
 			if let open = fence {
 				if let close = line.wholeMatch(of: /[ ]{0,3}(`{3,}|~{3,})\s*/),
 					close.1.first == open.first, close.1.count >= open.count
@@ -110,7 +120,15 @@ struct BodyRewriter {
 			for match in line.matches(of: /<!--\s*TODO:(.*?)-->/) {
 				state.placeholders.append(label ?? match.1.trimmingCharacters(in: .whitespaces))
 			}
-			output.append(rewriteLine(line, number: startLine + offset, label: label, state: &state))
+			let rewritten = rewriteLine(line, number: startLine + offset, label: label, state: &state)
+			let isVideo = state.attachments.contains {
+				$0.kind == .video && rewritten.trimmingCharacters(in: .whitespaces) == "![](\($0.staged))"
+			}
+			if isVideo, let previous = output.last, !Self.isBlank(previous) {
+				output.append("")
+			}
+			output.append(rewritten)
+			needsBlankLine = isVideo
 		}
 
 		let body = output.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines) + "\n"
@@ -221,6 +239,10 @@ struct BodyRewriter {
 	}
 
 	// MARK: Text
+
+	private static func isBlank(_ line: String) -> Bool {
+		line.allSatisfy(\.isWhitespace)
+	}
 
 	/// The text of the bold line above `index`, skipping blank lines, or `nil` when the first line
 	/// with text above it isn't entirely bold.

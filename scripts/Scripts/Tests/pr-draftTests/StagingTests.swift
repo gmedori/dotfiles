@@ -221,6 +221,43 @@ struct StagingTests {
 		#expect(json.contains("\"gh_supports_attach\" : true"))
 	}
 
+	@Test("Gives a video alone on its line a paragraph of its own")
+	func separatesVideos() throws {
+		try """
+		---
+		repo: gravitational/core
+		branch: ios/videos
+		base: master
+		---
+
+		# iOS: Videos
+
+		**Share sheet, recorded**
+		![[demo clip.mov]]
+		The sheet slides up.
+
+		Inline, ![[demo clip.mov]] stays in its sentence.
+
+		> ![[demo clip.mov]]
+		""".write(to: brokenFile, atomically: true, encoding: .utf8)
+
+		let prepared = try prepare(brokenFile)
+		let body = try vault.read(URL(filePath: prepared.bodyFile))
+
+		#expect(body == """
+		**Share sheet, recorded**
+
+		![](./01-demo-clip.mov)
+
+		The sheet slides up.
+
+		Inline, ![](./01-demo-clip.mov) stays in its sentence.
+
+		> ![](./01-demo-clip.mov)
+
+		""")
+	}
+
 	@Test("Names staged copies with lowercase words and hyphens")
 	func slugsNames() {
 		#expect(BodyRewriter.slug("Pasted image 20261118101500") == "pasted-image-20261118101500")
