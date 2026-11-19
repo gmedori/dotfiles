@@ -30,6 +30,10 @@ package directory.
 
 ## Platform and Tooling
 
+- Toolchain: the newest installed swift.org Swift 6.4.x, pinned in
+  `mise.toml`. A shell with mise activated picks it up in this folder.
+  Elsewhere, run SwiftPM through `mise exec --` from this folder, as the
+  commands below do, or SwiftPM runs on Xcode's Swift instead.
 - Swift tools version: 6.0 for `Escape`, 6.2 for `Scripts`
 - Minimum platform: macOS 14
 - Command-line parsing: `swift-argument-parser`
@@ -37,7 +41,7 @@ package directory.
   and `ths`, `is-work-macTests` covers the parsing in `is-work-mac`,
   `pr-draftTests` covers `pr-draft` against a throwaway vault and a stand-in
   `gh`, and `CommandKitTests` covers `GitHubCLI`. Run them with
-  `swift test --package-path Scripts`.
+  `mise exec -- swift test --package-path Scripts`.
 - No formatter or linter is currently configured.
 
 ## Build and Validation
@@ -45,8 +49,8 @@ package directory.
 Build the affected package:
 
 ```sh
-swift build --package-path Escape
-swift build --package-path Scripts
+mise exec -- swift build --package-path Escape
+mise exec -- swift build --package-path Scripts
 ```
 
 After changing `Escape`, also build `Scripts` to verify its integration with

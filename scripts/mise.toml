@@ -1,0 +1,7 @@
+# The Swift toolchain for both packages here, the newest installed swift.org
+# 6.4.x. `mise upgrade swift`, run in this folder, moves to a newer 6.4
+# release. Outside a shell with mise activated, run SwiftPM through
+# `mise exec --`.
+
+[tools]
+swift = "6.4"

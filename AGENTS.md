@@ -31,8 +31,9 @@ Main areas:
 - `scripts/`: Swift command-line tools such as `tp`, `ths`, and `is-work-mac`.
   It has its own AGENTS.md. Its install script, run by the `scripts` task,
   puts the binaries in `scripts/bin`, which `fish/config.fish` adds to `PATH`.
-  The task skips the build when no Swift source or manifest changed, and
-  `mise run --force scripts` builds anyway.
+  The task skips the build when no Swift source, manifest, or toolchain pin
+  changed, and `mise run --force scripts` builds anyway. `scripts/mise.toml`
+  pins its toolchain to the newest installed swift.org Swift 6.4.x.
 
 ## Safety Rules
 
@@ -72,8 +73,9 @@ Use the narrowest relevant checks after changes:
 - Ghostty config: `ghostty +validate-config --config-file=ghostty/config`
 - Zellij config: `zellij --config zellij/config.kdl setup --check`
 - mise tasks: `mise tasks validate` and `mise run --dry-run setup`
-- Swift tools: `swift build --package-path scripts/Scripts` and
-  `swift test --package-path scripts/Scripts`
+- Swift tools: `mise -C scripts exec -- swift build --package-path Scripts`
+  and `mise -C scripts exec -- swift test --package-path Scripts`, which use
+  the toolchain `scripts/mise.toml` pins
 - Git sanity: `git diff --check`
 
 Some checks may read the live config location or start local helper processes.

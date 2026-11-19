@@ -42,18 +42,24 @@ interactive = true
 run = "./linker.pl"
 
 # Runs after `link`, which puts the global config in ~/.config/mise. mise isn't
-# on PATH inside a task, so the task runs the mise that's running it.
+# on PATH inside a task, so the task runs the mise that's running it. Running
+# it in scripts/ also installs the Swift that scripts/mise.toml pins.
 [tasks.tools]
-description = "Install the languages in mise/config.toml"
+description = "Install the languages in mise/config.toml and scripts/mise.toml"
+dir = "scripts"
 run = '"{{ mise_bin }}" install'
 
 # install.fish does a clean release build, so the task skips it when no Swift
-# source or package manifest has changed since the binaries were last built.
+# source, package manifest, or toolchain pin has changed since the binaries
+# were last built. A task gets its tools from the file that defines it, so
+# install.fish runs through `mise exec` to get the Swift that scripts/mise.toml
+# pins.
 [tasks.scripts]
 description = "Build the Swift tools into scripts/bin and install their fish completions"
 dir = "scripts/Scripts"
-run = "./install.fish"
+run = '"{{ mise_bin }}" exec -- ./install.fish'
 sources = [
+  "../mise.toml",
   "Package.swift",
   "Package.resolved",
   "Sources/**/*.swift",
