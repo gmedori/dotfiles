@@ -7,7 +7,7 @@ brew "lolcat"
 brew "git"
 brew "node"
 brew "perl"
-# cpanm: standard CPAN installer, runs tests; fallback when cpm fails, and install.sh uses it to bootstrap local::lib
+# cpanm: standard CPAN installer, runs tests; fallback when cpm fails, and the perl task in mise.toml uses it to bootstrap local::lib
 brew "cpanminus"
 # cpm: faster parallel cpanm, skips tests; everyday installs via `cpm install -g Module` (-g = ~/perl5, not ./local)
 brew "cpm"

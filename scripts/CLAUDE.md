@@ -83,9 +83,10 @@ are added, run the relevant test target and report the result.
 - Do not edit `.build/` contents.
 - Treat `bin/` as generated output; change sources under `Scripts/Sources/`
   instead.
-- Do not run `Scripts/install.fish` unless explicitly requested. It builds
-  release binaries, copies them into `bin/`, and writes fish completions under
-  the user's home directory.
+- Do not run `Scripts/install.fish`, or the dotfiles repo's `mise run scripts`
+  task that runs it, unless explicitly requested. It builds release binaries,
+  copies them into `bin/`, and writes fish completions under the user's home
+  directory.
 - Do not run commands that delete user files or development data without
   explicit approval. In particular, `iosd nuke-derived-data` removes Xcode's
   DerivedData directory.
