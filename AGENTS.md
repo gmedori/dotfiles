@@ -26,7 +26,10 @@ Main areas:
   `~/.config/mise/config.toml`. It sets the default version of every language
   except Perl, which stays in the Brewfile, and Swift, which defaults to
   Xcode's. Its comments say how a project opts into a swift.org toolchain.
-- `install.sh`: bootstrap that installs mise if it's missing and runs `setup`.
+- `install.sh`: bootstrap that installs Homebrew and mise if they're missing,
+  clones the repo to `~/dotfiles` when run straight from GitHub, and runs
+  `setup`. Its header comment has the one-liner that runs it on a new Mac, so
+  keep it working when pasted as that one-liner, outside a clone.
 - `linker.pl`: the symlink script behind the `link` task.
 - `scripts/`: Swift command-line tools such as `tp`, `ths`, and `is-work-mac`.
   It has its own AGENTS.md. Its install script, run by the `scripts` task,

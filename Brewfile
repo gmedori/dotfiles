@@ -33,3 +33,7 @@ brew "bat"
 
 # Services
 brew "gh"
+
+# Apps
+# Xcodes installs Xcode and switches between versions of it
+cask "xcodes-app"
