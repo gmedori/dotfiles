@@ -99,5 +99,9 @@ let package = Package(
 			name: "is-work-macTests",
 			dependencies: ["is-work-mac"],
 		),
+		.testTarget(
+			name: "CommandKitTests",
+			dependencies: ["CommandKit"],
+		),
 	],
 )

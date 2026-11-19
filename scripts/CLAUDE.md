@@ -10,7 +10,9 @@ is organized as two sibling SwiftPM packages:
 
 - `Escape/`: A library for terminal output, colors, and control sequences.
 - `Scripts/`: Executable tools that depend on the local `Escape` package and
-  `swift-subprocess`.
+  `swift-subprocess`. Its `CommandKit` library target is what the tools use to
+  run other commands, either raw through `Subprocess` or through a wrapper like
+  `GitHubCLI` for `gh`.
 
 `Scripts` currently builds `iosd`, `chapter-splitter`, `github-permalink`,
 `notify`, `pr-watch`, `tp`, `ths`, and `is-work-mac`. `ths` publishes The
@@ -28,8 +30,9 @@ package directory.
 - Minimum platform: macOS 14
 - Command-line parsing: `swift-argument-parser`
 - Tests use Swift Testing syntax. `tpTests` and `thsTests` cover parts of `tp`
-  and `ths`, and `is-work-macTests` covers the parsing in `is-work-mac`. Run
-  them with `swift test --package-path Scripts`.
+  and `ths`, `is-work-macTests` covers the parsing in `is-work-mac`, and
+  `CommandKitTests` covers `GitHubCLI`. Run them with
+  `swift test --package-path Scripts`.
 - No formatter or linter is currently configured.
 
 ## Build and Validation
@@ -56,6 +59,10 @@ are added, run the relevant test target and report the result.
   `swift-argument-parser`.
 - Pass subprocess arguments as separate values to `Subprocess.run`, especially
   when they may contain spaces or user-provided values.
+- Run other commands through `CommandKit`. A command that more than one tool
+  runs gets a wrapper there, like `GitHubCLI`, instead of a copy in each tool.
+  Helpers only one tool needs stay in that tool, as an extension of the
+  wrapper.
 
 ## Dependencies
 
