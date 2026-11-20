@@ -28,9 +28,24 @@ struct PullRequestCreator {
 
 	let gh: GitHubCLI
 
+	/// The last pull request URL in `gh` output.
+	static func pullRequestURL(in output: String) -> String? {
+		output.matches(of: #/https://github\.com/[^\s]+/pull/\d+/#).last.map { String($0.output) }
+	}
+
+	/// The attachments whose staged path is still in `body`, which means they didn't upload.
+	static func stillStaged(_ attachments: [Attachment], in body: String) -> [Attachment] {
+		attachments.filter { body.contains($0.staged) }
+	}
+
 	func create(_ prepared: PreparedDraft, in stageDirectory: URL, asDraft: Bool) async throws -> CreatedPullRequest {
-		guard let repo = prepared.repo, let base = prepared.base, let branch = prepared.branch, let title = prepared.title else {
-			throw RuntimeError("The draft has no title or is missing frontmatter, so there's no pull request to open. Fix the draft and run `pr-draft prepare` again.")
+		guard
+			let repo = prepared.repo, let base = prepared.base, let branch = prepared.branch,
+			let title = prepared.title
+		else {
+			throw RuntimeError(
+				"The draft has no title or is missing frontmatter, so there's no pull request to open. Fix the draft and run `pr-draft prepare` again."
+			)
 		}
 
 		var arguments = [
@@ -53,16 +68,20 @@ struct PullRequestCreator {
 			)
 		}
 
-		var failed = Self.stillStaged(prepared.attachments, in: try await bodyIfNeeded(prepared, url: url))
+		var failed = try await Self.stillStaged(prepared.attachments, in: bodyIfNeeded(prepared, url: url))
 		if !failed.isEmpty {
 			let body = try await gh.pullRequestBody(url)
-			try body.write(to: stageDirectory.appending(path: Self.retryBodyFileName), atomically: true, encoding: .utf8)
+			try body.write(
+				to: stageDirectory.appending(path: Self.retryBodyFileName),
+				atomically: true,
+				encoding: .utf8,
+			)
 			_ = try await gh.run(
 				["pr", "edit", url, "--body-file", Self.retryBodyFileName]
 					+ failed.flatMap { ["--attach", $0.attachArgument] },
 				in: stageDirectory,
 			)
-			failed = Self.stillStaged(failed, in: try await gh.pullRequestBody(url))
+			failed = try await Self.stillStaged(failed, in: gh.pullRequestBody(url))
 		}
 
 		if failed.isEmpty {
@@ -79,15 +98,5 @@ struct PullRequestCreator {
 	/// The pull request's body, or an empty one when there are no attachments to check.
 	private func bodyIfNeeded(_ prepared: PreparedDraft, url: String) async throws -> String {
 		prepared.attachments.isEmpty ? "" : try await gh.pullRequestBody(url)
-	}
-
-	/// The last pull request URL in `gh` output.
-	static func pullRequestURL(in output: String) -> String? {
-		output.matches(of: #/https://github\.com/[^\s]+/pull/\d+/#).last.map { String($0.output) }
-	}
-
-	/// The attachments whose staged path is still in `body`, which means they didn't upload.
-	static func stillStaged(_ attachments: [Attachment], in body: String) -> [Attachment] {
-		attachments.filter { body.contains($0.staged) }
 	}
 }

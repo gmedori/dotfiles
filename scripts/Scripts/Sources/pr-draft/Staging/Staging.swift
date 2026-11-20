@@ -40,7 +40,8 @@ enum Staging {
 	/// The default staging folder for a draft, under the system temp folder.
 	static func directory(for draft: URL) -> URL {
 		let name = BodyRewriter.slug(draft.deletingPathExtension().lastPathComponent, limit: 80)
-		return FileManager.default.temporaryDirectory
+		return FileManager.default
+			.temporaryDirectory
 			.appending(path: "pr-draft", directoryHint: .isDirectory)
 			.appending(path: name, directoryHint: .isDirectory)
 	}
@@ -48,10 +49,15 @@ enum Staging {
 	/// Reads the draft, replaces the staging folder with a fresh one, and copies the attachments,
 	/// `body.md`, and nothing else into it. It doesn't save the manifest, since `prepare` adds
 	/// whether `gh` can attach files first.
-	static func prepare(draft draftFile: URL, altOverrides: [Int: String], stageDirectory: URL) throws -> PreparedDraft {
+	static func prepare(
+		draft draftFile: URL,
+		altOverrides: [Int: String],
+		stageDirectory: URL,
+	) throws -> PreparedDraft {
 		guard let vault = VaultFiles.containing(draftFile) else {
 			throw RuntimeError("\(draftFile.path(percentEncoded: false)) isn't in an Obsidian vault.")
 		}
+
 		let draft = try Draft.parse(String(contentsOf: draftFile, encoding: .utf8))
 
 		var errors: [String] = []
@@ -72,7 +78,10 @@ enum Staging {
 		errors += result.errors
 		let unknown = Set(altOverrides.keys).subtracting(result.attachments.map(\.number)).sorted()
 		if !unknown.isEmpty {
-			errors.append("`--alt` gives alt text for \(list(unknown.map { "\($0)" })), but the body has no attachment with that number.")
+			errors
+				.append(
+					"`--alt` gives alt text for \(list(unknown.map { "\($0)" })), but the body has no attachment with that number."
+				)
 		}
 
 		let fileManager = FileManager.default
@@ -83,13 +92,20 @@ enum Staging {
 
 		var warnings: [String] = []
 		for (attachment, source) in zip(result.attachments, result.sources) {
-			try fileManager.copyItem(at: source, to: stageDirectory.appending(path: String(attachment.staged.dropFirst(2))))
-			let size = (try fileManager.attributesOfItem(atPath: source.path(percentEncoded: false))[.size] as? Int) ?? 0
+			try fileManager.copyItem(
+				at: source,
+				to: stageDirectory.appending(path: String(attachment.staged.dropFirst(2))),
+			)
+			let size = try (fileManager.attributesOfItem(atPath: source.path(percentEncoded: false))[.size] as? Int) ??
+				0
 			let limit = attachment.kind == .video ? videoSizeLimit : imageSizeLimit
 			if size > limit {
 				let megabytes = String(format: "%.1f", Double(size) / 1_048_576)
 				let kind = attachment.kind == .video ? "a video" : "an image"
-				warnings.append("`\(attachment.source)` is \(megabytes) MB, over GitHub's \(limit / 1_048_576) MB limit for \(kind).")
+				warnings
+					.append(
+						"`\(attachment.source)` is \(megabytes) MB, over GitHub's \(limit / 1_048_576) MB limit for \(kind)."
+					)
 			}
 		}
 
@@ -120,8 +136,11 @@ enum Staging {
 	static func loadManifest(from stageDirectory: URL) throws -> PreparedDraft {
 		let file = stageDirectory.appending(path: manifestFileName)
 		guard let data = FileManager.default.contents(atPath: file.path(percentEncoded: false)) else {
-			throw RuntimeError("There's no \(manifestFileName) in \(stageDirectory.path(percentEncoded: false)). Run `pr-draft prepare` first.")
+			throw RuntimeError(
+				"There's no \(manifestFileName) in \(stageDirectory.path(percentEncoded: false)). Run `pr-draft prepare` first."
+			)
 		}
+
 		return try JSON.decoder().decode(PreparedDraft.self, from: data)
 	}
 
@@ -144,7 +163,7 @@ enum JSON {
 		let encoder = JSONEncoder()
 		encoder.keyEncodingStrategy = .convertToSnakeCase
 		encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
-		return String(decoding: try encoder.encode(value), as: UTF8.self)
+		return try String(decoding: encoder.encode(value), as: UTF8.self)
 	}
 
 	static func decoder() -> JSONDecoder {

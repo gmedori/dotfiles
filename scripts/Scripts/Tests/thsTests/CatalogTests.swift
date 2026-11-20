@@ -2,8 +2,7 @@ import Foundation
 import Testing
 @testable import ths
 
-@Suite("post states")
-struct CatalogTests {
+struct `post states` {
 	let source = URL(filePath: "/vault", directoryHint: .isDirectory)
 
 	func post(
@@ -30,7 +29,12 @@ struct CatalogTests {
 		let body = BodyConverter(noteDirectory: source).convert(post.body, startLine: post.bodyStartLine)
 		var files = try PageBundle.generate(for: post, body: body).files
 		edit?(&files)
-		return bundle(post.slug!, files: files, vaultSource: PageBundle.vaultSource(for: post), isDraft: post.status == .draft)
+		return bundle(
+			post.slug!,
+			files: files,
+			vaultSource: PageBundle.vaultSource(for: post),
+			isDraft: post.status == .draft,
+		)
 	}
 
 	func bundle(_ slug: String, files: [String: Data], vaultSource: String?, isDraft: Bool) -> ExistingBundle {
@@ -59,46 +63,47 @@ struct CatalogTests {
 		})
 	}
 
-	@Test("A post without a status stays in the vault")
-	func vaultOnly() throws {
+	@Test
+	func `A post without a status stays in the vault`() throws {
 		#expect(try states(posts: [post(nil, status: nil)]) == ["Blog Posts/untitled.md": .vaultOnly])
 	}
 
-	@Test("A valid post without a bundle is new")
-	func new() throws {
+	@Test
+	func `A valid post without a bundle is new`() throws {
 		#expect(try states(posts: [post("a")]) == ["Blog Posts/a.md": .new])
 	}
 
-	@Test("A bundle that matches the vault is up to date")
-	func upToDate() throws {
+	@Test
+	func `A bundle that matches the vault is up to date`() throws {
 		let post = try post("a")
 		#expect(try states(posts: [post], bundles: [bundle(for: post)]) == ["Blog Posts/a.md": .upToDate])
 	}
 
-	@Test("A bundle from an older version of the note is stale")
-	func stale() throws {
+	@Test
+	func `A bundle from an older version of the note is stale`() throws {
 		let old = try post("a", body: "# Title\n\nOld body.")
 		let new = try post("a", body: "# Title\n\nNew body.")
 		#expect(try states(posts: [new], bundles: [bundle(for: old)]) == ["Blog Posts/a.md": .stale])
 	}
 
-	@Test("A bundle changed after the last sync is edited")
-	func edited() throws {
+	@Test
+	func `A bundle changed after the last sync is edited`() throws {
 		let old = try post("a", body: "# Title\n\nOld body.")
 		let new = try post("a", body: "# Title\n\nNew body.")
 		let handEdited = try bundle(for: old) { $0["icon.png"] = Data([1]) }
 		#expect(try states(posts: [new], bundles: [handEdited]) == ["Blog Posts/a.md": .edited])
 	}
 
-	@Test("A hand edit later copied into the vault is up to date, with a hash to refresh")
-	func editCopiedIntoVault() throws {
+	@Test
+	func `A hand edit later copied into the vault is up to date, with a hash to refresh`() throws {
 		let old = try post("a", body: "# Title\n\nOld body.")
 		let new = try post("a", body: "# Title\n\nNew body.")
 		let generatedNew = try bundle(for: new)
 		let handEdited = try bundle(for: old) { files in
 			files["index.md"] = generatedNew.bundle.files["index.md"]!
 			let text = String(decoding: files["index.md"]!, as: UTF8.self)
-			files["index.md"] = Data(text.replacing(/generatedHash: "[^"]*"/, with: #"generatedHash: "sha256:old""#).utf8)
+			files["index.md"] = Data(text.replacing(/generatedHash: "[^"]*"/, with: #"generatedHash: "sha256:old""#)
+				.utf8)
 		}
 
 		let catalog = try Catalog.classify(posts: [new], bundles: ["a": handEdited], source: source)
@@ -106,15 +111,20 @@ struct CatalogTests {
 		#expect(catalog.entries[0].needsHashRefresh)
 	}
 
-	@Test("A bundle `ths` didn't make is a conflict")
-	func conflict() throws {
+	@Test
+	func `A bundle ths didn't make is a conflict`() throws {
 		let post = try post("a")
-		let handMade = bundle("a", files: ["index.md": Data("---\ntitle: A\n---\n".utf8)], vaultSource: nil, isDraft: false)
+		let handMade = bundle(
+			"a",
+			files: ["index.md": Data("---\ntitle: A\n---\n".utf8)],
+			vaultSource: nil,
+			isDraft: false,
+		)
 		#expect(try states(posts: [post], bundles: [handMade]) == ["Blog Posts/a.md": .conflict])
 	}
 
-	@Test("Bundles no post claims are orphaned, and unmanaged ones are ignored")
-	func orphans() throws {
+	@Test
+	func `Bundles no post claims are orphaned, and unmanaged ones are ignored`() throws {
 		let draft = try bundle(for: post("old-draft", status: "draft"))
 		let published = try bundle(for: post("old-post"))
 		let handMade = bundle("hand-made", files: ["index.md": Data()], vaultSource: nil, isDraft: false)
@@ -125,8 +135,8 @@ struct CatalogTests {
 		])
 	}
 
-	@Test("A post moved back to the vault orphans its bundle")
-	func backToVault() throws {
+	@Test
+	func `A post moved back to the vault orphans its bundle`() throws {
 		let published = try post("a")
 		let vaultOnly = try post("a", status: nil)
 		#expect(try states(posts: [vaultOnly], bundles: [bundle(for: published)]) == [
@@ -135,15 +145,15 @@ struct CatalogTests {
 		])
 	}
 
-	@Test("A published post set back to draft is retracted")
-	func retracted() throws {
+	@Test
+	func `A published post set back to draft is retracted`() throws {
 		let published = try post("a")
 		let draft = try post("a", status: "draft")
 		#expect(try states(posts: [draft], bundles: [bundle(for: published)]) == ["Blog Posts/a.md": .retracted])
 	}
 
-	@Test("A canceled post with a bundle is canceled, whatever its body says")
-	func canceled() throws {
+	@Test
+	func `A canceled post with a bundle is canceled, whatever its body says`() throws {
 		let published = try post("a")
 		let draft = try post("b", status: "draft")
 		let canceledPublished = try post("a", status: "canceled", body: "No title, TODO, [[link]].")
@@ -155,19 +165,20 @@ struct CatalogTests {
 		) == ["Blog Posts/a.md": .canceled, "Blog Posts/b.md": .canceled])
 	}
 
-	@Test("A canceled post whose bundle is gone stays in the vault")
-	func canceledAndDeleted() throws {
+	@Test
+	func `A canceled post whose bundle is gone stays in the vault`() throws {
 		#expect(try states(posts: [post("a", status: "canceled")]) == ["Blog Posts/a.md": .vaultOnly])
 	}
 
-	@Test("A canceled post never deletes a bundle `ths` didn't make")
-	func canceledConflict() throws {
+	@Test
+	func `A canceled post never deletes a bundle ths didn't make`() throws {
 		let handMade = bundle("a", files: ["index.md": Data()], vaultSource: nil, isDraft: false)
-		#expect(try states(posts: [post("a", status: "canceled")], bundles: [handMade]) == ["Blog Posts/a.md": .conflict])
+		#expect(try states(posts: [post("a", status: "canceled")], bundles: [handMade]) ==
+			["Blog Posts/a.md": .conflict])
 	}
 
-	@Test("Canceling a published post warns about its URL, and `sync` deletes the bundle")
-	func canceledWarnsAndDeletes() throws {
+	@Test
+	func `Canceling a published post warns about its URL, and sync deletes the bundle`() throws {
 		let published = try post("a")
 		let catalog = try Catalog.classify(
 			posts: [post("a", status: "canceled")],
@@ -183,15 +194,15 @@ struct CatalogTests {
 		#expect(!catalog.hasProblems)
 	}
 
-	@Test("An invalid post still claims its slug, so its bundle isn't orphaned")
-	func invalidClaimsSlug() throws {
+	@Test
+	func `An invalid post still claims its slug, so its bundle isn't orphaned`() throws {
 		let valid = try post("a")
 		let broken = try post("a", body: "No title.")
 		#expect(try states(posts: [broken], bundles: [bundle(for: valid)]) == ["Blog Posts/a.md": .invalid])
 	}
 
-	@Test("Two posts with the same slug are both invalid")
-	func duplicateSlugs() throws {
+	@Test
+	func `Two posts with the same slug are both invalid`() throws {
 		let first = try post("a", path: "Blog Posts/First.md")
 		let second = try post("a", path: "Blog Posts/Second.md")
 		let catalog = try Catalog.classify(posts: [first, second], bundles: [:], source: source)
@@ -200,8 +211,8 @@ struct CatalogTests {
 		#expect(catalog.entries[0].issues == [.duplicateSlug(otherPath: "Blog Posts/Second.md")])
 	}
 
-	@Test("A draft's TODO is a warning, and a published post's is a problem")
-	func todoWarnings() throws {
+	@Test
+	func `A draft's TODO is a warning, and a published post's is a problem`() throws {
 		let draft = try post("a", status: "draft", body: "# T\n\nTODO: finish")
 		let published = try post("b", body: "# T\n\nTODO: finish")
 		let catalog = try Catalog.classify(posts: [draft, published], bundles: [:], source: source)
@@ -218,6 +229,7 @@ extension CatalogEntry {
 		guard case let .invalid(_, issues, _) = self else {
 			return []
 		}
+
 		return issues
 	}
 }

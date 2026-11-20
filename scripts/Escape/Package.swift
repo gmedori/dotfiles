@@ -9,11 +9,11 @@ let package = Package(
 	products: [
 		.executable(
 			name: "EscapeClient",
-			targets: ["EscapeClient"]
+			targets: ["EscapeClient"],
 		),
 		.library(
 			name: "Escape",
-			targets: ["Escape"]
+			targets: ["Escape"],
 		),
 	],
 	targets: [
@@ -23,7 +23,7 @@ let package = Package(
 		.executableTarget(name: "EscapeClient", dependencies: ["Escape"]),
 		.testTarget(
 			name: "EscapeTests",
-			dependencies: ["Escape"]
+			dependencies: ["Escape"],
 		),
-	]
+	],
 )

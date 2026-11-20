@@ -37,6 +37,7 @@ struct Draft: Equatable {
 			guard let closing = lines.dropFirst().firstIndex(where: isDelimiter) else {
 				throw RuntimeError("The draft's frontmatter never closes with `---`.")
 			}
+
 			properties = try parseProperties(lines[1 ..< closing].joined(separator: "\n"))
 			frontmatterLineCount = closing + 1
 		}
@@ -46,6 +47,7 @@ struct Draft: Equatable {
 			guard let text = properties[key]?.scalar?.string.trimmingCharacters(in: .whitespaces) else {
 				return nil
 			}
+
 			return ["", "~", "null"].contains(text) ? nil : text
 		}
 
@@ -59,6 +61,7 @@ struct Draft: Equatable {
 				bodyStartLine: frontmatterLineCount + 1,
 			)
 		}
+
 		return Draft(
 			repo: value("repo"),
 			branch: value("branch"),

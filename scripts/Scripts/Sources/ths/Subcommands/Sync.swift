@@ -10,19 +10,20 @@ struct Sync: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		abstract: "Writes the vault's blog posts into the site repo.",
 		discussion: """
-		Without `--write`, `sync` only shows what it would do. With `--write`, it
-		creates bundles for new posts, rewrites stale bundles, and deletes orphaned
-		drafts along with the bundles of canceled posts. Then it runs the production
-		build, which has to finish with no warnings.
+			Without `--write`, `sync` only shows what it would do. With `--write`, it
+			creates bundles for new posts, rewrites stale bundles, and deletes orphaned
+			drafts along with the bundles of canceled posts. Then it runs the production
+			build, which has to finish with no warnings.
 
-		Problems, like a bundle edited by hand, are skipped and listed with what to
-		change, and the rest of the posts are still synced. Any problem makes `sync`
-		exit 1. Run `ths status --help` for what each state means. `sync` never
-		commits.
-		""",
+			Problems, like a bundle edited by hand, are skipped and listed with what to
+			change, and the rest of the posts are still synced. Any problem makes `sync`
+			exit 1. Run `ths status --help` for what each state means. `sync` never
+			commits.
+			""",
 	)
 
-	@OptionGroup var paths: SitePaths
+	@OptionGroup
+	var paths: SitePaths
 
 	@Flag(help: "Apply the changes. Without it, `sync` only shows what it would do.")
 	var write = false
@@ -124,46 +125,6 @@ enum SyncAction: Sendable {
 	/// Leaves a problem alone. It's reported after the list.
 	case skip
 
-	init(_ entry: CatalogEntry) {
-		switch entry {
-			case let .new(_, slug, generated, _):
-				self = .create(generated, slug: slug)
-			case let .stale(_, bundle, generated, _):
-				self = .update(generated, slug: bundle.slug)
-			case let .upToDate(_, bundle, generated, _):
-				self = entry.needsHashRefresh ? .update(generated, slug: bundle.slug) : .keep
-			case let .canceled(_, bundle), let .orphanedDraft(bundle):
-				self = .delete(slug: bundle.slug)
-			case .vaultOnly:
-				self = .keep
-			case .edited, .conflict, .invalid, .orphanedPublished, .retracted:
-				self = .skip
-		}
-	}
-
-	/// The action without its bundle and slug, for printing and counting.
-	var kind: Kind {
-		switch self {
-			case .create: .create
-			case .update: .update
-			case .delete: .delete
-			case .keep: .keep
-			case .skip: .skip
-		}
-	}
-
-	/// Writes or deletes the bundle. `keep` and `skip` do nothing.
-	func apply(with writer: BundleWriter) throws {
-		switch self {
-			case let .create(bundle, slug), let .update(bundle, slug):
-				try writer.write(bundle, slug: slug)
-			case let .delete(slug):
-				try writer.delete(slug: slug)
-			case .keep, .skip:
-				break
-		}
-	}
-
 	// MARK: Kind
 
 	/// A `SyncAction` without its bundle and slug.
@@ -197,6 +158,46 @@ enum SyncAction: Sendable {
 				case .keep: .brightBlack
 				case .skip: .red
 			}
+		}
+	}
+
+	/// The action without its bundle and slug, for printing and counting.
+	var kind: Kind {
+		switch self {
+			case .create: .create
+			case .update: .update
+			case .delete: .delete
+			case .keep: .keep
+			case .skip: .skip
+		}
+	}
+
+	init(_ entry: CatalogEntry) {
+		switch entry {
+			case let .new(_, slug, generated, _):
+				self = .create(generated, slug: slug)
+			case let .stale(_, bundle, generated, _):
+				self = .update(generated, slug: bundle.slug)
+			case let .upToDate(_, bundle, generated, _):
+				self = entry.needsHashRefresh ? .update(generated, slug: bundle.slug) : .keep
+			case let .canceled(_, bundle), let .orphanedDraft(bundle):
+				self = .delete(slug: bundle.slug)
+			case .vaultOnly:
+				self = .keep
+			case .edited, .conflict, .invalid, .orphanedPublished, .retracted:
+				self = .skip
+		}
+	}
+
+	/// Writes or deletes the bundle. `keep` and `skip` do nothing.
+	func apply(with writer: BundleWriter) throws {
+		switch self {
+			case let .create(bundle, slug), let .update(bundle, slug):
+				try writer.write(bundle, slug: slug)
+			case let .delete(slug):
+				try writer.delete(slug: slug)
+			case .keep, .skip:
+				break
 		}
 	}
 }

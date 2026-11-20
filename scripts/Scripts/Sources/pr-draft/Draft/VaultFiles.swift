@@ -13,10 +13,20 @@ import Foundation
 ///
 /// Every URL is resolved through symlinks, so paths compare equal however they were reached.
 final class VaultFiles {
+	/// What a link points at.
+	enum Resolution: Equatable {
+		case found(URL)
+		/// No file matches the link.
+		case missing
+		/// More than one file in the vault matches the link, sorted by path.
+		case ambiguous([URL])
+	}
+
 	/// The vault's root, the folder that holds `.obsidian`.
 	let root: URL
+
 	/// Every file in the vault by file name, built the first time a link needs it.
-	private var filesByName: [String: [URL]]?
+	private var filesByName: [String: [URL]]? = nil
 
 	init(root: URL) {
 		self.root = root.resolvingSymlinksInPath()
@@ -39,13 +49,10 @@ final class VaultFiles {
 		}
 	}
 
-	/// What a link points at.
-	enum Resolution: Equatable {
-		case found(URL)
-		/// No file matches the link.
-		case missing
-		/// More than one file in the vault matches the link, sorted by path.
-		case ambiguous([URL])
+	private static func isFile(_ url: URL) -> Bool {
+		var isDirectory: ObjCBool = false
+		return FileManager.default.fileExists(atPath: url.path(percentEncoded: false), isDirectory: &isDirectory)
+			&& !isDirectory.boolValue
 	}
 
 	func resolve(_ link: String, from noteDirectory: URL) -> Resolution {
@@ -77,7 +84,10 @@ final class VaultFiles {
 				return .found(matches[0])
 			default:
 				let besideNote = noteDirectory.appending(path: "assets").appending(path: name).standardizedFileURL
-				if let match = matches.first(where: { $0.path(percentEncoded: false) == besideNote.path(percentEncoded: false) }) {
+				if
+					let match = matches
+						.first(where: { $0.path(percentEncoded: false) == besideNote.path(percentEncoded: false) })
+				{
 					return .found(match)
 				}
 				return .ambiguous(matches.sorted { $0.path(percentEncoded: false) < $1.path(percentEncoded: false) })
@@ -106,16 +116,11 @@ final class VaultFiles {
 				guard (try? url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true else {
 					continue
 				}
+
 				index[url.lastPathComponent, default: []].append(url.resolvingSymlinksInPath())
 			}
 			filesByName = index
 		}
 		return filesByName?[name] ?? []
-	}
-
-	private static func isFile(_ url: URL) -> Bool {
-		var isDirectory: ObjCBool = false
-		return FileManager.default.fileExists(atPath: url.path(percentEncoded: false), isDirectory: &isDirectory)
-			&& !isDirectory.boolValue
 	}
 }

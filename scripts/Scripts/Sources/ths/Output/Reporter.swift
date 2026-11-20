@@ -74,7 +74,9 @@ struct Reporter: Sendable {
 					messages.append(Message(
 						kind: .warning,
 						headline: "\(bundlePath) is published, so deleting it takes /blog/\(slug)/ off the site",
-						details: ["Add a redirect from /blog/\(slug)/ before deploying, so links to the post still lead somewhere."],
+						details: [
+							"Add a redirect from /blog/\(slug)/ before deploying, so links to the post still lead somewhere."
+						],
 					))
 				}
 			case let .invalid(_, issues, _):
@@ -93,7 +95,7 @@ struct Reporter: Sendable {
 					kind: .error,
 					headline: "\(bundlePath) already exists and isn't managed by `ths`",
 					details: [
-						"If it's an older copy of \(notePath), delete it and sync again. Otherwise change the slug of the post.",
+						"If it's an older copy of \(notePath), delete it and sync again. Otherwise change the slug of the post."
 					],
 				))
 			case .orphanedPublished:
@@ -118,11 +120,6 @@ struct Reporter: Sendable {
 		return messages
 	}
 
-	private func issueMessage(_ issue: PostIssue, kind: Message.Kind, notePath: String) -> Message {
-		let location = issue.line.map { "\(notePath):\($0)" } ?? notePath
-		return Message(kind: kind, headline: "\(location): \(issue.message)", details: [issue.fix])
-	}
-
 	func format(_ message: Message) -> String {
 		let label = switch message.kind {
 			case .error: paint("error:", .red)
@@ -136,6 +133,11 @@ struct Reporter: Sendable {
 		let path = url.standardizedFileURL.path(percentEncoded: false).trimmingSuffix("/")
 		let home = FileManager.default.homeDirectoryForCurrentUser.path(percentEncoded: false).trimmingSuffix("/")
 		return path.hasPrefix(home) ? "~" + path.dropFirst(home.count) : path
+	}
+
+	private func issueMessage(_ issue: PostIssue, kind: Message.Kind, notePath: String) -> Message {
+		let location = issue.line.map { "\(notePath):\($0)" } ?? notePath
+		return Message(kind: kind, headline: "\(location): \(issue.message)", details: [issue.fix])
 	}
 }
 

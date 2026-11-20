@@ -26,6 +26,16 @@ struct PageBundle: Equatable, Sendable {
 	/// The contents of every file in the bundle, keyed by its path in the folder.
 	let files: [String: Data]
 
+	/// The bundle's files with the `generatedHash` line removed from `index.md`, for comparing a
+	/// bundle on disk with a freshly generated one regardless of what hash each stores.
+	var filesWithoutHash: [String: Data] {
+		var files = files
+		if let index = files[Self.indexName] {
+			files[Self.indexName] = Self.removingHashLine(from: index)
+		}
+		return files
+	}
+
 	// MARK: Generating
 
 	/// Builds the bundle for a post, reading its images from the vault.
@@ -35,7 +45,9 @@ struct PageBundle: Equatable, Sendable {
 			do {
 				files[image.name] = try Data(contentsOf: image.source)
 			} catch {
-				throw RuntimeError("Couldn't read \(image.source.path(percentEncoded: false)): \(error.localizedDescription)")
+				throw RuntimeError(
+					"Couldn't read \(image.source.path(percentEncoded: false)): \(error.localizedDescription)"
+				)
 			}
 		}
 
@@ -81,12 +93,6 @@ struct PageBundle: Equatable, Sendable {
 		"$\(SitePaths.sourceVariable)/\(post.relativePath)"
 	}
 
-	private static func quoted(_ value: String) -> String {
-		let encoder = JSONEncoder()
-		encoder.outputFormatting = [.withoutEscapingSlashes]
-		return String(decoding: try! encoder.encode(value), as: UTF8.self)
-	}
-
 	// MARK: Hashing
 
 	/// A SHA-256 over every file in the bundle, sorted by path, with the `generatedHash` line removed
@@ -112,19 +118,15 @@ struct PageBundle: Equatable, Sendable {
 		return "sha256:" + hasher.finalize().map { String(format: "%02x", $0) }.joined()
 	}
 
+	private static func quoted(_ value: String) -> String {
+		let encoder = JSONEncoder()
+		encoder.outputFormatting = [.withoutEscapingSlashes]
+		return String(decoding: try! encoder.encode(value), as: UTF8.self)
+	}
+
 	private static func removingHashLine(from data: Data) -> Data {
 		let text = String(decoding: data, as: UTF8.self)
 		return Data(text.replacing(/\n  generatedHash: "[^"\n]*"/, with: "", maxReplacements: 1).utf8)
-	}
-
-	/// The bundle's files with the `generatedHash` line removed from `index.md`, for comparing a
-	/// bundle on disk with a freshly generated one regardless of what hash each stores.
-	var filesWithoutHash: [String: Data] {
-		var files = files
-		if let index = files[Self.indexName] {
-			files[Self.indexName] = Self.removingHashLine(from: index)
-		}
-		return files
 	}
 }
 
@@ -189,10 +191,11 @@ struct ExistingBundle: Equatable, Sendable {
 		for case let url as URL in enumerator {
 			guard
 				!PageBundle.ignoredNames.contains(url.lastPathComponent),
-				(try url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true
+				try (url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true
 			else {
 				continue
 			}
+
 			let path = url.standardizedFileURL.path(percentEncoded: false)
 			files[String(path.dropFirst(base.count).trimmingPrefix("/"))] = try Data(contentsOf: url)
 		}

@@ -7,22 +7,25 @@ struct Status: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
 		abstract: "Shows where each post stands between the vault and the site, without changing anything.",
 		discussion: """
-		STATES
-		\(PostState.allCases.map { state in
+			STATES
+			\(PostState.allCases
+			.map { state in
 			"  " + state.label.padding(toLength: Reporter.labelWidth, withPad: " ", startingAt: 0) + "  " + state.summary
-		}.joined(separator: "\n"))
+			}
+			.joined(separator: "\n"))
 
-		Problems are listed after the posts with what to change, and make `status`
-		exit 1. Pending changes, like new or stale posts, don't.
-		""",
+			Problems are listed after the posts with what to change, and make `status`
+			exit 1. Pending changes, like new or stale posts, don't.
+			""",
 	)
 
-	@OptionGroup var paths: SitePaths
+	@OptionGroup
+	var paths: SitePaths
 
 	@Argument(help: "Only report on posts and bundles with these slugs.")
 	var slugs: [String] = []
 
-	func run() async throws {
+	func run() throws {
 		let catalog = try Catalog.load(source: paths.sourceDirectory, site: paths.siteDirectory)
 		let reporter = Reporter(siteDirectory: paths.siteDirectory)
 		let selection = SlugSelection(slugs: slugs, catalog: catalog)
@@ -67,22 +70,23 @@ struct SlugSelection {
 	/// The slugs given on the command line that match no entry.
 	let unknownSlugs: [String]
 
-	init(slugs: [String], catalog: Catalog) {
-		guard !slugs.isEmpty else {
-			entries = catalog.entries
-			unknownSlugs = []
-			return
-		}
-		let wanted = Set(slugs)
-		entries = catalog.entries.filter { $0.slug.map(wanted.contains) == true }
-		let found = Set(entries.compactMap(\.slug))
-		unknownSlugs = slugs.filter { !found.contains($0) }
-	}
-
 	/// An error for each slug in `unknownSlugs`.
 	var unknownSlugMessages: [Message] {
 		unknownSlugs.map {
 			Message(kind: .error, headline: "no post or bundle has the slug \($0)", details: [])
 		}
+	}
+
+	init(slugs: [String], catalog: Catalog) {
+		guard !slugs.isEmpty else {
+			self.entries = catalog.entries
+			self.unknownSlugs = []
+			return
+		}
+
+		let wanted = Set(slugs)
+		self.entries = catalog.entries.filter { $0.slug.map(wanted.contains) == true }
+		let found = Set(entries.compactMap(\.slug))
+		self.unknownSlugs = slugs.filter { !found.contains($0) }
 	}
 }

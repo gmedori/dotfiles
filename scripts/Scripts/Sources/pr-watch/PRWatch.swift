@@ -15,15 +15,15 @@ struct PRWatch: AsyncParsableCommand {
 
 	@Option(
 		name: [.customShort("R"), .long],
-		help: "Select another repository using the [HOST/]OWNER/REPO format"
+		help: "Select another repository using the [HOST/]OWNER/REPO format",
 	)
 	var repo: String?
 
 	@Option(
 		name: [.customShort("i"), .customLong("interval")],
-		help: "The number of seconds between polls"
+		help: "The number of seconds between polls",
 	)
-	var interval: Int = 10
+	var interval = 10
 
 	func validate() throws {
 		guard interval > 0 else {
@@ -35,7 +35,7 @@ struct PRWatch: AsyncParsableCommand {
 		let display = PollDisplay()
 		let loadingTask = echoLoadingText(
 			loop: .weeee,
-			writesNewlineOnCancellation: false
+			writesNewlineOnCancellation: false,
 		) { symbol in
 			await display.line(symbol: symbol)
 		}
@@ -53,7 +53,7 @@ struct PRWatch: AsyncParsableCommand {
 		loadingTask.cancel()
 		await loadingTask.value
 		clearLine()
-		echo(await display.line(symbol: "✓"), "\n")
+		await echo(display.line(symbol: "✓"), "\n")
 		print(mergedPullRequest.url)
 
 		try await postNotification(
@@ -83,7 +83,8 @@ struct PRWatch: AsyncParsableCommand {
 					return pullRequest
 				}
 
-				if let previousPullRequest,
+				if
+					let previousPullRequest,
 					let notification = pullRequest.queueRemovalNotification(
 						after: previousPullRequest
 					)
@@ -128,34 +129,34 @@ struct PRWatch: AsyncParsableCommand {
 		reference: PullRequestReference
 	) async throws -> PullRequest {
 		let query = """
-		query($id: ID!) {
-		  node(id: $id) {
-		    ... on PullRequest {
-		      number
-		      state
-		      mergedAt
-		      url
-		      isInMergeQueue
-		      mergeQueueEntry {
-		        state
-		        position
-		        estimatedTimeToMerge
-		      }
-		      latestQueueRemoval: timelineItems(
-		        last: 1
-		        itemTypes: [REMOVED_FROM_MERGE_QUEUE_EVENT]
-		      ) {
-		        nodes {
-		          ... on RemovedFromMergeQueueEvent {
-		            id
-		            reason
-		          }
-		        }
-		      }
-		    }
-		  }
-		}
-		"""
+			query($id: ID!) {
+			  node(id: $id) {
+			    ... on PullRequest {
+			      number
+			      state
+			      mergedAt
+			      url
+			      isInMergeQueue
+			      mergeQueueEntry {
+			        state
+			        position
+			        estimatedTimeToMerge
+			      }
+			      latestQueueRemoval: timelineItems(
+			        last: 1
+			        itemTypes: [REMOVED_FROM_MERGE_QUEUE_EVENT]
+			      ) {
+			        nodes {
+			          ... on RemovedFromMergeQueueEvent {
+			            id
+			            reason
+			          }
+			        }
+			      }
+			    }
+			  }
+			}
+			"""
 		let output = try await GitHubCLI().output([
 			"api",
 			"graphql",
@@ -178,21 +179,21 @@ struct PRWatch: AsyncParsableCommand {
 
 	private func postNotification(message: String) async throws {
 		let script = """
-		on run arguments
-			display notification (item 1 of arguments) with title "PR Watch" sound name "Purr"
-		end run
-		"""
+			on run arguments
+				display notification (item 1 of arguments) with title "PR Watch" sound name "Purr"
+			end run
+			"""
 		let result: ExecutionResult<
 			Void,
 			StringOutput<Unicode.UTF8>,
-			StringOutput<Unicode.UTF8>
+			StringOutput<Unicode.UTF8>,
 		>
 		do {
 			result = try await Subprocess.run(
 				.path(FilePath("/usr/bin/osascript")),
 				arguments: ["-e", script, message],
 				output: .string(limit: 64 * 1024),
-				error: .string(limit: 64 * 1024)
+				error: .string(limit: 64 * 1024),
 			)
 		} catch {
 			throw RuntimeError("Could not run osascript: \(error)")
@@ -247,13 +248,14 @@ private struct PullRequest: Decodable, Sendable {
 	}
 
 	var latestRemoval: QueueRemoval? {
-		latestQueueRemoval.nodes.compactMap { $0 }.last
+		latestQueueRemoval.nodes.compactMap(\.self).last
 	}
 
 	func queueRemovalNotification(after previous: PullRequest) -> String? {
 		guard !isMerged, !isInMergeQueue else {
 			return nil
 		}
+
 		let newRemoval = latestRemoval?.id != previous.latestRemoval?.id
 			? latestRemoval
 			: nil
@@ -262,11 +264,13 @@ private struct PullRequest: Decodable, Sendable {
 		}
 
 		let prefix = "PR \(number) left the merge queue"
-		guard let reason = newRemoval?.reason,
+		guard
+			let reason = newRemoval?.reason,
 			!reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 		else {
 			return prefix
 		}
+
 		return "\(prefix): \(singleLine(reason, limit: 180))"
 	}
 }
@@ -299,8 +303,8 @@ private enum PullRequestState: Sendable {
 			case .open: "open"
 			case .closed: "closed"
 			case .merged: "merged"
-			case .queued(let entry): queueLabel(entry: entry)
-			case .removedFromQueue(let reason): removalLabel(reason: reason)
+			case let .queued(entry): queueLabel(entry: entry)
+			case let .removedFromQueue(reason): removalLabel(reason: reason)
 			case .unknown: "unknown"
 		}
 	}
@@ -320,6 +324,7 @@ private enum PullRequestState: Sendable {
 		guard let entry else {
 			return "queued"
 		}
+
 		var details = [
 			"position \(entry.position)",
 			queueStateLabel(entry.state),
@@ -339,8 +344,8 @@ private enum PullRequestState: Sendable {
 
 	private func formattedDuration(_ totalSeconds: Int) -> String {
 		let totalSeconds = max(0, totalSeconds)
-		let hours = totalSeconds / 3_600
-		let minutes = totalSeconds % 3_600 / 60
+		let hours = totalSeconds / 3600
+		let minutes = totalSeconds % 3600 / 60
 		let seconds = totalSeconds % 60
 
 		if hours > 0 {
@@ -353,19 +358,21 @@ private enum PullRequestState: Sendable {
 	}
 
 	private func removalLabel(reason: String?) -> String {
-		guard let reason,
+		guard
+			let reason,
 			!reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 		else {
 			return "removed from merge queue"
 		}
+
 		return "removed from merge queue: \(singleLine(reason, limit: 120))"
 	}
 }
 
 private actor PollDisplay {
-	private var pullRequest: PullRequest?
-	private var lastPollDate: Date?
-	private var operationError: (kind: String, message: String)?
+	private var pullRequest: PullRequest? = nil
+	private var lastPollDate: Date? = nil
+	private var operationError: (kind: String, message: String)? = nil
 	private let dateFormatter: DateFormatter = {
 		let formatter = DateFormatter()
 		formatter.locale = Locale(identifier: "en_US_POSIX")
@@ -388,7 +395,7 @@ private actor PollDisplay {
 		lastPollDate = date
 		operationError = (
 			kind: "poll error",
-			message: singleLine(String(describing: error), limit: 160)
+			message: singleLine(String(describing: error), limit: 160),
 		)
 	}
 
@@ -396,7 +403,7 @@ private actor PollDisplay {
 		lastPollDate = date
 		operationError = (
 			kind: "notification error",
-			message: singleLine(String(describing: error), limit: 160)
+			message: singleLine(String(describing: error), limit: 160),
 		)
 	}
 
@@ -409,19 +416,18 @@ private actor PollDisplay {
 		}
 		let status = colorize(
 			"\(symbol) \(description)",
-			foreground: state.color
+			foreground: state.color,
 		)
 
-		let detail: String
-		if let operationError, let lastPollDate {
-			detail = colorize(
+		let detail: String = if let operationError, let lastPollDate {
+			colorize(
 				"\(operationError.kind) \(formatted(lastPollDate)): \(operationError.message)",
-				foreground: .red
+				foreground: .red,
 			)
 		} else if let lastPollDate {
-			detail = "last poll \(formatted(lastPollDate))"
+			"last poll \(formatted(lastPollDate))"
 		} else {
-			detail = "waiting for first poll"
+			"waiting for first poll"
 		}
 
 		return "\(status) - \(detail)"
@@ -439,5 +445,6 @@ private func singleLine(_ text: String, limit: Int) -> String {
 	guard text.count > limit else {
 		return text
 	}
+
 	return "\(text.prefix(limit))…"
 }

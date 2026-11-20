@@ -12,9 +12,6 @@ import Foundation
 /// Properties that can't be read are left `nil` and recorded in `issues`. Parsing never throws, so
 /// one broken note never hides the others.
 struct BlogPost: Equatable, Sendable {
-	/// The value of `type` that marks a note as a blog post.
-	static let type = "blog post"
-
 	enum Status: String, Equatable, Sendable {
 		/// On the site only under `hugo server -D`. Production builds leave it out.
 		case draft
@@ -23,6 +20,9 @@ struct BlogPost: Equatable, Sendable {
 		/// Taken down. Its bundle is deleted from the site repo, and the note stays in the vault.
 		case canceled
 	}
+
+	/// The value of `type` that marks a note as a blog post.
+	static let type = "blog post"
 
 	/// The note's path relative to the source directory, like `Blog Posts/My Post.md`.
 	let relativePath: String
@@ -45,6 +45,44 @@ struct BlogPost: Equatable, Sendable {
 	/// The issues found in the frontmatter. Issues in the body are found when it's converted.
 	let issues: [PostIssue]
 
+	private init(brokenAt relativePath: String, reason: Frontmatter.ParseError) {
+		let message = switch reason {
+			case .unterminated: "the block that opens with --- never closes."
+			case let .invalidYAML(details): details
+		}
+		self.relativePath = relativePath
+		self.status = nil
+		self.slug = nil
+		self.date = nil
+		self.description = nil
+		self.tags = []
+		self.body = ""
+		self.bodyStartLine = 1
+		self.issues = [.invalidFrontmatter(message)]
+	}
+
+	private init(
+		relativePath: String,
+		status: Status?,
+		slug: String?,
+		date: String?,
+		description: String?,
+		tags: [String],
+		body: String,
+		bodyStartLine: Int,
+		issues: [PostIssue],
+	) {
+		self.relativePath = relativePath
+		self.status = status
+		self.slug = slug
+		self.date = date
+		self.description = description
+		self.tags = tags
+		self.body = body
+		self.bodyStartLine = bodyStartLine
+		self.issues = issues
+	}
+
 	/// Parses a note. Returns `nil` when the note isn't a blog post, because it has no frontmatter or
 	/// its `type` isn't `blog post`. A note whose frontmatter can't be read isn't a blog post either,
 	/// since its type can't be known, unless the type line itself says it's one.
@@ -56,6 +94,7 @@ struct BlogPost: Equatable, Sendable {
 			guard declaresBlogPostType(text) else {
 				return nil
 			}
+
 			return BlogPost(brokenAt: relativePath, reason: error)
 		}
 
@@ -158,6 +197,7 @@ struct BlogPost: Equatable, Sendable {
 		guard let match = date.wholeMatch(of: /(\d{4})-(\d{2})-(\d{2})/) else {
 			return false
 		}
+
 		var components = DateComponents()
 		components.year = Int(match.1)
 		components.month = Int(match.2)
@@ -173,43 +213,5 @@ struct BlogPost: Equatable, Sendable {
 		text.split(separator: "\n").contains { line in
 			line.trimmingTrailingWhitespace().wholeMatch(of: /type:\s*["']?blog post["']?/) != nil
 		}
-	}
-
-	private init(brokenAt relativePath: String, reason: Frontmatter.ParseError) {
-		let message = switch reason {
-			case .unterminated: "the block that opens with --- never closes."
-			case let .invalidYAML(details): details
-		}
-		self.relativePath = relativePath
-		self.status = nil
-		self.slug = nil
-		self.date = nil
-		self.description = nil
-		self.tags = []
-		self.body = ""
-		self.bodyStartLine = 1
-		self.issues = [.invalidFrontmatter(message)]
-	}
-
-	private init(
-		relativePath: String,
-		status: Status?,
-		slug: String?,
-		date: String?,
-		description: String?,
-		tags: [String],
-		body: String,
-		bodyStartLine: Int,
-		issues: [PostIssue],
-	) {
-		self.relativePath = relativePath
-		self.status = status
-		self.slug = slug
-		self.date = date
-		self.description = description
-		self.tags = tags
-		self.body = body
-		self.bodyStartLine = bodyStartLine
-		self.issues = issues
 	}
 }

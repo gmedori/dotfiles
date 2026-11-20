@@ -9,13 +9,6 @@ import Yams
 /// written as. Decoding would turn `date: 2025-03-31` into a `Date` at midnight UTC and lose what the
 /// author typed.
 struct Frontmatter {
-	/// The properties, composed but not decoded, so each value keeps the text it was written as.
-	let properties: Yams.Node.Mapping
-	/// Everything after the closing `---`.
-	let body: String
-	/// The 1-based line number in the file where `body` starts.
-	let bodyStartLine: Int
-
 	enum ParseError: Error, Equatable {
 		/// The file opens with `---` but never closes the block.
 		case unterminated
@@ -29,9 +22,16 @@ struct Frontmatter {
 	///
 	/// Yams doesn't mark `Resolver` as `Sendable`, but its rules are constants, so one instance is
 	/// safe to share.
-	nonisolated(unsafe) private static let resolver = Yams.Resolver.default.replacing(
+	private nonisolated(unsafe) static let resolver = Yams.Resolver.default.replacing(
 		try! Yams.Resolver.Rule(.bool, "^(?:true|True|TRUE|false|False|FALSE)$")
 	)
+
+	/// The properties, composed but not decoded, so each value keeps the text it was written as.
+	let properties: Yams.Node.Mapping
+	/// Everything after the closing `---`.
+	let body: String
+	/// The 1-based line number in the file where `body` starts.
+	let bodyStartLine: Int
 
 	/// Splits `text` into frontmatter and body. Returns `nil` when the file has no frontmatter, which
 	/// is any file whose first line isn't `---`.
@@ -67,11 +67,22 @@ struct Frontmatter {
 		return Frontmatter(properties: properties, body: body, bodyStartLine: closingIndex + 2)
 	}
 
+	private static func isDelimiter(_ line: Substring) -> Bool {
+		line.trimmingTrailingWhitespace() == "---"
+	}
+
+	/// Whether the value is null as Yams reads it, which is an empty value, `~`, or `null` written
+	/// without quotes. Obsidian writes an empty property as `key:` with nothing after it.
+	private static func isNull(_ scalar: Yams.Node.Scalar) -> Bool {
+		NSNull.construct(from: scalar) != nil
+	}
+
 	/// The value of `key` as text, or `nil` when it's missing, empty, or `null`.
 	func string(_ key: String) -> String? {
 		guard let scalar = properties[key]?.scalar, !Self.isNull(scalar) else {
 			return nil
 		}
+
 		return scalar.string
 	}
 
@@ -84,6 +95,7 @@ struct Frontmatter {
 		guard let node = properties[key], node.tag == Yams.Tag(.bool) else {
 			return nil
 		}
+
 		return node.bool
 	}
 
@@ -92,6 +104,7 @@ struct Frontmatter {
 		guard let node = properties[key] else {
 			return false
 		}
+
 		return node.scalar == nil
 	}
 
@@ -109,22 +122,13 @@ struct Frontmatter {
 					guard let scalar = node.scalar else {
 						return nil
 					}
+
 					values.append(scalar.string)
 				}
 				return values
 			default:
 				return nil
 		}
-	}
-
-	private static func isDelimiter(_ line: Substring) -> Bool {
-		line.trimmingTrailingWhitespace() == "---"
-	}
-
-	/// Whether the value is null as Yams reads it, which is an empty value, `~`, or `null` written
-	/// without quotes. Obsidian writes an empty property as `key:` with nothing after it.
-	private static func isNull(_ scalar: Yams.Node.Scalar) -> Bool {
-		NSNull.construct(from: scalar) != nil
 	}
 }
 

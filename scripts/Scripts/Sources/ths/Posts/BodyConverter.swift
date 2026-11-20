@@ -44,37 +44,6 @@ struct BundleImage: Equatable, Sendable {
 /// Fenced code blocks and inline code pass through untouched and aren't checked. Everything else is
 /// checked for what the site can't show, like wiki links and raw HTML, and reported as issues.
 struct BodyConverter {
-	static let imageExtensions: Set = ["png", "jpg", "jpeg", "gif", "webp", "avif", "svg"]
-
-	/// The folder the note is in. Images are looked up here and in its `assets/` folder, which is
-	/// where Obsidian saves attachments in this vault.
-	let noteDirectory: URL
-	/// Whether a file exists. Tests swap it out.
-	var fileExists: (URL) -> Bool = { FileManager.default.fileExists(atPath: $0.path(percentEncoded: false)) }
-
-	func convert(_ body: String, startLine: Int) -> ConvertedBody {
-		var state = ConversionState()
-		var lines = Self.removingComments(from: body, startLine: startLine)
-
-		state.title = Self.removeTitle(from: &lines)
-		if state.title == nil {
-			state.issues.append(.missingTitle)
-		}
-
-		for index in lines.indices where !lines[index].isCode {
-			lines[index].text = convertLine(lines[index].text, line: lines[index].number, state: &state)
-		}
-		Self.foldCaptions(into: &lines)
-
-		var markdown = lines.map(\.text).joined(separator: "\n")
-		while markdown.last?.isWhitespace == true {
-			markdown.removeLast()
-		}
-		markdown += "\n"
-
-		return ConvertedBody(title: state.title, markdown: markdown, images: state.images, issues: state.issues)
-	}
-
 	// MARK: Lines
 
 	/// A line of the body, with its line number in the note.
@@ -86,6 +55,26 @@ struct BodyConverter {
 		/// Whether the line is part of a fenced code block, fences included.
 		let isCode: Bool
 	}
+
+	// MARK: Line Conversion
+
+	/// What a conversion has found so far.
+	private struct ConversionState {
+		/// The text of the leading H1, once it's found.
+		var title: String? = nil
+		/// The images found so far, in the order they first appear.
+		var images: [BundleImage] = []
+		/// The issues found so far.
+		var issues: [PostIssue] = []
+	}
+
+	static let imageExtensions: Set = ["png", "jpg", "jpeg", "gif", "webp", "avif", "svg"]
+
+	/// The folder the note is in. Images are looked up here and in its `assets/` folder, which is
+	/// where Obsidian saves attachments in this vault.
+	let noteDirectory: URL
+	/// Whether a file exists. Tests swap it out.
+	var fileExists: (URL) -> Bool = { FileManager.default.fileExists(atPath: $0.path(percentEncoded: false)) }
 
 	/// Splits the body into lines, marks fenced code, and removes `%% comments %%`, which can span
 	/// lines.
@@ -121,6 +110,7 @@ struct BodyConverter {
 					}
 					break
 				}
+
 				hadComment = true
 				if !inComment {
 					text += rest[..<marker.lowerBound]
@@ -156,16 +146,90 @@ struct BodyConverter {
 		return String(match.1)
 	}
 
-	// MARK: Line Conversion
+	/// The image's file name in the bundle. It's lowercase, with runs of spaces and underscores turned
+	/// into hyphens, so `Pre-order Badge.png` becomes `pre-order-badge.png`.
+	static func bundleName(for fileName: String) -> String {
+		fileName.lowercased().replacing(/[\s_]+/, with: "-")
+	}
 
-	/// What a conversion has found so far.
-	private struct ConversionState {
-		/// The text of the leading H1, once it's found.
-		var title: String?
-		/// The images found so far, in the order they first appear.
-		var images: [BundleImage] = []
-		/// The issues found so far.
-		var issues: [PostIssue] = []
+	// MARK: Captions
+
+	/// Moves an italic line under a standalone image into the image's title, which the render hook
+	/// shows as the caption. Images that already have a title keep it.
+	static func foldCaptions(into lines: inout [Line]) {
+		var index = lines.startIndex
+		while index < lines.endIndex {
+			defer { index += 1 }
+			guard
+				!lines[index].isCode,
+				let image = lines[index].text.wholeMatch(of: /\s*(!\[[^\]]*\]\([^\s)"]+)\)\s*/)
+			else {
+				continue
+			}
+
+			var captionIndex = index + 1
+			if captionIndex < lines.endIndex, lines[captionIndex].text.allSatisfy(\.isWhitespace) {
+				captionIndex += 1
+			}
+			guard
+				captionIndex < lines.endIndex,
+				!lines[captionIndex].isCode,
+				let caption = lines[captionIndex].text.wholeMatch(of: /\s*(?:_([^_].*?)_|\*([^*].*?)\*)\s*/)
+			else {
+				continue
+			}
+
+			let text = String(caption.1 ?? caption.2 ?? "")
+				.replacing("\\", with: "\\\\")
+				.replacing("\"", with: "\\\"")
+			lines[index].text = "\(image.1) \"\(text)\")"
+			lines.removeSubrange((index + 1) ... captionIndex)
+		}
+	}
+
+	// MARK: Inline Code
+
+	/// The line with the contents of every inline code span replaced by spaces, so checks don't
+	/// match code.
+	static func blankingInlineCode(in text: String) -> String {
+		text.replacing(/`[^`]*`/) { match in
+			String(repeating: " ", count: match.output.count)
+		}
+	}
+
+	/// Applies `transform` to the parts of the line outside inline code spans.
+	static func replacingOutsideInlineCode(in text: String, _ transform: (String) -> String) -> String {
+		var result = ""
+		var rest = Substring(text)
+		while let code = rest.firstMatch(of: /`[^`]*`/) {
+			result += transform(String(rest[..<code.range.lowerBound]))
+			result += code.output
+			rest = rest[code.range.upperBound...]
+		}
+		return result + transform(String(rest))
+	}
+
+	func convert(_ body: String, startLine: Int) -> ConvertedBody {
+		var state = ConversionState()
+		var lines = Self.removingComments(from: body, startLine: startLine)
+
+		state.title = Self.removeTitle(from: &lines)
+		if state.title == nil {
+			state.issues.append(.missingTitle)
+		}
+
+		for index in lines.indices where !lines[index].isCode {
+			lines[index].text = convertLine(lines[index].text, line: lines[index].number, state: &state)
+		}
+		Self.foldCaptions(into: &lines)
+
+		var markdown = lines.map(\.text).joined(separator: "\n")
+		while markdown.last?.isWhitespace == true {
+			markdown.removeLast()
+		}
+		markdown += "\n"
+
+		return ConvertedBody(title: state.title, markdown: markdown, images: state.images, issues: state.issues)
 	}
 
 	private func convertLine(_ text: String, line: Int, state: inout ConversionState) -> String {
@@ -236,6 +300,7 @@ struct BodyConverter {
 		guard let name = addImage(target, line: line, state: &state) else {
 			return "![[\(target)]]"
 		}
+
 		if alt.isEmpty {
 			state.issues.append(.missingAltText(name: target, line: line))
 		}
@@ -259,6 +324,7 @@ struct BodyConverter {
 		guard let name = addImage(path, line: line, state: &state) else {
 			return original
 		}
+
 		if alt.trimmingCharacters(in: .whitespaces).isEmpty {
 			state.issues.append(.missingAltText(name: path, line: line))
 		}
@@ -280,7 +346,13 @@ struct BodyConverter {
 			return nil
 		}
 
-		let image = convertImage(alt: attributes["alt"] ?? "", destination: source, title: nil, line: line, state: &state)
+		let image = convertImage(
+			alt: attributes["alt"] ?? "",
+			destination: source,
+			title: nil,
+			line: line,
+			state: &state,
+		)
 		return "[\(image)](\(match.1))"
 	}
 
@@ -307,68 +379,5 @@ struct BodyConverter {
 		}
 		state.images.append(BundleImage(source: source, name: name))
 		return name
-	}
-
-	/// The image's file name in the bundle. It's lowercase, with runs of spaces and underscores turned
-	/// into hyphens, so `Pre-order Badge.png` becomes `pre-order-badge.png`.
-	static func bundleName(for fileName: String) -> String {
-		fileName.lowercased().replacing(/[\s_]+/, with: "-")
-	}
-
-	// MARK: Captions
-
-	/// Moves an italic line under a standalone image into the image's title, which the render hook
-	/// shows as the caption. Images that already have a title keep it.
-	static func foldCaptions(into lines: inout [Line]) {
-		var index = lines.startIndex
-		while index < lines.endIndex {
-			defer { index += 1 }
-			guard
-				!lines[index].isCode,
-				let image = lines[index].text.wholeMatch(of: /\s*(!\[[^\]]*\]\([^\s)"]+)\)\s*/)
-			else {
-				continue
-			}
-
-			var captionIndex = index + 1
-			if captionIndex < lines.endIndex, lines[captionIndex].text.allSatisfy(\.isWhitespace) {
-				captionIndex += 1
-			}
-			guard
-				captionIndex < lines.endIndex,
-				!lines[captionIndex].isCode,
-				let caption = lines[captionIndex].text.wholeMatch(of: /\s*(?:_([^_].*?)_|\*([^*].*?)\*)\s*/)
-			else {
-				continue
-			}
-
-			let text = String(caption.1 ?? caption.2 ?? "")
-				.replacing("\\", with: "\\\\")
-				.replacing("\"", with: "\\\"")
-			lines[index].text = "\(image.1) \"\(text)\")"
-			lines.removeSubrange((index + 1) ... captionIndex)
-		}
-	}
-
-	// MARK: Inline Code
-
-	/// The line with the contents of every inline code span replaced by spaces, so checks don't
-	/// match code.
-	static func blankingInlineCode(in text: String) -> String {
-		text.replacing(/`[^`]*`/) { match in
-			String(repeating: " ", count: match.output.count)
-		}
-	}
-
-	/// Applies `transform` to the parts of the line outside inline code spans.
-	static func replacingOutsideInlineCode(in text: String, _ transform: (String) -> String) -> String {
-		var result = ""
-		var rest = Substring(text)
-		while let code = rest.firstMatch(of: /`[^`]*`/) {
-			result += transform(String(rest[..<code.range.lowerBound]))
-			result += code.output
-			rest = rest[code.range.upperBound...]
-		}
-		return result + transform(String(rest))
 	}
 }

@@ -6,6 +6,13 @@ import System
 
 /// Runs `gh`, the GitHub CLI.
 public struct GitHubCLI: Sendable {
+	/// What `gh` printed, and whether it exited successfully.
+	public struct Output: Sendable {
+		public let succeeded: Bool
+		public let standardOutput: String
+		public let standardError: String
+	}
+
 	/// The most `gh` can print to each of standard output and standard error.
 	public static let outputLimit = 1024 * 1024
 
@@ -16,11 +23,10 @@ public struct GitHubCLI: Sendable {
 		self.executable = executable
 	}
 
-	/// What `gh` printed, and whether it exited successfully.
-	public struct Output: Sendable {
-		public let succeeded: Bool
-		public let standardOutput: String
-		public let standardError: String
+	/// The command as `gh` and its first two arguments that aren't options, like `gh pr view`.
+	static func commandName(_ arguments: [String]) -> String {
+		let words = arguments.prefix { !$0.hasPrefix("-") }.prefix(2)
+		return (["gh"] + words).joined(separator: " ")
 	}
 
 	/// Runs `gh` with `arguments`, from `directory` when it's given, and returns what it printed
@@ -53,12 +59,7 @@ public struct GitHubCLI: Sendable {
 			let error = output.standardError.trimmingCharacters(in: .whitespacesAndNewlines)
 			throw RuntimeError(error.isEmpty ? "\(Self.commandName(arguments)) failed." : error)
 		}
-		return output.standardOutput
-	}
 
-	/// The command as `gh` and its first two arguments that aren't options, like `gh pr view`.
-	static func commandName(_ arguments: [String]) -> String {
-		let words = arguments.prefix { !$0.hasPrefix("-") }.prefix(2)
-		return (["gh"] + words).joined(separator: " ")
+		return output.standardOutput
 	}
 }

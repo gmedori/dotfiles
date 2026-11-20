@@ -105,6 +105,7 @@ enum CatalogEntry: Sendable {
 		guard case let .upToDate(_, bundle, generated, _) = self else {
 			return false
 		}
+
 		return bundle.storedHash != PageBundle.contentHash(of: generated.files)
 	}
 
@@ -161,7 +162,7 @@ struct Catalog: Sendable {
 					issues.append(.duplicateSlug(otherPath: otherPath))
 				}
 			}
-			entries.append(try classify(post, issues: issues, bundles: bundles, source: source))
+			try entries.append(classify(post, issues: issues, bundles: bundles, source: source))
 		}
 
 		let claimedSlugs = Set(pathsBySlug.keys)
@@ -169,6 +170,7 @@ struct Catalog: Sendable {
 			guard !claimedSlugs.contains(bundle.slug) else {
 				continue
 			}
+
 			entries.append(bundle.isDraft ? .orphanedDraft(bundle) : .orphanedPublished(bundle))
 		}
 
@@ -192,12 +194,25 @@ struct Catalog: Sendable {
 			guard let existing else {
 				return .vaultOnly(post)
 			}
-			return existing.isManaged ? .canceled(post, bundle: existing) : .conflict(post, bundle: existing, warnings: [])
+
+			return existing.isManaged
+				? .canceled(post, bundle: existing)
+				: .conflict(
+					post,
+					bundle: existing,
+					warnings: [],
+				)
 		}
 
 		let noteDirectory = source.appending(path: post.relativePath).deletingLastPathComponent()
 		let body = BodyConverter(noteDirectory: noteDirectory).convert(post.body, startLine: post.bodyStartLine)
-		let readable = !issues.contains { if case .invalidFrontmatter = $0 { true } else { false } }
+		let readable = !issues.contains {
+			if case .invalidFrontmatter = $0 {
+				true
+			} else {
+				false
+			}
+		}
 		let allIssues = issues + (readable ? body.issues : [])
 
 		// A post whose status can't be read is held to everything a published post is.
@@ -207,6 +222,7 @@ struct Catalog: Sendable {
 		guard blocking.isEmpty else {
 			return .invalid(post, issues: blocking, warnings: warnings)
 		}
+
 		// A missing slug always blocks a post, so a post that gets this far has one.
 		guard let slug = post.slug else {
 			return .invalid(post, issues: [.missingSlug], warnings: warnings)
@@ -219,6 +235,7 @@ struct Catalog: Sendable {
 		guard existing.isManaged else {
 			return .conflict(post, bundle: existing, warnings: warnings)
 		}
+
 		if post.status == .draft, !existing.isDraft {
 			return .retracted(post, bundle: existing, warnings: warnings)
 		}

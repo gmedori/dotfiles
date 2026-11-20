@@ -3,5 +3,5 @@ public func clearLine() {
 }
 
 enum ControlConstants {
-	static let clearLineSequence: String = "\(escape)[2K\r"
+	static let clearLineSequence = "\(escape)[2K\r"
 }

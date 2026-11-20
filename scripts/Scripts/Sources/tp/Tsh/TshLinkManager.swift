@@ -12,10 +12,10 @@ enum TshLinkState: Equatable {
 
 	var targetURL: URL? {
 		switch self {
-			case .broken(let targetURL), .linked(let targetURL):
-				return targetURL
+			case let .broken(targetURL), let .linked(targetURL):
+				targetURL
 			case .missing, .occupied:
-				return nil
+				nil
 		}
 	}
 }
@@ -27,18 +27,18 @@ struct TshLinkManager {
 	let homeDirectory: URL
 	let environment: [String: String]
 
+	var linkURL: URL {
+		homeDirectory.appending(path: "dotfiles/scripts/bin/tsh")
+	}
+
 	init(
 		fileManager: FileManager = .default,
 		homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser,
-		environment: [String: String] = ProcessInfo.processInfo.environment
+		environment: [String: String] = ProcessInfo.processInfo.environment,
 	) {
 		self.fileManager = fileManager
 		self.homeDirectory = homeDirectory.standardizedFileURL
 		self.environment = environment
-	}
-
-	var linkURL: URL {
-		homeDirectory.appending(path: "dotfiles/scripts/bin/tsh")
 	}
 
 	// MARK: - State
@@ -53,7 +53,7 @@ struct TshLinkManager {
 
 		let targetURL = URL(
 			fileURLWithPath: destination,
-			relativeTo: linkURL.deletingLastPathComponent()
+			relativeTo: linkURL.deletingLastPathComponent(),
 		).standardizedFileURL
 
 		return fileManager.fileExists(atPath: targetURL.path)
@@ -75,8 +75,8 @@ struct TshLinkManager {
 				throw RuntimeError(
 					"~/dotfiles/scripts/bin/tsh exists but is not a symbolic link; refusing to replace it."
 				)
-			case .linked(let currentTargetURL)
-				where currentTargetURL.resolvingSymlinksInPath().path == targetURL.path:
+			case let .linked(currentTargetURL)
+			where currentTargetURL.resolvingSymlinksInPath().path == targetURL.path:
 				return false
 			case .missing, .broken, .linked:
 				break
@@ -84,14 +84,14 @@ struct TshLinkManager {
 
 		try fileManager.createDirectory(
 			at: linkURL.deletingLastPathComponent(),
-			withIntermediateDirectories: true
+			withIntermediateDirectories: true,
 		)
 
 		let temporaryLinkURL = linkURL.deletingLastPathComponent()
 			.appending(path: ".tsh.\(UUID().uuidString).tmp")
 		try fileManager.createSymbolicLink(
 			at: temporaryLinkURL,
-			withDestinationURL: targetURL
+			withDestinationURL: targetURL,
 		)
 		defer {
 			try? fileManager.removeItem(at: temporaryLinkURL)
@@ -127,14 +127,13 @@ struct TshLinkManager {
 		guard case .linked = state() else {
 			return nil
 		}
-
 		guard let path = environment["PATH"] else {
 			return "~/dotfiles/scripts/bin is not in PATH."
 		}
 
 		let workingDirectory = URL(
 			fileURLWithPath: fileManager.currentDirectoryPath,
-			isDirectory: true
+			isDirectory: true,
 		)
 		for component in path.split(separator: ":", omittingEmptySubsequences: false) {
 			let directory = component.isEmpty

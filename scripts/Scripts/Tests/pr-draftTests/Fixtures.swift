@@ -8,10 +8,14 @@ final class TemporaryVault {
 	let root: URL
 
 	init() throws {
-		root = FileManager.default.temporaryDirectory
+		self.root = FileManager.default
+			.temporaryDirectory
 			.appending(path: "pr-draft-tests-\(UUID().uuidString)", directoryHint: .isDirectory)
 			.resolvingSymlinksInPath()
-		try FileManager.default.createDirectory(at: root.appending(path: ".obsidian"), withIntermediateDirectories: true)
+		try FileManager.default.createDirectory(
+			at: root.appending(path: ".obsidian"),
+			withIntermediateDirectories: true,
+		)
 	}
 
 	deinit {
@@ -55,54 +59,59 @@ extension URL {
 struct FakeGitHubCLI {
 	static let url = "https://github.com/gmedori/example/pull/7"
 	static let script = """
-	#!/bin/sh
-	dir="$(dirname "$0")"
-	pwd -P >> "$dir/pwd"
-	for arg in "$@"; do printf '%s\\n' "$arg" >> "$dir/args"; done
-	printf -- '--\\n' >> "$dir/args"
-	command="$1 $2"
-	subcommand="$2"
-	if [ "$command" = "pr view" ]; then cat "$dir/pr-body"; exit 0; fi
-	if [ "$command" = "pr create" ] && [ "$3" = "--help" ]; then echo "      --attach file   Attach an image or video file"; exit 0; fi
-	if [ "$command" = "pr create" ] && [ -f "$dir/no-pr" ]; then echo "a pull request for branch already exists" >&2; exit 1; fi
-	body=""
-	attach=""
-	while [ $# -gt 0 ]; do
-		case "$1" in
-			--body-file) body="$2"; shift ;;
-			--attach) attach="$attach ${2%%#*}"; shift ;;
-		esac
-		shift
-	done
-	cp "$body" "$dir/pr-body"
-	status=0
-	for file in $attach; do
-		if grep -qxF "$file" "$dir/fail-$subcommand" 2>/dev/null; then status=1; continue; fi
-		sed -i '' "s|($file)|(https://github.com/user-attachments/assets/${file#./})|g" "$dir/pr-body"
-	done
-	if [ "$command" = "pr create" ]; then echo "\(FakeGitHubCLI.url)"; fi
-	exit $status
-	"""
+		#!/bin/sh
+		dir="$(dirname "$0")"
+		pwd -P >> "$dir/pwd"
+		for arg in "$@"; do printf '%s\\n' "$arg" >> "$dir/args"; done
+		printf -- '--\\n' >> "$dir/args"
+		command="$1 $2"
+		subcommand="$2"
+		if [ "$command" = "pr view" ]; then cat "$dir/pr-body"; exit 0; fi
+		if [ "$command" = "pr create" ] && [ "$3" = "--help" ]; then echo "      --attach file   Attach an image or video file"; exit 0; fi
+		if [ "$command" = "pr create" ] && [ -f "$dir/no-pr" ]; then echo "a pull request for branch already exists" >&2; exit 1; fi
+		body=""
+		attach=""
+		while [ $# -gt 0 ]; do
+			case "$1" in
+				--body-file) body="$2"; shift ;;
+				--attach) attach="$attach ${2%%#*}"; shift ;;
+			esac
+			shift
+		done
+		cp "$body" "$dir/pr-body"
+		status=0
+		for file in $attach; do
+			if grep -qxF "$file" "$dir/fail-$subcommand" 2>/dev/null; then status=1; continue; fi
+			sed -i '' "s|($file)|(https://github.com/user-attachments/assets/${file#./})|g" "$dir/pr-body"
+		done
+		if [ "$command" = "pr create" ]; then echo "\(FakeGitHubCLI.url)"; fi
+		exit $status
+		"""
 
 	let directory: URL
-
-	init() throws {
-		directory = FileManager.default.temporaryDirectory
-			.appending(path: "pr-draft-fake-gh-\(UUID().uuidString)", directoryHint: .isDirectory)
-			.resolvingSymlinksInPath()
-		try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-		let script = directory.appending(path: "gh")
-		try Self.script.write(to: script, atomically: true, encoding: .utf8)
-		try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: script.path(percentEncoded: false))
-	}
 
 	var cli: GitHubCLI {
 		GitHubCLI(executable: .path(FilePath(directory.appending(path: "gh").path(percentEncoded: false))))
 	}
 
+	init() throws {
+		self.directory = FileManager.default
+			.temporaryDirectory
+			.appending(path: "pr-draft-fake-gh-\(UUID().uuidString)", directoryHint: .isDirectory)
+			.resolvingSymlinksInPath()
+		try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+		let script = directory.appending(path: "gh")
+		try Self.script.write(to: script, atomically: true, encoding: .utf8)
+		try FileManager.default.setAttributes(
+			[.posixPermissions: 0o755],
+			ofItemAtPath: script.path(percentEncoded: false),
+		)
+	}
+
 	/// Makes the staged paths fail to upload in `gh pr create` or `gh pr edit`.
 	func fail(_ staged: [String], in subcommand: String) throws {
-		try staged.joined(separator: "\n").appending("\n")
+		try staged.joined(separator: "\n")
+			.appending("\n")
 			.write(to: directory.appending(path: "fail-\(subcommand)"), atomically: true, encoding: .utf8)
 	}
 

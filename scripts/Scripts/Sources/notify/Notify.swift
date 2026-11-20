@@ -12,7 +12,7 @@ struct Notify: ParsableCommand {
 	var message: [String]
 
 	@Option(name: .shortAndLong, help: "The title of the message")
-	var title: String = "Notify"
+	var title = "Notify"
 
 	@Option(name: .long, help: "An optional subtitle to include with the notification")
 	var subtitle: String?

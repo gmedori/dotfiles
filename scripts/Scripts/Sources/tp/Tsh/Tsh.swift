@@ -5,12 +5,6 @@ import Foundation
 // MARK: - tsh Command Group
 
 struct Tsh: AsyncParsableCommand {
-	static let configuration = CommandConfiguration(
-		commandName: "tsh",
-		abstract: "Manage the tsh executable available in ~/dotfiles/scripts/bin",
-		subcommands: [ListInstallations.self, Use.self, Current.self, Unlink.self],
-	)
-
 	// MARK: - List
 
 	struct ListInstallations: AsyncParsableCommand {
@@ -20,7 +14,7 @@ struct Tsh: AsyncParsableCommand {
 			aliases: ["ls"],
 		)
 
-		func run() async throws {
+		func run() async {
 			let discovery = TshDiscovery()
 			let installations = await discovery.discover()
 			let linkManager = TshLinkManager()
@@ -47,7 +41,7 @@ struct Tsh: AsyncParsableCommand {
 
 		private func printLinkProblem(for state: TshLinkState) {
 			switch state {
-				case .broken(let targetURL):
+				case let .broken(targetURL):
 					print("\nWarning: ~/dotfiles/scripts/bin/tsh points to missing file \(targetURL.path).")
 				case .occupied:
 					print("\nWarning: ~/dotfiles/scripts/bin/tsh exists but is not a symbolic link.")
@@ -97,7 +91,7 @@ struct Tsh: AsyncParsableCommand {
 				installation = try TshSelector.select(
 					version: version,
 					source: source,
-					from: installations
+					from: installations,
 				)
 			} else {
 				throw ValidationError("Supply either a version or --path.")
@@ -134,9 +128,9 @@ struct Tsh: AsyncParsableCommand {
 					print("No tsh installation is selected.")
 				case .occupied:
 					throw RuntimeError("~/dotfiles/scripts/bin/tsh exists but is not a symbolic link.")
-				case .broken(let targetURL):
+				case let .broken(targetURL):
 					throw RuntimeError("~/dotfiles/scripts/bin/tsh points to missing file \(targetURL.path).")
-				case .linked(let targetURL):
+				case let .linked(targetURL):
 					let installation = try await TshDiscovery().installation(at: targetURL.path)
 					print("Version: \(installation.version)")
 					print("Source:  \(installation.source.rawValue)")
@@ -169,6 +163,12 @@ struct Tsh: AsyncParsableCommand {
 			print(removed ? "Removed ~/dotfiles/scripts/bin/tsh." : "No tsh installation was selected.")
 		}
 	}
+
+	static let configuration = CommandConfiguration(
+		commandName: "tsh",
+		abstract: "Manage the tsh executable available in ~/dotfiles/scripts/bin",
+		subcommands: [ListInstallations.self, Use.self, Current.self, Unlink.self],
+	)
 }
 
 // MARK: - List Formatting
@@ -177,13 +177,13 @@ private struct TshInstallationTable {
 	private let versionWidth: Int
 	private let sourceWidth: Int
 
-	init(installations: [TshInstallation]) {
-		versionWidth = max("VERSION".count, installations.map(\.version.count).max() ?? 0)
-		sourceWidth = max("SOURCE".count, installations.map(\.source.rawValue.count).max() ?? 0)
-	}
-
 	var header: String {
 		formattedRow(marker: " ", version: "VERSION", source: "SOURCE", location: "PATH")
+	}
+
+	init(installations: [TshInstallation]) {
+		self.versionWidth = max("VERSION".count, installations.map(\.version.count).max() ?? 0)
+		self.sourceWidth = max("SOURCE".count, installations.map(\.source.rawValue.count).max() ?? 0)
 	}
 
 	func row(for installation: TshInstallation, isActive: Bool) -> String {
@@ -191,7 +191,7 @@ private struct TshInstallationTable {
 			marker: isActive ? "*" : " ",
 			version: installation.version,
 			source: installation.source.rawValue,
-			location: installation.displayPath
+			location: installation.displayPath,
 		)
 	}
 
@@ -199,7 +199,7 @@ private struct TshInstallationTable {
 		marker: String,
 		version: String,
 		source: String,
-		location: String
+		location: String,
 	) -> String {
 		let selectionAndVersion = "\(marker) \(padded(version, to: versionWidth))"
 		return [selectionAndVersion, padded(source, to: sourceWidth), location]

@@ -39,6 +39,7 @@ enum TshVersionParser {
 				guard field.first == "v" else {
 					continue
 				}
+
 				let version = field.dropFirst()
 				if version.first?.isNumber == true {
 					return String(version)
@@ -64,7 +65,7 @@ enum TshSelector {
 	static func select(
 		version requestedVersion: String,
 		source: TshSource?,
-		from installations: [TshInstallation]
+		from installations: [TshInstallation],
 	) throws -> TshInstallation {
 		let requestedVersion = TshVersionParser.normalize(requestedVersion)
 		let matches = installations.filter {
@@ -78,7 +79,6 @@ enum TshSelector {
 					+ "Run 'tp tsh list' to see available installations."
 			)
 		}
-
 		guard matches.count == 1 else {
 			let choices = matches
 				.map { "  \($0.source.rawValue): \($0.displayPath)" }
@@ -98,7 +98,7 @@ enum TshSelector {
 enum TshPathFormatter {
 	static func display(
 		_ url: URL,
-		homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser
+		homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser,
 	) -> String {
 		let path = url.standardizedFileURL.path
 		let homePath = homeDirectory.standardizedFileURL.path

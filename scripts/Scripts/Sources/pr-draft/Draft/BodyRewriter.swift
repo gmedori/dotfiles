@@ -57,15 +57,6 @@ struct Attachment: Codable, Equatable, Sendable {
 /// line, it's a plain link. So when a video's embed is alone on its line, the rewriter puts blank
 /// lines around it. Images show either way.
 struct BodyRewriter {
-	static let imageExtensions: Set = ["png", "jpg", "jpeg", "gif", "svg"]
-	static let videoExtensions: Set = ["mp4", "mov", "webm"]
-
-	/// The folder the draft is in.
-	let noteDirectory: URL
-	let vault: VaultFiles
-	/// Alt text from the `--alt` option, by attachment number.
-	var altOverrides: [Int: String] = [:]
-
 	struct Result {
 		/// The body without leading or trailing blank lines, ending in one newline.
 		let body: String
@@ -87,6 +78,53 @@ struct BodyRewriter {
 		var placeholders: [String] = []
 	}
 
+	static let imageExtensions: Set = ["png", "jpg", "jpeg", "gif", "svg"]
+	static let videoExtensions: Set = ["mp4", "mov", "webm"]
+
+	/// The folder the draft is in.
+	let noteDirectory: URL
+	let vault: VaultFiles
+	/// Alt text from the `--alt` option, by attachment number.
+	var altOverrides: [Int: String] = [:]
+
+	/// The text of the bold line above `index`, skipping blank lines, or `nil` when the first line
+	/// with text above it isn't entirely bold.
+	static func label(above index: Int, in lines: [String]) -> String? {
+		guard let line = lines[..<index].last(where: { !$0.allSatisfy(\.isWhitespace) }) else {
+			return nil
+		}
+
+		let trimmed = line.trimmingCharacters(in: .whitespaces)
+		return trimmed.wholeMatch(of: /(\*\*|__)(.+?)\1/).map { String($0.2).trimmingCharacters(in: .whitespaces) }
+	}
+
+	/// The text with its brackets removed, which would end a Markdown image's alt text early, and its
+	/// whitespace collapsed. Returns `nil` when nothing is left.
+	static func cleanAlt(_ text: String) -> String? {
+		let cleaned = text
+			.replacing(/[\[\]]/, with: "")
+			.replacing(/\s+/, with: " ")
+			.trimmingCharacters(in: .whitespaces)
+		return cleaned.isEmpty ? nil : cleaned
+	}
+
+	/// The name in lowercase, with every run of other characters than letters and digits turned into
+	/// a hyphen, so `Pasted image 20261118.png` gives `pasted-image-20261118`. It's cut to `limit`
+	/// characters, and it's `file` when nothing is left.
+	static func slug(_ name: String, limit: Int = 40) -> String {
+		let hyphens: Set<Character> = ["-"]
+		let slug = name.lowercased().replacing(/[^a-z0-9]+/, with: "-")
+		let trimmed = String(slug.drop { hyphens.contains($0) }.prefix(limit))
+		let result = String(trimmed.reversed().drop { hyphens.contains($0) }.reversed())
+		return result.isEmpty ? "file" : result
+	}
+
+	// MARK: Text
+
+	private static func isBlank(_ line: String) -> Bool {
+		line.allSatisfy(\.isWhitespace)
+	}
+
 	/// Rewrites `lines`, the first of which is line `startLine` of the draft. Error messages use
 	/// line numbers in the draft.
 	func rewrite(_ lines: [String], startLine: Int) -> Result {
@@ -102,7 +140,8 @@ struct BodyRewriter {
 			needsBlankLine = false
 
 			if let open = fence {
-				if let close = line.wholeMatch(of: /[ ]{0,3}(`{3,}|~{3,})\s*/),
+				if
+					let close = line.wholeMatch(of: /[ ]{0,3}(`{3,}|~{3,})\s*/),
 					close.1.first == open.first, close.1.count >= open.count
 				{
 					fence = nil
@@ -173,6 +212,7 @@ struct BodyRewriter {
 			guard let index = attachmentIndex(for: target, original: original, line: number, state: &state) else {
 				return original
 			}
+
 			if state.attachments[index].kind == .video {
 				return "![](\(state.attachments[index].staged))"
 			}
@@ -236,42 +276,5 @@ struct BodyRewriter {
 		))
 		state.sources.append(source)
 		return state.attachments.count - 1
-	}
-
-	// MARK: Text
-
-	private static func isBlank(_ line: String) -> Bool {
-		line.allSatisfy(\.isWhitespace)
-	}
-
-	/// The text of the bold line above `index`, skipping blank lines, or `nil` when the first line
-	/// with text above it isn't entirely bold.
-	static func label(above index: Int, in lines: [String]) -> String? {
-		guard let line = lines[..<index].last(where: { !$0.allSatisfy(\.isWhitespace) }) else {
-			return nil
-		}
-		let trimmed = line.trimmingCharacters(in: .whitespaces)
-		return trimmed.wholeMatch(of: /(\*\*|__)(.+?)\1/).map { String($0.2).trimmingCharacters(in: .whitespaces) }
-	}
-
-	/// The text with its brackets removed, which would end a Markdown image's alt text early, and its
-	/// whitespace collapsed. Returns `nil` when nothing is left.
-	static func cleanAlt(_ text: String) -> String? {
-		let cleaned = text
-			.replacing(/[\[\]]/, with: "")
-			.replacing(/\s+/, with: " ")
-			.trimmingCharacters(in: .whitespaces)
-		return cleaned.isEmpty ? nil : cleaned
-	}
-
-	/// The name in lowercase, with every run of other characters than letters and digits turned into
-	/// a hyphen, so `Pasted image 20261118.png` gives `pasted-image-20261118`. It's cut to `limit`
-	/// characters, and it's `file` when nothing is left.
-	static func slug(_ name: String, limit: Int = 40) -> String {
-		let hyphens: Set<Character> = ["-"]
-		let slug = name.lowercased().replacing(/[^a-z0-9]+/, with: "-")
-		let trimmed = String(slug.drop { hyphens.contains($0) }.prefix(limit))
-		let result = String(trimmed.reversed().drop { hyphens.contains($0) }.reversed())
-		return result.isEmpty ? "file" : result
 	}
 }

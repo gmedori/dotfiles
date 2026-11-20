@@ -68,27 +68,27 @@ public enum Color: Sendable {
 	}
 }
 
-public extension String.StringInterpolation {
-	mutating func appendInterpolation(_ string: String, background: Color) {
+extension String.StringInterpolation {
+	public mutating func appendInterpolation(_ string: String, background: Color) {
 		appendInterpolation(colorize(string, foreground: .reset, background: background))
 	}
 
-	mutating func appendInterpolation(_ string: String, foreground: Color) {
+	public mutating func appendInterpolation(_ string: String, foreground: Color) {
 		appendInterpolation(colorize(string, foreground: foreground, background: .reset))
 	}
 
-	mutating func appendInterpolation(_ string: String, foreground: Color, background: Color) {
+	public mutating func appendInterpolation(_ string: String, foreground: Color, background: Color) {
 		appendInterpolation(colorize(string, foreground: foreground, background: background))
 	}
 }
 
-public extension String {
-	mutating func colorize(foreground: Color = .reset, background: Color = .reset) {
+extension String {
+	public mutating func colorize(foreground: Color = .reset, background: Color = .reset) {
 		self = Escape.colorize(self, foreground: foreground, background: background)
 	}
 
-	func colorized(foreground: Color = .reset, background: Color = .reset) -> String {
-		return Escape.colorize(self, foreground: foreground, background: background)
+	public func colorized(foreground: Color = .reset, background: Color = .reset) -> String {
+		Escape.colorize(self, foreground: foreground, background: background)
 	}
 }
 

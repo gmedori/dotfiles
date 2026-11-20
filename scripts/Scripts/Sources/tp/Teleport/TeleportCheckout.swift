@@ -12,11 +12,11 @@ struct TeleportCheckout {
 		let expandedPath = (path as NSString).expandingTildeInPath
 		let workingDirectory = URL(
 			fileURLWithPath: fileManager.currentDirectoryPath,
-			isDirectory: true
+			isDirectory: true,
 		)
-		rootDirectory = URL(
+		self.rootDirectory = URL(
 			fileURLWithPath: expandedPath,
-			relativeTo: workingDirectory
+			relativeTo: workingDirectory,
 		)
 		.standardizedFileURL
 		.resolvingSymlinksInPath()
@@ -24,7 +24,7 @@ struct TeleportCheckout {
 		var isDirectory: ObjCBool = false
 		guard fileManager.fileExists(
 			atPath: rootDirectory.path,
-			isDirectory: &isDirectory
+			isDirectory: &isDirectory,
 		), isDirectory.boolValue else {
 			throw ValidationError(
 				"Teleport checkout is not a directory: \(rootDirectory.path)"
@@ -33,7 +33,8 @@ struct TeleportCheckout {
 
 		let makefile = rootDirectory.appending(path: "Makefile")
 		let deployScript = enterpriseDirectory.appending(path: "scripts/deploy-cloud.sh")
-		guard fileManager.fileExists(atPath: makefile.path),
+		guard
+			fileManager.fileExists(atPath: makefile.path),
 			fileManager.fileExists(atPath: deployScript.path)
 		else {
 			throw ValidationError(

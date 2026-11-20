@@ -78,7 +78,7 @@ struct ChapterSplitter: AsyncParsableCommand {
 			let formattedIntermediateFileNumber = i.formatted(
 				.number
 					.precision(.integerLength(3))
-					.grouping(.never),
+					.grouping(.never)
 			)
 			let intermediateTitle = "output-\(formattedIntermediateFileNumber).mkv"
 
@@ -86,7 +86,7 @@ struct ChapterSplitter: AsyncParsableCommand {
 			let formattedOutputNumber = episodeNumber.formatted(
 				.number
 					.precision(.integerLength(integerLength))
-					.grouping(.never),
+					.grouping(.never)
 			)
 			let episodeTitle = outputFileFormat.replacingOccurrences(of: "%n", with: formattedOutputNumber)
 			echo("Renaming \(intermediateTitle) to \(episodeTitle)... ")

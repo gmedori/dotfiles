@@ -71,7 +71,7 @@ struct GitHubPermalink: AsyncParsableCommand {
 			repositoryIsDirectory.boolValue
 		else {
 			throw ValidationError(
-				"Repository root is not a directory: \(repositoryURL.path)",
+				"Repository root is not a directory: \(repositoryURL.path)"
 			)
 		}
 
@@ -98,12 +98,12 @@ struct GitHubPermalink: AsyncParsableCommand {
 		let repositoryPrefix = repositoryURL.path + "/"
 		guard resolvedFileURL.path.hasPrefix(repositoryPrefix) else {
 			throw ValidationError(
-				"File is outside the repository root: \(resolvedFileURL.path)",
+				"File is outside the repository root: \(resolvedFileURL.path)"
 			)
 		}
 
 		let relativePath = String(
-			resolvedFileURL.path.dropFirst(repositoryPrefix.count),
+			resolvedFileURL.path.dropFirst(repositoryPrefix.count)
 		)
 		return (repositoryURL, relativePath)
 	}

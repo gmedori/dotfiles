@@ -49,10 +49,10 @@ enum MDMEnrollment {
 				.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 			throw RuntimeError(error.isEmpty ? "profiles status failed." : error)
 		}
-
 		guard let isEnrolled = isEnrolled(from: result.standardOutput ?? "") else {
 			throw RuntimeError("profiles status didn't report an MDM enrollment.")
 		}
+
 		return isEnrolled
 	}
 

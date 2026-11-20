@@ -8,6 +8,7 @@ extension GitHubCLI {
 		guard let output = try? await run(["pr", "create", "--help"]) else {
 			return false
 		}
+
 		return (output.standardOutput + output.standardError).contains("--attach")
 	}
 

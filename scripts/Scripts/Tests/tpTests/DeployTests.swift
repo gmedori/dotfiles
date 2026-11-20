@@ -2,10 +2,9 @@ import Foundation
 import Testing
 @testable import tp
 
-@Suite("deploy nightly tag resolution")
-struct DeployNightlyTagResolverTests {
-	@Test("Selects the newest matching nightly")
-	func selectsNewestNightly() {
+struct `deploy nightly tag resolution` {
+	@Test
+	func `Selects the newest matching nightly`() {
 		let tags = [
 			"19.0.0-prealpha.2-nightly20260817-1-master",
 			"19.0.0-prealpha.2-nightly20260916-1-master",
@@ -15,13 +14,13 @@ struct DeployNightlyTagResolverTests {
 		#expect(
 			NightlyTagResolver.newestTag(
 				for: "19.0.0-prealpha.2",
-				from: tags
+				from: tags,
 			) == "19.0.0-prealpha.2-nightly20260916-1-master"
 		)
 	}
 
-	@Test("Accepts commit and branch suffixes")
-	func acceptsPublishedSuffixes() {
+	@Test
+	func `Accepts commit and branch suffixes`() {
 		let tags = [
 			"19.0.0-prealpha.2-nightly20260915-1-6c1e6e25",
 			"19.0.0-prealpha.2-nightly20260916-1-master",
@@ -30,13 +29,13 @@ struct DeployNightlyTagResolverTests {
 		#expect(
 			NightlyTagResolver.newestTag(
 				for: "19.0.0-prealpha.2",
-				from: tags
+				from: tags,
 			) == "19.0.0-prealpha.2-nightly20260916-1-master"
 		)
 	}
 
-	@Test("Uses numeric build ordering")
-	func usesNumericBuildOrdering() {
+	@Test
+	func `Uses numeric build ordering`() {
 		let tags = [
 			"19.0.0-prealpha.2-nightly20260916-2-master",
 			"19.0.0-prealpha.2-nightly20260916-10-master",
@@ -45,13 +44,13 @@ struct DeployNightlyTagResolverTests {
 		#expect(
 			NightlyTagResolver.newestTag(
 				for: "19.0.0-prealpha.2",
-				from: tags
+				from: tags,
 			) == "19.0.0-prealpha.2-nightly20260916-10-master"
 		)
 	}
 
-	@Test("Prefers master for otherwise equal tags")
-	func prefersMaster() {
+	@Test
+	func `Prefers master for otherwise equal tags`() {
 		let tags = [
 			"19.0.0-prealpha.2-nightly20260916-1-feat",
 			"19.0.0-prealpha.2-nightly20260916-1-master",
@@ -60,13 +59,13 @@ struct DeployNightlyTagResolverTests {
 		#expect(
 			NightlyTagResolver.newestTag(
 				for: "19.0.0-prealpha.2",
-				from: tags
+				from: tags,
 			) == "19.0.0-prealpha.2-nightly20260916-1-master"
 		)
 	}
 
-	@Test("Ignores malformed nightlies")
-	func ignoresMalformedTags() {
+	@Test
+	func `Ignores malformed nightlies`() {
 		let tags = [
 			"19.0.0-prealpha.2",
 			"19.0.0-prealpha.2-nightly2026091-1-master",
@@ -76,16 +75,15 @@ struct DeployNightlyTagResolverTests {
 		#expect(
 			NightlyTagResolver.newestTag(
 				for: "19.0.0-prealpha.2",
-				from: tags
+				from: tags,
 			) == nil
 		)
 	}
 }
 
-@Suite("Public ECR repository parsing")
-struct PublicECRRepositoryTests {
-	@Test("Parses a registry alias and nested repository")
-	func parsesRepository() throws {
+struct `Public ECR repository parsing` {
+	@Test
+	func `Parses a registry alias and nested repository`() throws {
 		let repository = try PublicECRRepository(
 			"public.ecr.aws/gravitational-staging/team/teleport-ent-distroless"
 		)
@@ -98,18 +96,17 @@ struct PublicECRRepositoryTests {
 		)
 	}
 
-	@Test("Rejects a non-public repository")
-	func rejectsNonPublicRepository() {
+	@Test
+	func `Rejects a non-public repository`() {
 		#expect(throws: (any Error).self) {
 			_ = try PublicECRRepository("example.com/teleport-ent-distroless")
 		}
 	}
 }
 
-@Suite("Teleport checkout")
-struct TeleportCheckoutTests {
-	@Test("Resolves the root and enterprise directories")
-	func resolvesDirectories() throws {
+struct `Teleport checkout` {
+	@Test
+	func `Resolves the root and enterprise directories`() throws {
 		let fixture = try TeleportCheckoutFixture()
 		defer { fixture.remove() }
 
@@ -119,15 +116,16 @@ struct TeleportCheckoutTests {
 		#expect(checkout.enterpriseDirectory.path == fixture.root.appending(path: "e").path)
 	}
 
-	@Test("Rejects a directory without the enterprise deploy script")
-	func rejectsIncompleteCheckout() throws {
-		let root = FileManager.default.temporaryDirectory
+	@Test
+	func `Rejects a directory without the enterprise deploy script`() throws {
+		let root = FileManager.default
+			.temporaryDirectory
 			.appending(path: "tp-checkout-tests-\(UUID().uuidString)")
 		try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
 		defer { try? FileManager.default.removeItem(at: root) }
 		#expect(FileManager.default.createFile(
 			atPath: root.appending(path: "Makefile").path,
-			contents: Data()
+			contents: Data(),
 		))
 
 		#expect(throws: (any Error).self) {
@@ -140,16 +138,17 @@ private struct TeleportCheckoutFixture {
 	let root: URL
 
 	init() throws {
-		root = FileManager.default.temporaryDirectory
+		self.root = FileManager.default
+			.temporaryDirectory
 			.appending(path: "tp-checkout-tests-\(UUID().uuidString)")
 		let scripts = root.appending(path: "e/scripts", directoryHint: .isDirectory)
 		try FileManager.default.createDirectory(at: scripts, withIntermediateDirectories: true)
 		guard FileManager.default.createFile(
 			atPath: root.appending(path: "Makefile").path,
-			contents: Data()
+			contents: Data(),
 		), FileManager.default.createFile(
 			atPath: scripts.appending(path: "deploy-cloud.sh").path,
-			contents: Data()
+			contents: Data(),
 		) else {
 			throw TeleportCheckoutFixtureError.couldNotCreateFiles
 		}

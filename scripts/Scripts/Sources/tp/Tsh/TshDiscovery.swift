@@ -9,14 +9,37 @@ struct TshDiscovery {
 	let homeDirectory: URL
 	let environment: [String: String]
 
+	// MARK: - Helpers
+
+	private var workingDirectoryURL: URL {
+		URL(
+			fileURLWithPath: fileManager.currentDirectoryPath,
+			isDirectory: true,
+		)
+	}
+
 	init(
 		fileManager: FileManager = .default,
 		homeDirectory: URL = FileManager.default.homeDirectoryForCurrentUser,
-		environment: [String: String] = ProcessInfo.processInfo.environment
+		environment: [String: String] = ProcessInfo.processInfo.environment,
 	) {
 		self.fileManager = fileManager
 		self.homeDirectory = homeDirectory.standardizedFileURL
 		self.environment = environment
+	}
+
+	private static func sortInstallations(
+		_ lhs: TshInstallation,
+		_ rhs: TshInstallation,
+	) -> Bool {
+		let comparison = lhs.version.compare(rhs.version, options: .numeric)
+		if comparison != .orderedSame {
+			return comparison == .orderedDescending
+		}
+		if lhs.source != rhs.source {
+			return lhs.source.rawValue < rhs.source.rawValue
+		}
+		return lhs.url.path < rhs.url.path
 	}
 
 	// MARK: - Public API
@@ -28,7 +51,7 @@ struct TshDiscovery {
 				group.addTask {
 					await TshVersionProbe.installation(
 						at: candidate.url,
-						source: candidate.source
+						source: candidate.source,
 					)
 				}
 			}
@@ -61,7 +84,7 @@ struct TshDiscovery {
 		}
 		guard let installation = await TshVersionProbe.installation(
 			at: candidate.url,
-			source: candidate.source
+			source: candidate.source,
 		) else {
 			throw ValidationError(
 				"Could not determine a Teleport version by running '\(candidate.url.path) version'."
@@ -81,6 +104,7 @@ struct TshDiscovery {
 				guard let candidate = candidate(at: url, suggestedSource: source) else {
 					continue
 				}
+
 				if candidatesByURL[candidate.url] == nil {
 					candidatesByURL[candidate.url] = candidate
 				}
@@ -93,7 +117,7 @@ struct TshDiscovery {
 		}
 		add(homebrewURLs(), source: .homebrew)
 		add(pathEnvironmentURLs(), source: .other)
-		add(await sourceBuildURLs(), source: .source)
+		await add(sourceBuildURLs(), source: .source)
 
 		return Array(candidatesByURL.values)
 	}
@@ -137,10 +161,11 @@ struct TshDiscovery {
 			guard let versionDirectoryURLs = try? fileManager.contentsOfDirectory(
 				at: cellarURL,
 				includingPropertiesForKeys: [.isDirectoryKey],
-				options: [.skipsHiddenFiles]
+				options: [.skipsHiddenFiles],
 			) else {
 				return []
 			}
+
 			return versionDirectoryURLs.map { $0.appending(path: "bin/tsh") }
 		}
 	}
@@ -167,7 +192,7 @@ struct TshDiscovery {
 		guard let enumerator = fileManager.enumerator(
 			at: rootURL,
 			includingPropertiesForKeys: [.isRegularFileKey, .isSymbolicLinkKey],
-			options: [.skipsHiddenFiles]
+			options: [.skipsHiddenFiles],
 		) else {
 			return []
 		}
@@ -176,6 +201,7 @@ struct TshDiscovery {
 			guard let url = element as? URL, url.lastPathComponent == "tsh" else {
 				return nil
 			}
+
 			return url
 		}
 	}
@@ -183,12 +209,12 @@ struct TshDiscovery {
 	private func sourceBuildURLs() async -> [URL] {
 		let codeDirectoryURL = homeDirectory.appending(
 			path: "code",
-			directoryHint: .isDirectory
+			directoryHint: .isDirectory,
 		)
 		var isDirectory: ObjCBool = false
 		guard fileManager.fileExists(
 			atPath: codeDirectoryURL.path,
-			isDirectory: &isDirectory
+			isDirectory: &isDirectory,
 		), isDirectory.boolValue else {
 			return []
 		}
@@ -205,11 +231,12 @@ struct TshDiscovery {
 					codeDirectoryURL.path,
 				],
 				output: .string(limit: 1024 * 1024),
-				error: .discarded
+				error: .discarded,
 			)
 			guard result.terminationStatus.isSuccess else {
 				return []
 			}
+
 			return (result.standardOutput ?? "")
 				.split(whereSeparator: \.isNewline)
 				.map { URL(fileURLWithPath: String($0)) }
@@ -230,7 +257,8 @@ struct TshDiscovery {
 		}
 
 		let resolvedURL = suppliedURL.resolvingSymlinksInPath().standardizedFileURL
-		guard resolvedURL != managedLinkURL,
+		guard
+			resolvedURL != managedLinkURL,
 			fileManager.isExecutableFile(atPath: resolvedURL.path),
 			isRegularFile(resolvedURL),
 			isMachOBinary(resolvedURL)
@@ -240,7 +268,7 @@ struct TshDiscovery {
 
 		return TshCandidate(
 			url: resolvedURL,
-			source: source(for: resolvedURL, fallback: suggestedSource)
+			source: source(for: resolvedURL, fallback: suggestedSource),
 		)
 	}
 
@@ -251,6 +279,7 @@ struct TshDiscovery {
 		]) else {
 			return false
 		}
+
 		return values.isRegularFile == true && values.isSymbolicLink != true
 	}
 
@@ -258,17 +287,19 @@ struct TshDiscovery {
 		guard let handle = try? FileHandle(forReadingFrom: url) else {
 			return false
 		}
+
 		defer { try? handle.close() }
 
 		guard let data = try? handle.read(upToCount: 4), data.count == 4 else {
 			return false
 		}
+
 		let magic = data.reduce(UInt32(0)) { ($0 << 8) | UInt32($1) }
 		return [
-			0xFEEDFACE, 0xCEFAEDFE,
-			0xFEEDFACF, 0xCFFAEDFE,
-			0xCAFEBABE, 0xBEBAFECA,
-			0xCAFEBABF, 0xBFBAFECA,
+			0xFEED_FACE, 0xCEFA_EDFE,
+			0xFEED_FACF, 0xCFFA_EDFE,
+			0xCAFE_BABE, 0xBEBA_FECA,
+			0xCAFE_BABF, 0xBFBA_FECA,
 		].contains(magic)
 	}
 
@@ -297,35 +328,12 @@ struct TshDiscovery {
 		return fallback
 	}
 
-	// MARK: - Helpers
-
-	private var workingDirectoryURL: URL {
-		URL(
-			fileURLWithPath: fileManager.currentDirectoryPath,
-			isDirectory: true
-		)
-	}
-
 	private func url(for path: String) -> URL {
 		let expandedPath = (path as NSString).expandingTildeInPath
 		return URL(
 			fileURLWithPath: expandedPath,
-			relativeTo: workingDirectoryURL
+			relativeTo: workingDirectoryURL,
 		).standardizedFileURL
-	}
-
-	private static func sortInstallations(
-		_ lhs: TshInstallation,
-		_ rhs: TshInstallation
-	) -> Bool {
-		let comparison = lhs.version.compare(rhs.version, options: .numeric)
-		if comparison != .orderedSame {
-			return comparison == .orderedDescending
-		}
-		if lhs.source != rhs.source {
-			return lhs.source.rawValue < rhs.source.rawValue
-		}
-		return lhs.url.path < rhs.url.path
 	}
 }
 

@@ -17,25 +17,25 @@ struct Deploy: AsyncParsableCommand {
 
 	@Option(
 		name: .customLong("base-image-repo"),
-		help: "Public ECR base-image repository used to resolve a nightly"
+		help: "Public ECR base-image repository used to resolve a nightly",
 	)
 	var baseImageRepository = defaultBaseImageRepository
 
 	@Option(
 		name: .customLong("base-image-tag"),
-		help: "Use an exact base-image tag instead of resolving the newest nightly"
+		help: "Use an exact base-image tag instead of resolving the newest nightly",
 	)
 	var baseImageTag: String?
 
 	@Option(
 		name: .long,
-		help: "Linux amd64 C compiler passed to make; otherwise it is discovered automatically"
+		help: "Linux amd64 C compiler passed to make; otherwise it is discovered automatically",
 	)
 	var cc: String?
 
 	@Option(
 		name: .customLong("teleport-dir"),
-		help: "Teleport checkout containing the deploy-cloud make target"
+		help: "Teleport checkout containing the deploy-cloud make target",
 	)
 	var teleportDirectory = "."
 
@@ -46,7 +46,9 @@ struct Deploy: AsyncParsableCommand {
 		guard !baseImageRepository.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
 			throw ValidationError("--base-image-repo must not be empty.")
 		}
-		if let baseImageTag,
+
+		if
+			let baseImageTag,
 			baseImageTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 		{
 			throw ValidationError("--base-image-tag must not be empty.")
@@ -64,13 +66,13 @@ struct Deploy: AsyncParsableCommand {
 		try await Make.run(
 			arguments: ["deploy-cloud-login"],
 			in: checkout.enterpriseDirectory,
-			failureMessage: "deploy-cloud-login failed"
+			failureMessage: "deploy-cloud-login failed",
 		)
 
 		let version = try await Make.capture(
 			arguments: ["--no-print-directory", "print-version"],
 			in: checkout.rootDirectory,
-			failureMessage: "Could not determine the Teleport version"
+			failureMessage: "Could not determine the Teleport version",
 		)
 
 		let tag: String
@@ -82,13 +84,14 @@ struct Deploy: AsyncParsableCommand {
 			let tags = try await PublicECRClient().tags(in: repository)
 			guard let resolvedTag = NightlyTagResolver.newestTag(
 				for: version,
-				from: tags
+				from: tags,
 			) else {
 				throw RuntimeError(
 					"No nightly tag beginning with \(version)-nightly was found in "
 						+ baseImageRepository + "."
 				)
 			}
+
 			tag = resolvedTag
 		}
 
@@ -110,7 +113,7 @@ struct Deploy: AsyncParsableCommand {
 		try await Make.run(
 			arguments: arguments,
 			in: checkout.enterpriseDirectory,
-			failureMessage: "deploy-cloud failed"
+			failureMessage: "deploy-cloud failed",
 		)
 	}
 }
@@ -119,7 +122,7 @@ private enum DeployCompiler {
 	static func resolve(
 		explicit: String?,
 		environment: [String: String] = ProcessInfo.processInfo.environment,
-		fileManager: FileManager = .default
+		fileManager: FileManager = .default,
 	) throws -> String? {
 		if let explicit {
 			return explicit
@@ -149,11 +152,11 @@ private enum DeployCompiler {
 		}
 
 		#if arch(arm64)
-		throw ValidationError(
-			"Could not find \(compilerName). Install the macOS cross-toolchain or pass --cc."
-		)
+			throw ValidationError(
+				"Could not find \(compilerName). Install the macOS cross-toolchain or pass --cc."
+			)
 		#else
-		return nil
+			return nil
 		#endif
 	}
 }
@@ -162,7 +165,7 @@ private enum Make {
 	static func run(
 		arguments: [String],
 		in directory: URL,
-		failureMessage: String
+		failureMessage: String,
 	) async throws {
 		let result: ExecutionResult<Void, FileDescriptorOutput, FileDescriptorOutput>
 		do {
@@ -172,7 +175,7 @@ private enum Make {
 				workingDirectory: FilePath(directory.path),
 				input: .standardInput,
 				output: .currentStandardOutput,
-				error: .currentStandardError
+				error: .currentStandardError,
 			)
 		} catch {
 			throw RuntimeError("Could not run make: \(error)")
@@ -186,12 +189,12 @@ private enum Make {
 	static func capture(
 		arguments: [String],
 		in directory: URL,
-		failureMessage: String
+		failureMessage: String,
 	) async throws -> String {
 		let result: ExecutionResult<
 			Void,
 			StringOutput<Unicode.UTF8>,
-			StringOutput<Unicode.UTF8>
+			StringOutput<Unicode.UTF8>,
 		>
 		do {
 			result = try await Subprocess.run(
@@ -199,7 +202,7 @@ private enum Make {
 				arguments: Arguments(arguments),
 				workingDirectory: FilePath(directory.path),
 				output: .string(limit: 64 * 1024),
-				error: .string(limit: 64 * 1024)
+				error: .string(limit: 64 * 1024),
 			)
 		} catch {
 			throw RuntimeError("Could not run make: \(error)")
@@ -216,6 +219,7 @@ private enum Make {
 		guard !output.isEmpty else {
 			throw RuntimeError(failureMessage)
 		}
+
 		return output
 	}
 }

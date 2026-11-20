@@ -35,26 +35,6 @@ struct SitePaths: ParsableArguments {
 		Self.resolve(site, variable: Self.siteVariable)!
 	}
 
-	func validate() throws {
-		try Self.validateDirectory(
-			source,
-			flag: "--source",
-			variable: Self.sourceVariable,
-			setCommand: Self.sourceSetCommand,
-		)
-		try Self.validateDirectory(
-			site,
-			flag: "--site",
-			variable: Self.siteVariable,
-			setCommand: Self.siteSetCommand,
-		)
-
-		let blog = siteDirectory.appending(path: "content/blog")
-		guard FileManager.default.fileExists(atPath: blog.path(percentEncoded: false)) else {
-			throw ValidationError("\(siteDirectory.path(percentEncoded: false)) has no content/blog folder, so it isn't the site repo.")
-		}
-	}
-
 	private static func validateDirectory(
 		_ flagValue: String?,
 		flag: String,
@@ -63,10 +43,10 @@ struct SitePaths: ParsableArguments {
 	) throws {
 		guard let url = resolve(flagValue, variable: variable) else {
 			throw ValidationError("""
-			No \(flag.dropFirst(2)) directory. Pass `\(flag)`, or set `$\(variable)` once for every `fish` session:
+				No \(flag.dropFirst(2)) directory. Pass `\(flag)`, or set `$\(variable)` once for every `fish` session:
 
-			  \(setCommand)
-			""")
+				  \(setCommand)
+				""")
 		}
 
 		var isDirectory: ObjCBool = false
@@ -83,5 +63,27 @@ struct SitePaths: ParsableArguments {
 
 		let expanded = (path as NSString).expandingTildeInPath
 		return URL(filePath: expanded, directoryHint: .isDirectory).standardizedFileURL
+	}
+
+	func validate() throws {
+		try Self.validateDirectory(
+			source,
+			flag: "--source",
+			variable: Self.sourceVariable,
+			setCommand: Self.sourceSetCommand,
+		)
+		try Self.validateDirectory(
+			site,
+			flag: "--site",
+			variable: Self.siteVariable,
+			setCommand: Self.siteSetCommand,
+		)
+
+		let blog = siteDirectory.appending(path: "content/blog")
+		guard FileManager.default.fileExists(atPath: blog.path(percentEncoded: false)) else {
+			throw ValidationError(
+				"\(siteDirectory.path(percentEncoded: false)) has no content/blog folder, so it isn't the site repo."
+			)
+		}
 	}
 }

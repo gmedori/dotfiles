@@ -6,6 +6,14 @@ struct PublicECRRepository: Equatable, Sendable {
 	let registryAlias: String
 	let repositoryName: String
 
+	var tagsURL: URL {
+		var components = URLComponents()
+		components.scheme = "https"
+		components.host = "public.ecr.aws"
+		components.path = "/v2/\(registryAlias)/\(repositoryName)/tags/list"
+		return components.url!
+	}
+
 	init(_ imageRepository: String) throws {
 		let prefix = "public.ecr.aws/"
 		guard imageRepository.hasPrefix(prefix) else {
@@ -19,19 +27,11 @@ struct PublicECRRepository: Equatable, Sendable {
 			throw ValidationError("Public ECR repository is missing a repository name.")
 		}
 
-		registryAlias = String(path[..<separator])
-		repositoryName = String(path[path.index(after: separator)...])
+		self.registryAlias = String(path[..<separator])
+		self.repositoryName = String(path[path.index(after: separator)...])
 		guard !registryAlias.isEmpty, !repositoryName.isEmpty else {
 			throw ValidationError("Public ECR repository is malformed: \(imageRepository)")
 		}
-	}
-
-	var tagsURL: URL {
-		var components = URLComponents()
-		components.scheme = "https"
-		components.host = "public.ecr.aws"
-		components.path = "/v2/\(registryAlias)/\(repositoryName)/tags/list"
-		return components.url!
 	}
 }
 
@@ -46,14 +46,14 @@ struct PublicECRClient: Sendable {
 
 		let response: TagsResponse = try await get(
 			repository.tagsURL,
-			authorization: "Bearer \(tokenResponse.token)"
+			authorization: "Bearer \(tokenResponse.token)",
 		)
 		return response.tags ?? []
 	}
 
 	private func get<Response: Decodable>(
 		_ url: URL,
-		authorization: String? = nil
+		authorization: String? = nil,
 	) async throws -> Response {
 		var request = URLRequest(url: url)
 		if let authorization {
@@ -68,7 +68,8 @@ struct PublicECRClient: Sendable {
 			throw RuntimeError("Could not query Public ECR: \(error)")
 		}
 
-		guard let httpResponse = response as? HTTPURLResponse,
+		guard
+			let httpResponse = response as? HTTPURLResponse,
 			(200 ..< 300).contains(httpResponse.statusCode)
 		else {
 			let status = (response as? HTTPURLResponse)?.statusCode
@@ -86,8 +87,9 @@ struct PublicECRClient: Sendable {
 
 enum NightlyTagResolver {
 	static func newestTag(for version: String, from tags: [String]) -> String? {
-		return tags.compactMap { NightlyTag(version: version, tag: $0) }
-			.max()?.tag
+		tags.compactMap { NightlyTag(version: version, tag: $0) }
+			.max()?
+			.tag
 	}
 }
 
@@ -105,7 +107,8 @@ private struct NightlyTag: Comparable {
 
 		let suffix = tag.dropFirst(prefix.count)
 		let parts = suffix.split(separator: "-", omittingEmptySubsequences: false)
-		guard parts.count >= 3,
+		guard
+			parts.count >= 3,
 			parts[0].count == 8,
 			parts[0].allSatisfy(\.isNumber),
 			let build = Int(parts[1])
@@ -119,7 +122,7 @@ private struct NightlyTag: Comparable {
 		}
 
 		self.tag = tag
-		date = String(parts[0])
+		self.date = String(parts[0])
 		self.build = build
 		self.source = source
 	}

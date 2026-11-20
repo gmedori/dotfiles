@@ -6,7 +6,8 @@ import System
 
 enum TshVersionProbe {
 	static func installation(at url: URL, source: TshSource) async -> TshInstallation? {
-		guard case .completed(let result) = await runVersion(at: url),
+		guard
+			case let .completed(result) = await runVersion(at: url),
 			result.succeeded
 		else {
 			return nil
@@ -23,7 +24,7 @@ enum TshVersionProbe {
 			version: version,
 			versionOutput: output,
 			url: url,
-			source: source
+			source: source,
 		)
 	}
 
@@ -33,7 +34,8 @@ enum TshVersionProbe {
 		await withTaskGroup(of: ProbeOutcome.self) { group in
 			group.addTask {
 				do {
-					let isolatedHomeURL = FileManager.default.temporaryDirectory
+					let isolatedHomeURL = FileManager.default
+						.temporaryDirectory
 						.appending(path: "tp-tsh-version-\(UUID().uuidString)")
 					let result = try await Subprocess.run(
 						.path(FilePath(url.path)),
@@ -43,7 +45,7 @@ enum TshVersionProbe {
 							"TELEPORT_HOME": isolatedHomeURL.path,
 						]),
 						output: .string(limit: 4096),
-						error: .string(limit: 4096)
+						error: .string(limit: 4096),
 					)
 					return .completed(
 						ProbeOutput(
@@ -51,7 +53,7 @@ enum TshVersionProbe {
 							standardOutput: result.standardOutput?
 								.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
 							standardError: result.standardError?
-								.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+								.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
 						)
 					)
 				} catch {

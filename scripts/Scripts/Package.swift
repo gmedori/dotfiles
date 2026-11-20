@@ -56,7 +56,7 @@ let package = Package(
 		.executableTarget(
 			name: "notify",
 			dependencies: [
-				.product(name: "ArgumentParser", package: "swift-argument-parser"),
+				.product(name: "ArgumentParser", package: "swift-argument-parser")
 			],
 		),
 		.executableTarget(

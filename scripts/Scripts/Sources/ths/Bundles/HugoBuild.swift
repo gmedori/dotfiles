@@ -17,7 +17,7 @@ enum HugoBuild {
 		let result: ExecutionResult<
 			Void,
 			StringOutput<Unicode.UTF8>,
-			StringOutput<Unicode.UTF8>
+			StringOutput<Unicode.UTF8>,
 		>
 		do {
 			result = try await Subprocess.run(
@@ -44,7 +44,8 @@ enum HugoBuild {
 		return Message(
 			kind: .error,
 			headline: "The production build (`\(command)`) didn't finish cleanly",
-			details: problems.isEmpty ? [output.trimmingCharacters(in: .whitespacesAndNewlines)] : problems.map(String.init),
+			details: problems.isEmpty ? [output.trimmingCharacters(in: .whitespacesAndNewlines)] : problems
+				.map(String.init),
 		)
 	}
 }

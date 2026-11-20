@@ -6,13 +6,13 @@ import System
 
 struct NukeDerivedData: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
-		abstract: "Forcefully deletes the derived data directory where Xcode stores many intermediate products.",
+		abstract: "Forcefully deletes the derived data directory where Xcode stores many intermediate products."
 	)
 
 	func run() async throws {
 		let derivedDataDirectory = await getDerivedDataDirectory()
 		print(
-			"Are you sure you want to delete the DerivedData directory?\n\(derivedDataDirectory)\n\nAnything except 'yes' will abort.",
+			"Are you sure you want to delete the DerivedData directory?\n\(derivedDataDirectory)\n\nAnything except 'yes' will abort."
 		)
 		guard let input = readLine() else {
 			throw RuntimeError("❌ Failed to read any input")
@@ -57,6 +57,7 @@ struct NukeDerivedData: AsyncParsableCommand {
 			else {
 				return nil
 			}
+
 			return FilePath(output)
 		} catch {
 			return nil
