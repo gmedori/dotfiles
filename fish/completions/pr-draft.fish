@@ -38,6 +38,7 @@ end
 complete -c pr-draft -n '_swift_pr-draft_using_command "pr-draft prepare"' -l alt -d 'Alt text for attachment N, used over any the draft gives it. Repeat it for more attachments.'
 complete -c pr-draft -n '_swift_pr-draft_using_command "pr-draft prepare"' -s h -l help -d 'Show help information.'
 complete -c pr-draft -n '_swift_pr-draft_using_command "pr-draft create"' -l draft -d 'Open the pull request as a draft.'
+complete -c pr-draft -n '_swift_pr-draft_using_command "pr-draft create"' -l label -d 'Add this label to the pull request. Repeat it for more labels.'
 complete -c pr-draft -n '_swift_pr-draft_using_command "pr-draft create"' -s h -l help -d 'Show help information.'
 complete -c pr-draft -n '_swift_pr-draft_using_command "pr-draft" "prepare create help"' -s h -l help -d 'Show help information.'
 complete -c pr-draft -n '_swift_pr-draft_using_command "pr-draft" "prepare create help"' -f -a 'prepare' -d 'Stages a draft\'s images and videos and prints what it found as JSON.'
