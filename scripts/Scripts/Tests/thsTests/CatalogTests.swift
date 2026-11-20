@@ -25,12 +25,15 @@ struct `post states` {
 	}
 
 	/// The bundle `ths` would write for the post, as if it were on disk.
-	func bundle(for post: BlogPost, editing edit: ((inout [String: Data]) -> Void)? = nil) throws -> ExistingBundle {
+	func bundle(
+		for post: BlogPost,
+		editing edit: ((inout [String: Data]) throws -> Void)? = nil,
+	) throws -> ExistingBundle {
 		let body = BodyConverter(noteDirectory: source).convert(post.body, startLine: post.bodyStartLine)
 		var files = try PageBundle.generate(for: post, body: body).files
-		edit?(&files)
-		return bundle(
-			post.slug!,
+		try edit?(&files)
+		return try bundle(
+			#require(post.slug),
 			files: files,
 			vaultSource: PageBundle.vaultSource(for: post),
 			isDraft: post.status == .draft,
@@ -58,9 +61,11 @@ struct `post states` {
 			bundles: Dictionary(uniqueKeysWithValues: bundles.map { ($0.slug, $0) }),
 			source: source,
 		)
-		return Dictionary(uniqueKeysWithValues: catalog.entries.map { entry in
-			(entry.post?.relativePath ?? "bundle \(entry.slug!)", entry.state)
-		})
+		let states = try catalog.entries.map { entry in
+			let key = try entry.post?.relativePath ?? "bundle \(#require(entry.slug))"
+			return (key, entry.state)
+		}
+		return Dictionary(uniqueKeysWithValues: states)
 	}
 
 	@Test
@@ -100,10 +105,10 @@ struct `post states` {
 		let new = try post("a", body: "# Title\n\nNew body.")
 		let generatedNew = try bundle(for: new)
 		let handEdited = try bundle(for: old) { files in
-			files["index.md"] = generatedNew.bundle.files["index.md"]!
-			let text = String(decoding: files["index.md"]!, as: UTF8.self)
-			files["index.md"] = Data(text.replacing(/generatedHash: "[^"]*"/, with: #"generatedHash: "sha256:old""#)
-				.utf8)
+			let index = try #require(generatedNew.bundle.files["index.md"])
+			let text = try #require(String(bytes: index, encoding: .utf8))
+			let edited = text.replacing(/generatedHash: "[^"]*"/, with: #"generatedHash: "sha256:old""#)
+			files["index.md"] = Data(edited.utf8)
 		}
 
 		let catalog = try Catalog.classify(posts: [new], bundles: ["a": handEdited], source: source)

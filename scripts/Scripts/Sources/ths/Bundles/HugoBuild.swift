@@ -2,12 +2,11 @@ import CommandKit
 import Foundation
 import System
 
-// MARK: - Hugo Build
-
 /// Runs the site's production build, the same one the AGENTS.md in the site repo requires before a
 /// change is done. The build has to finish with no warnings, so any `WARN` or `ERROR` line counts as
 /// a failure.
 enum HugoBuild {
+	/// The arguments for `hugo` that make the production build.
 	static let arguments = ["--gc", "--minify", "--cleanDestinationDir"]
 
 	/// Builds the site. Returns `nil` when the build is clean, or an error message with Hugo's
@@ -41,11 +40,13 @@ enum HugoBuild {
 			return nil
 		}
 
+		let details = problems.isEmpty
+			? [output.trimmingCharacters(in: .whitespacesAndNewlines)]
+			: problems.map(String.init)
 		return Message(
 			kind: .error,
 			headline: "The production build (`\(command)`) didn't finish cleanly",
-			details: problems.isEmpty ? [output.trimmingCharacters(in: .whitespacesAndNewlines)] : problems
-				.map(String.init),
+			details: details,
 		)
 	}
 }

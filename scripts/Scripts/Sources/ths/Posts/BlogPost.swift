@@ -1,8 +1,6 @@
 import CommandKit
 import Foundation
 
-// MARK: - Blog Post
-
 /// A vault note with `type: blog post` in its frontmatter.
 ///
 /// Notes are found by their `type`, not by their folder, so posts can live anywhere under the source
@@ -12,18 +10,6 @@ import Foundation
 /// Properties that can't be read are left `nil` and recorded in `issues`. Parsing never throws, so
 /// one broken note never hides the others.
 struct BlogPost: Equatable, Sendable {
-	enum Status: String, Equatable, Sendable {
-		/// On the site only under `hugo server -D`. Production builds leave it out.
-		case draft
-		/// Public on the site.
-		case published
-		/// Taken down. Its bundle is deleted from the site repo, and the note stays in the vault.
-		case canceled
-	}
-
-	/// The value of `type` that marks a note as a blog post.
-	static let type = "blog post"
-
 	/// The note's path relative to the source directory, like `Blog Posts/My Post.md`.
 	let relativePath: String
 	/// The status, or `nil` when the note has none or has one that isn't valid.
@@ -82,6 +68,27 @@ struct BlogPost: Equatable, Sendable {
 		self.bodyStartLine = bodyStartLine
 		self.issues = issues
 	}
+}
+
+// MARK: - Supporting Types
+
+extension BlogPost {
+	/// Where a post stands on the site.
+	enum Status: String, Equatable, Sendable {
+		/// On the site only under `hugo server -D`. Production builds leave it out.
+		case draft
+		/// Public on the site.
+		case published
+		/// Taken down. Its bundle is deleted from the site repo, and the note stays in the vault.
+		case canceled
+	}
+}
+
+// MARK: - Static Members
+
+extension BlogPost {
+	/// The value of `type` that marks a note as a blog post.
+	static let type = "blog post"
 
 	/// Parses a note. Returns `nil` when the note isn't a blog post, because it has no frontmatter or
 	/// its `type` isn't `blog post`. A note whose frontmatter can't be read isn't a blog post either,
@@ -189,10 +196,12 @@ struct BlogPost: Equatable, Sendable {
 		return posts.sorted { $0.relativePath < $1.relativePath }
 	}
 
+	/// Whether `slug` is lowercase letters and digits, with single hyphens between them.
 	static func isValidSlug(_ slug: String) -> Bool {
 		slug.wholeMatch(of: /[a-z0-9]+(-[a-z0-9]+)*/) != nil
 	}
 
+	/// Whether `date` is a real calendar date written as YYYY-MM-DD.
 	static func isValidDate(_ date: String) -> Bool {
 		guard let match = date.wholeMatch(of: /(\d{4})-(\d{2})-(\d{2})/) else {
 			return false
@@ -202,11 +211,18 @@ struct BlogPost: Equatable, Sendable {
 		components.year = Int(match.1)
 		components.month = Int(match.2)
 		components.day = Int(match.3)
-		return Calendar(identifier: .gregorian).date(from: components).map {
-			Calendar(identifier: .gregorian).dateComponents([.year, .month, .day], from: $0) == components
-		} ?? false
-	}
+		let calendar = Calendar(identifier: .gregorian)
+		guard let date = calendar.date(from: components) else {
+			return false
+		}
 
+		return calendar.dateComponents([.year, .month, .day], from: date) == components
+	}
+}
+
+// MARK: - Private Helpers
+
+extension BlogPost {
 	/// Whether a note whose frontmatter can't be parsed still has a `type: blog post` line, so a typo
 	/// elsewhere in the frontmatter is reported instead of the post silently disappearing.
 	private static func declaresBlogPostType(_ text: String) -> Bool {

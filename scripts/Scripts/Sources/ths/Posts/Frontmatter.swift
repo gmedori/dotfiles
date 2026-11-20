@@ -1,81 +1,18 @@
 import Foundation
 import Yams
 
-// MARK: - Frontmatter
-
 /// A Markdown file split into its YAML frontmatter and its body.
 ///
 /// The YAML is composed into a `Yams.Node` instead of decoded, so every value stays the text it was
 /// written as. Decoding would turn `date: 2025-03-31` into a `Date` at midnight UTC and lose what the
 /// author typed.
 struct Frontmatter {
-	enum ParseError: Error, Equatable {
-		/// The file opens with `---` but never closes the block.
-		case unterminated
-		/// The block isn't YAML, or isn't a mapping of keys to values.
-		case invalidYAML(String)
-	}
-
-	/// The default resolver from Yams, with booleans read the way YAML 1.2 reads them. Only `true` and
-	/// `false` are booleans, in lowercase, capitalized, or all caps. The default follows YAML 1.1,
-	/// which also reads `yes`, `on`, and their opposites as booleans. Hugo doesn't.
-	///
-	/// Yams doesn't mark `Resolver` as `Sendable`, but its rules are constants, so one instance is
-	/// safe to share.
-	private nonisolated(unsafe) static let resolver = Yams.Resolver.default.replacing(
-		try! Yams.Resolver.Rule(.bool, "^(?:true|True|TRUE|false|False|FALSE)$")
-	)
-
 	/// The properties, composed but not decoded, so each value keeps the text it was written as.
-	let properties: Yams.Node.Mapping
+	var properties: Yams.Node.Mapping
 	/// Everything after the closing `---`.
-	let body: String
+	var body: String
 	/// The 1-based line number in the file where `body` starts.
-	let bodyStartLine: Int
-
-	/// Splits `text` into frontmatter and body. Returns `nil` when the file has no frontmatter, which
-	/// is any file whose first line isn't `---`.
-	static func parse(_ text: String) throws(ParseError) -> Frontmatter? {
-		let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
-		guard lines.first.map(Self.isDelimiter) == true else {
-			return nil
-		}
-		guard let closingIndex = lines.dropFirst().firstIndex(where: Self.isDelimiter) else {
-			throw .unterminated
-		}
-
-		let yaml = lines[1 ..< closingIndex].joined(separator: "\n")
-		let body = lines[(closingIndex + 1)...].joined(separator: "\n")
-
-		let node: Yams.Node?
-		do {
-			node = try Yams.compose(yaml: yaml, resolver)
-		} catch {
-			throw .invalidYAML(String(describing: error))
-		}
-
-		let properties: Yams.Node.Mapping
-		switch node {
-			case nil:
-				properties = Yams.Node.Mapping([])
-			case let .mapping(mapping)?:
-				properties = mapping
-			default:
-				throw .invalidYAML("The frontmatter isn't a list of properties.")
-		}
-
-		return Frontmatter(properties: properties, body: body, bodyStartLine: closingIndex + 2)
-	}
-
-	private static func isDelimiter(_ line: Substring) -> Bool {
-		line.trimmingTrailingWhitespace() == "---"
-	}
-
-	/// Whether the value is null as Yams reads it, which is an empty value, `~`, or `null` written
-	/// without quotes. Obsidian writes an empty property as `key:` with nothing after it.
-	private static func isNull(_ scalar: Yams.Node.Scalar) -> Bool {
-		NSNull.construct(from: scalar) != nil
-	}
+	var bodyStartLine: Int
 
 	/// The value of `key` as text, or `nil` when it's missing, empty, or `null`.
 	func string(_ key: String) -> String? {
@@ -132,14 +69,82 @@ struct Frontmatter {
 	}
 }
 
-// MARK: - Substring + Whitespace
+// MARK: - Supporting Types
 
-extension Substring {
-	func trimmingTrailingWhitespace() -> Substring {
-		var result = self
-		while let last = result.last, last.isWhitespace {
-			result.removeLast()
+extension Frontmatter {
+	/// Why a file's frontmatter can't be read.
+	enum ParseError: Error, Equatable {
+		/// The file opens with `---` but never closes the block.
+		case unterminated
+		/// The block isn't YAML, or isn't a mapping of keys to values.
+		case invalidYAML(String)
+	}
+}
+
+// MARK: - Static Members
+
+extension Frontmatter {
+	/// The default resolver from Yams, with booleans read the way YAML 1.2 reads them. Only `true` and
+	/// `false` are booleans, in lowercase, capitalized, or all caps. The default follows YAML 1.1,
+	/// which also reads `yes`, `on`, and their opposites as booleans. Hugo doesn't.
+	///
+	/// Yams doesn't mark `Resolver` as `Sendable`, but its rules are constants, so one instance is
+	/// safe to share.
+	private nonisolated(unsafe) static let resolver: Yams.Resolver = {
+		do {
+			return try Yams.Resolver.default.replacing(
+				Yams.Resolver.Rule(.bool, "^(?:true|True|TRUE|false|False|FALSE)$")
+			)
+		} catch {
+			preconditionFailure("The pattern for YAML 1.2 booleans doesn't compile: \(error)")
 		}
-		return result
+	}()
+
+	/// Splits `text` into frontmatter and body. Returns `nil` when the file has no frontmatter, which
+	/// is any file whose first line isn't `---`.
+	static func parse(_ text: String) throws(ParseError) -> Frontmatter? {
+		let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
+		guard lines.first.map(Self.isDelimiter) == true else {
+			return nil
+		}
+		guard let closingIndex = lines.dropFirst().firstIndex(where: Self.isDelimiter) else {
+			throw .unterminated
+		}
+
+		let yaml = lines[1 ..< closingIndex].joined(separator: "\n")
+		let body = lines[(closingIndex + 1)...].joined(separator: "\n")
+
+		let node: Yams.Node?
+		do {
+			node = try Yams.compose(yaml: yaml, resolver)
+		} catch {
+			throw .invalidYAML(String(describing: error))
+		}
+
+		let properties: Yams.Node.Mapping
+		switch node {
+			case nil:
+				properties = Yams.Node.Mapping([])
+			case let .mapping(mapping)?:
+				properties = mapping
+			default:
+				throw .invalidYAML("The frontmatter isn't a list of properties.")
+		}
+
+		return Frontmatter(properties: properties, body: body, bodyStartLine: closingIndex + 2)
+	}
+}
+
+// MARK: - Private Helpers
+
+extension Frontmatter {
+	private static func isDelimiter(_ line: Substring) -> Bool {
+		line.trimmingTrailingWhitespace() == "---"
+	}
+
+	/// Whether the value is null as Yams reads it, which is an empty value, `~`, or `null` written
+	/// without quotes. Obsidian writes an empty property as `key:` with nothing after it.
+	private static func isNull(_ scalar: Yams.Node.Scalar) -> Bool {
+		NSNull.construct(from: scalar) != nil
 	}
 }

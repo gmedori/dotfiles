@@ -1,29 +1,5 @@
 import Foundation
 
-// MARK: - Converted Body
-
-/// A post's body, ready for its bundle's `index.md`, with the images it uses.
-struct ConvertedBody: Equatable, Sendable {
-	/// The text of the leading H1, or `nil` when the body doesn't open with one.
-	let title: String?
-	/// The Markdown for the bundle, without the title and ending in one newline.
-	let markdown: String
-	/// Every image the post uses, in the order they first appear.
-	let images: [BundleImage]
-	/// Everything in the body the site can't show, each with its line in the note.
-	let issues: [PostIssue]
-}
-
-/// An image copied from the vault into a post's bundle.
-struct BundleImage: Equatable, Sendable {
-	/// The image file in the vault.
-	let source: URL
-	/// The file name in the bundle, which the Markdown refers to.
-	let name: String
-}
-
-// MARK: - Body Converter
-
 /// Converts an Obsidian note's body into the Markdown a Hugo page bundle uses.
 ///
 /// The conversion works on lines and rewrites only the constructs below, so the author's text
@@ -44,19 +20,50 @@ struct BundleImage: Equatable, Sendable {
 /// Fenced code blocks and inline code pass through untouched and aren't checked. Everything else is
 /// checked for what the site can't show, like wiki links and raw HTML, and reported as issues.
 struct BodyConverter {
-	// MARK: Lines
+	/// The folder the note is in. Images are looked up here and in its `assets/` folder, which is
+	/// where Obsidian saves attachments in this vault.
+	let noteDirectory: URL
+	/// Whether a file exists. Tests swap it out.
+	var fileExists: (URL) -> Bool = { FileManager.default.fileExists(atPath: $0.path(percentEncoded: false)) }
 
+	/// Converts `body`, whose first line is line `startLine` of the note, and finds what the site
+	/// can't show.
+	func convert(_ body: String, startLine: Int) -> ConvertedBody {
+		var state = ConversionState()
+		var lines = Self.removingComments(from: body, startLine: startLine)
+
+		state.title = Self.removeTitle(from: &lines)
+		if state.title == nil {
+			state.issues.append(.missingTitle)
+		}
+
+		for index in lines.indices where !lines[index].isCode {
+			lines[index].text = convertLine(lines[index].text, line: lines[index].number, state: &state)
+		}
+		Self.foldCaptions(into: &lines)
+
+		var markdown = lines.map(\.text).joined(separator: "\n")
+		while markdown.last?.isWhitespace == true {
+			markdown.removeLast()
+		}
+		markdown += "\n"
+
+		return ConvertedBody(title: state.title, markdown: markdown, images: state.images, issues: state.issues)
+	}
+}
+
+// MARK: - Supporting Types
+
+extension BodyConverter {
 	/// A line of the body, with its line number in the note.
 	struct Line: Equatable {
 		/// The text of the line, without its newline.
 		var text: String
 		/// The line's number in the note, counting from 1.
-		let number: Int
+		var number: Int
 		/// Whether the line is part of a fenced code block, fences included.
-		let isCode: Bool
+		var isCode: Bool
 	}
-
-	// MARK: Line Conversion
 
 	/// What a conversion has found so far.
 	private struct ConversionState {
@@ -67,20 +74,21 @@ struct BodyConverter {
 		/// The issues found so far.
 		var issues: [PostIssue] = []
 	}
+}
 
+// MARK: - Static Members
+
+extension BodyConverter {
+	/// The file extensions of the images the site can show.
 	static let imageExtensions: Set = ["png", "jpg", "jpeg", "gif", "webp", "avif", "svg"]
 
-	/// The folder the note is in. Images are looked up here and in its `assets/` folder, which is
-	/// where Obsidian saves attachments in this vault.
-	let noteDirectory: URL
-	/// Whether a file exists. Tests swap it out.
-	var fileExists: (URL) -> Bool = { FileManager.default.fileExists(atPath: $0.path(percentEncoded: false)) }
+	// MARK: Lines
 
 	/// Splits the body into lines, marks fenced code, and removes `%% comments %%`, which can span
 	/// lines.
 	static func removingComments(from body: String, startLine: Int) -> [Line] {
 		var lines: [Line] = []
-		var fence: Substring?
+		var fence: Substring? = nil
 		var inComment = false
 
 		for (offset, rawLine) in body.split(separator: "\n", omittingEmptySubsequences: false).enumerated() {
@@ -208,30 +216,11 @@ struct BodyConverter {
 		}
 		return result + transform(String(rest))
 	}
+}
 
-	func convert(_ body: String, startLine: Int) -> ConvertedBody {
-		var state = ConversionState()
-		var lines = Self.removingComments(from: body, startLine: startLine)
+// MARK: - Private Helpers
 
-		state.title = Self.removeTitle(from: &lines)
-		if state.title == nil {
-			state.issues.append(.missingTitle)
-		}
-
-		for index in lines.indices where !lines[index].isCode {
-			lines[index].text = convertLine(lines[index].text, line: lines[index].number, state: &state)
-		}
-		Self.foldCaptions(into: &lines)
-
-		var markdown = lines.map(\.text).joined(separator: "\n")
-		while markdown.last?.isWhitespace == true {
-			markdown.removeLast()
-		}
-		markdown += "\n"
-
-		return ConvertedBody(title: state.title, markdown: markdown, images: state.images, issues: state.issues)
-	}
-
+extension BodyConverter {
 	private func convertLine(_ text: String, line: Int, state: inout ConversionState) -> String {
 		if let linked = convertLinkedImage(text, line: line, state: &state) {
 			return linked
@@ -287,7 +276,7 @@ struct BodyConverter {
 
 	private func convertEmbed(target: String, alias: String?, line: Int, state: inout ConversionState) -> String {
 		let target = target.trimmingCharacters(in: .whitespaces)
-		guard Self.imageExtensions.contains((target as NSString).pathExtension.lowercased()) else {
+		guard Self.imageExtensions.contains(URL(filePath: target).pathExtension.lowercased()) else {
 			state.issues.append(.wikiLink(target, line: line))
 			return "![[\(target)]]"
 		}
@@ -359,7 +348,7 @@ struct BodyConverter {
 	/// Finds an image in the vault, records it, and returns its name in the bundle. Returns `nil` and
 	/// records an issue when it can't be found or its name is taken.
 	private func addImage(_ path: String, line: Int, state: inout ConversionState) -> String? {
-		let fileName = (path as NSString).lastPathComponent
+		let fileName = URL(filePath: path).lastPathComponent
 		let candidates = [
 			noteDirectory.appending(path: path),
 			noteDirectory.appending(path: "assets").appending(path: fileName),

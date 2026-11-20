@@ -1,5 +1,3 @@
-// MARK: - Post Issue
-
 /// Something wrong with a blog post note that keeps `ths` from converting it as it is.
 ///
 /// Every case has a `message`, which says what's wrong, and a `fix`, which says what to change in

@@ -1,7 +1,5 @@
 import Foundation
 
-// MARK: - Bundle Writer
-
 /// Writes and deletes bundles under `content/blog/` in the site repo. Nothing outside a bundle's own
 /// folder is ever touched.
 struct BundleWriter {

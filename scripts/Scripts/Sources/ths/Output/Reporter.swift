@@ -2,39 +2,17 @@ import Darwin
 import Escape
 import Foundation
 
-// MARK: - Message
-
-/// An error or warning printed after the list of posts. It's a line saying what's wrong, then lines
-/// saying how to fix it.
-struct Message: Equatable, Sendable {
-	/// Whether a message is an error or a warning.
-	enum Kind: Sendable {
-		/// A problem, which makes the command exit 1.
-		case error
-		/// Something to fix that doesn't block the post or change the exit status.
-		case warning
-	}
-
-	/// Whether it's an error or a warning, which decides the label it's printed with.
-	let kind: Kind
-	/// The line saying what's wrong.
-	let headline: String
-	/// The lines saying how to fix it, each printed indented under the headline.
-	let details: [String]
-}
-
-// MARK: - Reporter
-
 /// Formats what `status` and `sync` print.
 ///
 /// Output is colored only when stdout is a terminal and `NO_COLOR` isn't set, so piped output stays
 /// plain text.
 struct Reporter: Sendable {
-	static let labelWidth = PostState.allCases.map(\.label.count).max()!
-
+	/// The website repo, which the fix for an edited bundle names.
 	let siteDirectory: URL
+	/// Whether output is colored.
 	var usesColor = isatty(STDOUT_FILENO) != 0 && ProcessInfo.processInfo.environment["NO_COLOR"] == nil
 
+	/// `text` in `color`, or as it is when output isn't colored.
 	func paint(_ text: String, _ color: Color) -> String {
 		usesColor ? text.colorized(foreground: color) : text
 	}
@@ -51,6 +29,7 @@ struct Reporter: Sendable {
 		entry.post?.relativePath ?? entry.bundlePath ?? ""
 	}
 
+	/// The width of the longest slug in `entries`, so the list lines up.
 	func slugWidth(for entries: [CatalogEntry]) -> Int {
 		entries.map { ($0.slug ?? "(no slug)").count }.max() ?? 0
 	}
@@ -120,6 +99,7 @@ struct Reporter: Sendable {
 		return messages
 	}
 
+	/// The message as it's printed, with its label and its details indented under it.
 	func format(_ message: Message) -> String {
 		let label = switch message.kind {
 			case .error: paint("error:", .red)
@@ -134,21 +114,20 @@ struct Reporter: Sendable {
 		let home = FileManager.default.homeDirectoryForCurrentUser.path(percentEncoded: false).trimmingSuffix("/")
 		return path.hasPrefix(home) ? "~" + path.dropFirst(home.count) : path
 	}
+}
 
+// MARK: - Static Members
+
+extension Reporter {
+	/// The length of the longest state label, so the list lines up.
+	static let labelWidth = PostState.allCases.map(\.label.count).max() ?? 0
+}
+
+// MARK: - Private Helpers
+
+extension Reporter {
 	private func issueMessage(_ issue: PostIssue, kind: Message.Kind, notePath: String) -> Message {
 		let location = issue.line.map { "\(notePath):\($0)" } ?? notePath
 		return Message(kind: kind, headline: "\(location): \(issue.message)", details: [issue.fix])
-	}
-}
-
-// MARK: - String + Suffix
-
-extension String {
-	func trimmingSuffix(_ suffix: String) -> String {
-		hasSuffix(suffix) ? String(dropLast(suffix.count)) : self
-	}
-
-	func trimmingTrailingWhitespace() -> String {
-		String(Substring(self).trimmingTrailingWhitespace())
 	}
 }

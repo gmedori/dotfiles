@@ -1,7 +1,5 @@
 import Escape
 
-// MARK: - Post State
-
 /// Where a post stands between the vault and the site repo.
 ///
 /// `Catalog` gives every blog post note, and every bundle `ths` manages, exactly one state. The

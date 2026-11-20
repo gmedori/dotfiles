@@ -93,6 +93,7 @@ struct `page bundles` {
 		let bundle = try generate()
 		let directory = FileManager.default.temporaryDirectory.appending(path: "ths-tests-\(UUID().uuidString)/a-post")
 		try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+		// Ignoring the error here leaves the folder in the temp folder, which doesn't change the result.
 		defer { try? FileManager.default.removeItem(at: directory.deletingLastPathComponent()) }
 		for (name, data) in bundle.files {
 			try data.write(to: directory.appending(path: name))

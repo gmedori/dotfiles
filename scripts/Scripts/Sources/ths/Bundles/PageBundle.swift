@@ -1,9 +1,6 @@
 import CommandKit
 import CryptoKit
 import Foundation
-import Yams
-
-// MARK: - Page Bundle
 
 /// A post's folder in the site repo, `content/blog/<slug>/`, as a set of files keyed by their path
 /// in the folder.
@@ -18,13 +15,8 @@ import Yams
 /// A bundle with `vaultSource` is managed by `ths`. Any other bundle was made some other way, and
 /// `ths` never changes or deletes it.
 struct PageBundle: Equatable, Sendable {
-	/// The name of the Markdown file Hugo renders as the page.
-	static let indexName = "index.md"
-	/// Files the operating system drops into folders, which aren't part of a bundle.
-	static let ignoredNames: Set = [".DS_Store"]
-
 	/// The contents of every file in the bundle, keyed by its path in the folder.
-	let files: [String: Data]
+	var files: [String: Data]
 
 	/// The bundle's files with the `generatedHash` line removed from `index.md`, for comparing a
 	/// bundle on disk with a freshly generated one regardless of what hash each stores.
@@ -35,6 +27,15 @@ struct PageBundle: Equatable, Sendable {
 		}
 		return files
 	}
+}
+
+// MARK: - Static Members
+
+extension PageBundle {
+	/// The name of the Markdown file Hugo renders as the page.
+	static let indexName = "index.md"
+	/// Files the operating system drops into folders, which aren't part of a bundle.
+	static let ignoredNames: Set = [".DS_Store"]
 
 	// MARK: Generating
 
@@ -89,6 +90,7 @@ struct PageBundle: Equatable, Sendable {
 		return lines.joined(separator: "\n") + "\n" + body.markdown
 	}
 
+	/// The `vaultSource` for a post, its path written from `$THS_SOURCE_DIR`.
 	static func vaultSource(for post: BlogPost) -> String {
 		"$\(SitePaths.sourceVariable)/\(post.relativePath)"
 	}
@@ -105,11 +107,8 @@ struct PageBundle: Equatable, Sendable {
 	/// - Its contents
 	static func contentHash(of files: [String: Data]) -> String {
 		var hasher = SHA256()
-		for path in files.keys.sorted() {
-			var data = files[path]!
-			if path == indexName {
-				data = removingHashLine(from: data)
-			}
+		for (path, contents) in files.sorted(by: { $0.key < $1.key }) {
+			let data = path == indexName ? removingHashLine(from: contents) : contents
 			hasher.update(data: Data(path.utf8))
 			hasher.update(data: Data([0]))
 			withUnsafeBytes(of: UInt64(data.count).bigEndian) { hasher.update(bufferPointer: $0) }
@@ -117,100 +116,27 @@ struct PageBundle: Equatable, Sendable {
 		}
 		return "sha256:" + hasher.finalize().map { String(format: "%02x", $0) }.joined()
 	}
+}
 
+// MARK: - Private Helpers
+
+extension PageBundle {
 	private static func quoted(_ value: String) -> String {
 		let encoder = JSONEncoder()
 		encoder.outputFormatting = [.withoutEscapingSlashes]
-		return String(decoding: try! encoder.encode(value), as: UTF8.self)
+		do {
+			guard let json = try String(bytes: encoder.encode(value), encoding: .utf8) else {
+				preconditionFailure("JSONEncoder wrote a string that isn't UTF-8.")
+			}
+
+			return json
+		} catch {
+			preconditionFailure("JSONEncoder couldn't encode a string: \(error)")
+		}
 	}
 
 	private static func removingHashLine(from data: Data) -> Data {
 		let text = String(decoding: data, as: UTF8.self)
 		return Data(text.replacing(/\n  generatedHash: "[^"\n]*"/, with: "", maxReplacements: 1).utf8)
-	}
-}
-
-// MARK: - Existing Bundle
-
-/// A bundle already in the site repo.
-struct ExistingBundle: Equatable, Sendable {
-	/// The slug, which is the name of the bundle's folder.
-	let slug: String
-	/// The bundle's folder in the site repo.
-	let directory: URL
-	/// The files in the folder, as they are on disk.
-	let bundle: PageBundle
-	/// `params.vaultSource`, or `nil` when `ths` didn't generate the bundle.
-	let vaultSource: String?
-	/// `params.generatedHash`, as stored in the front matter.
-	let storedHash: String?
-	/// Whether the front matter sets `draft` to `true`, `True`, or `TRUE`, the only spellings that YAML
-	/// 1.2 and Hugo both read as true. Any other value counts as published, since `sync` never deletes
-	/// a published bundle. A bundle without the field is published, which matches Hugo.
-	let isDraft: Bool
-
-	/// Whether `ths` generated the bundle, which it knows from `vaultSource`. `ths` never changes or
-	/// deletes a bundle it doesn't manage.
-	var isManaged: Bool {
-		vaultSource != nil
-	}
-
-	/// Whether the files on disk are still the ones `ths` wrote.
-	var matchesStoredHash: Bool {
-		storedHash == PageBundle.contentHash(of: bundle.files)
-	}
-
-	/// Reads every bundle in `content/blog/` of the site repo. Files directly in `content/blog/`,
-	/// like the section's `_index.md`, aren't bundles.
-	static func readAll(in siteDirectory: URL) throws -> [String: ExistingBundle] {
-		let blogDirectory = siteDirectory.appending(path: "content/blog", directoryHint: .isDirectory)
-		let entries = try FileManager.default.contentsOfDirectory(
-			at: blogDirectory,
-			includingPropertiesForKeys: [.isDirectoryKey],
-			options: [.skipsHiddenFiles],
-		)
-
-		var bundles: [String: ExistingBundle] = [:]
-		for entry in entries where (try? entry.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true {
-			let bundle = try read(from: entry)
-			bundles[bundle.slug] = bundle
-		}
-		return bundles
-	}
-
-	static func read(from directory: URL) throws -> ExistingBundle {
-		let base = directory.standardizedFileURL.path(percentEncoded: false)
-		guard let enumerator = FileManager.default.enumerator(
-			at: directory,
-			includingPropertiesForKeys: [.isRegularFileKey],
-		) else {
-			throw RuntimeError("Couldn't read \(base).")
-		}
-
-		var files: [String: Data] = [:]
-		for case let url as URL in enumerator {
-			guard
-				!PageBundle.ignoredNames.contains(url.lastPathComponent),
-				try (url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true
-			else {
-				continue
-			}
-
-			let path = url.standardizedFileURL.path(percentEncoded: false)
-			files[String(path.dropFirst(base.count).trimmingPrefix("/"))] = try Data(contentsOf: url)
-		}
-
-		let frontmatter = files[PageBundle.indexName].flatMap {
-			try? Frontmatter.parse(String(decoding: $0, as: UTF8.self))
-		}
-		let params = frontmatter?.properties["params"]?.mapping
-		return ExistingBundle(
-			slug: directory.lastPathComponent,
-			directory: directory,
-			bundle: PageBundle(files: files),
-			vaultSource: params?["vaultSource"]?.string,
-			storedHash: params?["generatedHash"]?.string,
-			isDraft: frontmatter?.bool("draft") == true,
-		)
 	}
 }
