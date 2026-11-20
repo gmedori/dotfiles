@@ -84,30 +84,23 @@ the shared configs beside it, at the versions that the dotfiles repo's
   line is edited, so new and edited code follows every rule. Fix a new
   violation in the code instead of writing the baseline again.
 
-Run these from this folder before committing. The baseline's paths are
-relative to it, so SwiftLint run from anywhere else reports every baselined
-violation. The first command formats in place, and the other two report
-anything left to fix.
+Run these from this folder before committing. The first command formats in
+place. The second runs the `lint` task in `mise.toml`, which checks the
+formatting, then runs `swiftlint lint` and `swiftlint analyze`, and stops at
+the first check that finds a problem. It takes about two minutes.
 
 ```sh
 mise exec -- swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" .
-mise exec -- swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" --lint .
-mise exec -- swiftlint lint
+mise run lint
 ```
 
 `swiftlint analyze` checks for unused imports and declarations. It needs the
-compiler commands from a clean, verbose build of both packages. It also needs
-`TOOLCHAIN_DIR` set to mise's Swift toolchain, because Xcode's SourceKit can't
-load modules that mise's Swift built. Run these from this folder before
-committing too. The two builds take under a minute, and the analysis takes
-about a minute and a half.
-
-```sh
-rm -rf "$TMPDIR/scripts-analyze"
-mise exec -- swift build --package-path Escape --build-tests -v --scratch-path "$TMPDIR/scripts-analyze/Escape" > "$TMPDIR/scripts-analyze.log"
-mise exec -- swift build --package-path Scripts --build-tests -v --scratch-path "$TMPDIR/scripts-analyze/Scripts" >> "$TMPDIR/scripts-analyze.log"
-TOOLCHAIN_DIR="$(mise where swift)" mise exec -- swiftlint analyze --compiler-log-path "$TMPDIR/scripts-analyze.log"
-```
+compiler commands for every file, so the task first builds both packages from
+scratch in a temporary folder. It also sets `TOOLCHAIN_DIR` to mise's Swift
+toolchain, because Xcode's SourceKit, which SwiftLint loads otherwise, can't
+load modules that mise's Swift built. Run SwiftLint itself only from this
+folder. The baseline's paths are relative to it, so SwiftLint run from
+anywhere else reports every baselined violation.
 
 ## Development Conventions
 
@@ -150,8 +143,7 @@ TOOLCHAIN_DIR="$(mise where swift)" mise exec -- swiftlint analyze --compiler-lo
 
 1. Build the affected package.
 2. After changing `Escape`, build `Scripts`.
-3. Format with SwiftFormat, and check that `swiftformat --lint`,
-   `swiftlint lint`, and `swiftlint analyze` report nothing, as Formatting and
-   Linting describes.
+3. Format with SwiftFormat, and check that `mise run lint` passes, as
+   Formatting and Linting describes.
 4. Review the diff for generated files and unrelated changes.
 5. Do not claim test coverage where none exists.

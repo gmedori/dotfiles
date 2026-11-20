@@ -1,4 +1,5 @@
-# Overrides for the shared base config, which the commands in AGENTS.md pass with --base-config.
+# Overrides for the shared base config. The format command in AGENTS.md and the lint task in mise.toml both pass it
+# with --base-config.
 
 # The tools have no Macrobox module for the #URL macro, so SwiftFormat leaves URL(string:) alone.
 --url-macro none
