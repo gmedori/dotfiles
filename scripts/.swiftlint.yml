@@ -1,0 +1,6 @@
+parent_config: ${HOME}/gooseOS/Skills/swift-style-guide/swiftlint-base.yml
+baseline: .swiftlint-baseline.json
+
+excluded:
+  - Escape/.build
+  - Scripts/.build

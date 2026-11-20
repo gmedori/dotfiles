@@ -42,7 +42,8 @@ package directory.
   `pr-draftTests` covers `pr-draft` against a throwaway vault and a stand-in
   `gh`, and `CommandKitTests` covers `GitHubCLI`. Run them with
   `mise exec -- swift test --package-path Scripts`.
-- No formatter or linter is currently configured.
+- Style: the Swift style guide, enforced by SwiftFormat and SwiftLint as
+  described under Formatting and Linting.
 
 ## Build and Validation
 
@@ -59,9 +60,35 @@ the shared library.
 Do not claim that a change is covered by automated tests. If meaningful tests
 are added, run the relevant test target and report the result.
 
+## Formatting and Linting
+
+Swift here follows the style guide at
+`$HOME/gooseOS/Skills/swift-style-guide/SKILL.md`. Read it before writing or
+reviewing Swift. SwiftFormat and SwiftLint enforce its mechanical rules with
+the shared configs beside it, at the versions that the dotfiles repo's
+`mise/config.toml` pins.
+
+- `.swiftformat` holds only this folder's overrides of the shared
+  `base.swiftformat`. The tools have no `Macrobox` module, so it turns off the
+  rewrite to the `#URL` macro.
+- `.swiftlint.yml` names the shared `swiftlint-base.yml` as its parent and
+  skips the `.build` folders.
+- `.swiftlint-baseline.json` records the SwiftLint violations that were in the
+  code when SwiftLint was adopted. A baselined violation stays quiet until its
+  line is edited, so new and edited code follows every rule. Fix a new
+  violation in the code instead of writing the baseline again.
+
+Run these from this folder before committing. The first formats in place, and
+the other two report anything left to fix.
+
+```sh
+mise exec -- swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" .
+mise exec -- swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" --lint .
+mise exec -- swiftlint lint
+```
+
 ## Development Conventions
 
-- Follow the existing Swift style in the file being edited.
 - Prefer focused changes over unrelated cleanup.
 - Use Swift concurrency for asynchronous process work where appropriate.
 - Keep command-line parsing and help text consistent with
@@ -101,5 +128,7 @@ are added, run the relevant test target and report the result.
 
 1. Build the affected package.
 2. After changing `Escape`, build `Scripts`.
-3. Review the diff for generated files and unrelated changes.
-4. Do not claim test coverage where none exists.
+3. Format with SwiftFormat, and check that `swiftformat --lint` and
+   `swiftlint lint` report nothing, as Formatting and Linting describes.
+4. Review the diff for generated files and unrelated changes.
+5. Do not claim test coverage where none exists.
