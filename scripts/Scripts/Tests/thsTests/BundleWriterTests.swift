@@ -2,13 +2,13 @@ import Foundation
 import Testing
 @testable import ths
 
-@Suite("bundle writer")
-struct BundleWriterTests {
-	@Test("Makes the folder hold exactly the bundle's files, keeping .DS_Store")
-	func replacesFiles() throws {
+struct `bundle writer` {
+	@Test
+	func `Makes the folder hold exactly the bundle's files, keeping .DS_Store`() throws {
 		let site = FileManager.default.temporaryDirectory.appending(path: "ths-tests-\(UUID().uuidString)")
 		let directory = site.appending(path: "content/blog/a-post")
 		try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+		// Ignoring the error here leaves the folder in the temp folder, which doesn't change the result.
 		defer { try? FileManager.default.removeItem(at: site) }
 		try Data("old".utf8).write(to: directory.appending(path: "index.md"))
 		try Data("stray".utf8).write(to: directory.appending(path: "icon.png"))

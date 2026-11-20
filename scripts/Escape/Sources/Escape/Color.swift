@@ -1,9 +1,7 @@
-public func colorize(_ string: String, foreground: Color = .reset, background: Color = .reset) -> String {
-	let colorSequence = colorEscapeSequence(foreground: foreground, background: background)
-	let resetSequence = colorEscapeSequence()
-	return "\(colorSequence)\(string)\(resetSequence)"
-}
-
+/// The 16 ANSI terminal colors, and `reset` for the terminal's own colors.
+///
+/// The bright colors are the high-intensity versions that most terminals show for SGR codes 90 to 97
+/// and 100 to 107.
 public enum Color: Sendable {
 	case black
 	case red
@@ -23,6 +21,7 @@ public enum Color: Sendable {
 	case brightCyan
 	case brightWhite
 
+	/// The SGR code that sets this color as the text color.
 	var foregroundCode: Int {
 		switch self {
 			case .black: 30
@@ -45,6 +44,7 @@ public enum Color: Sendable {
 		}
 	}
 
+	/// The SGR code that sets this color as the background color.
 	var backgroundCode: Int {
 		switch self {
 			case .black: 40
@@ -66,34 +66,4 @@ public enum Color: Sendable {
 			case .brightWhite: 107
 		}
 	}
-}
-
-public extension String.StringInterpolation {
-	mutating func appendInterpolation(_ string: String, background: Color) {
-		appendInterpolation(colorize(string, foreground: .reset, background: background))
-	}
-
-	mutating func appendInterpolation(_ string: String, foreground: Color) {
-		appendInterpolation(colorize(string, foreground: foreground, background: .reset))
-	}
-
-	mutating func appendInterpolation(_ string: String, foreground: Color, background: Color) {
-		appendInterpolation(colorize(string, foreground: foreground, background: background))
-	}
-}
-
-public extension String {
-	mutating func colorize(foreground: Color = .reset, background: Color = .reset) {
-		self = Escape.colorize(self, foreground: foreground, background: background)
-	}
-
-	func colorized(foreground: Color = .reset, background: Color = .reset) -> String {
-		return Escape.colorize(self, foreground: foreground, background: background)
-	}
-}
-
-// MARK: Private Helpers
-
-private func colorEscapeSequence(foreground: Color = .reset, background: Color = .reset) -> String {
-	"\(escape)[\(foreground.foregroundCode);\(background.backgroundCode)m"
 }

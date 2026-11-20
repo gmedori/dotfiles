@@ -1,0 +1,96 @@
+# Tasks that set up a Mac from this repo. `install.sh` installs mise and runs
+# `setup`. Each step also runs on its own, as in `mise run link`.
+
+[tasks.setup]
+description = "Run every setup step in order"
+run = [
+  { task = "submodules" },
+  { task = "brew" },
+  { task = "perl" },
+  { task = "link" },
+  { task = "tools" },
+  { task = "scripts" },
+  { task = "shell" },
+]
+
+[tasks.submodules]
+description = "Check out the git submodules"
+run = "git submodule update --init --recursive"
+
+[tasks.brew]
+description = "Install the Homebrew packages in Brewfile"
+run = "brew bundle --file=Brewfile"
+
+# Perl and cpanm come from Homebrew, so this runs after `brew`. CPAN modules go
+# to ~/perl5 through local::lib, and fish/config.fish sets the matching
+# environment statically. cpanm runs under Homebrew's perl explicitly, since
+# /usr/bin may still be ahead of Homebrew on PATH.
+[tasks.perl]
+description = "Install local::lib into ~/perl5 with Homebrew's perl"
+run = '''
+BREW_PREFIX="$(brew --prefix)"
+PERL_LOCAL_LIB="$HOME/perl5"
+if ! "$BREW_PREFIX/bin/perl" -I"$PERL_LOCAL_LIB/lib/perl5" -Mlocal::lib -e1 2>/dev/null; then
+    "$BREW_PREFIX/bin/perl" "$BREW_PREFIX/bin/cpanm" --local-lib="$PERL_LOCAL_LIB" local::lib
+fi
+'''
+
+# linker.pl asks for confirmation before it replaces anything, so the task
+# gets the terminal.
+[tasks.link]
+description = "Symlink the configs in this repo into $HOME, replacing what's there"
+interactive = true
+run = "./linker.pl"
+
+# Runs after `link`, which puts the global config in ~/.config/mise. mise isn't
+# on PATH inside a task, so the task runs the mise that's running it. Running
+# it in scripts/ also installs the Swift that scripts/mise.toml pins.
+[tasks.tools]
+description = "Install the tools in mise/config.toml and scripts/mise.toml"
+dir = "scripts"
+run = '"{{ mise_bin }}" install'
+
+# chsh only accepts a shell listed in /etc/shells, so Homebrew's fish goes there
+# first, through sudo. Each step skips when it's already done, and both ask for
+# a password, so the task gets the terminal.
+[tasks.shell]
+description = "Make Homebrew's fish the login shell"
+interactive = true
+run = '''
+FISH="$(brew --prefix)/bin/fish"
+if ! grep -qxF "$FISH" /etc/shells; then
+    echo "$FISH" | sudo tee -a /etc/shells >/dev/null
+fi
+if [ "$(dscl . -read "/Users/$(id -un)" UserShell | awk '{print $2}')" != "$FISH" ]; then
+    chsh -s "$FISH"
+fi
+'''
+
+# The task skips install.fish when no Swift source, package manifest, or
+# toolchain pin has changed since the binaries were last built, and when it
+# runs, SwiftPM rebuilds only the targets a change affects. A task gets its
+# tools from the file that defines it, so install.fish runs through
+# `mise exec` to get the Swift that scripts/mise.toml pins.
+[tasks.scripts]
+description = "Build the Swift tools into scripts/bin and install their fish completions"
+dir = "scripts/Scripts"
+run = '"{{ mise_bin }}" exec -- ./install.fish'
+sources = [
+  "../mise.toml",
+  "Package.swift",
+  "Package.resolved",
+  "Sources/**/*.swift",
+  "../Escape/Package.swift",
+  "../Escape/Sources/**/*.swift",
+]
+outputs = ["../bin/*"]
+
+# For when SwiftPM's build cache is the problem. The binaries in scripts/bin
+# still look up to date after the clean, so the rebuild has to be forced.
+[tasks."scripts:rebuild"]
+description = "Run `swift package clean`, then rebuild every Swift tool from scratch"
+dir = "scripts/Scripts"
+run = [
+  '"{{ mise_bin }}" exec -- swift package clean',
+  '"{{ mise_bin }}" run --force scripts',
+]

@@ -2,11 +2,16 @@ import CommandKit
 import Foundation
 import System
 
-// MARK: - Version Probe
-
+/// Runs `tsh version` to learn which Teleport version a `tsh` binary is.
 enum TshVersionProbe {
+	/// How many seconds `tsh version` gets before the probe gives up on it.
+	static let timeoutInSeconds = 5
+
+	/// The installation at `url`, or `nil` when the binary doesn't run, doesn't finish in time, or
+	/// doesn't report a Teleport version.
 	static func installation(at url: URL, source: TshSource) async -> TshInstallation? {
-		guard case .completed(let result) = await runVersion(at: url),
+		guard
+			case let .completed(result) = await runVersion(at: url),
 			result.succeeded
 		else {
 			return nil
@@ -23,17 +28,42 @@ enum TshVersionProbe {
 			version: version,
 			versionOutput: output,
 			url: url,
-			source: source
+			source: source,
 		)
 	}
+}
 
-	// MARK: - Process Execution
+// MARK: - Supporting Types
 
-	private static func runVersion(at url: URL) async -> ProbeOutcome {
-		await withTaskGroup(of: ProbeOutcome.self) { group in
+extension TshVersionProbe {
+	/// What `tsh version` printed, and whether it exited successfully.
+	struct Output: Sendable {
+		/// Whether `tsh version` exited with status 0.
+		var succeeded: Bool
+		/// What it printed to standard output, trimmed.
+		var standardOutput: String
+		/// What it printed to standard error, trimmed.
+		var standardError: String
+	}
+
+	/// How running `tsh version` ended.
+	enum Outcome: Sendable {
+		/// It finished, with what it printed.
+		case completed(Output)
+		/// It couldn't run, or didn't finish in time.
+		case unavailable
+	}
+}
+
+// MARK: - Private Helpers
+
+extension TshVersionProbe {
+	private static func runVersion(at url: URL) async -> Outcome {
+		await withTaskGroup(of: Outcome.self) { group in
 			group.addTask {
 				do {
-					let isolatedHomeURL = FileManager.default.temporaryDirectory
+					let isolatedHomeURL = FileManager.default
+						.temporaryDirectory
 						.appending(path: "tp-tsh-version-\(UUID().uuidString)")
 					let result = try await Subprocess.run(
 						.path(FilePath(url.path)),
@@ -43,28 +73,27 @@ enum TshVersionProbe {
 							"TELEPORT_HOME": isolatedHomeURL.path,
 						]),
 						output: .string(limit: 4096),
-						error: .string(limit: 4096)
+						error: .string(limit: 4096),
 					)
 					return .completed(
-						ProbeOutput(
+						Output(
 							succeeded: result.terminationStatus.isSuccess,
 							standardOutput: result.standardOutput?
 								.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
 							standardError: result.standardError?
-								.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+								.trimmingCharacters(in: .whitespacesAndNewlines) ?? "",
 						)
 					)
 				} catch {
+					// Ignoring the error here means a binary that can't run isn't listed as an installation.
 					return .unavailable
 				}
 			}
 
 			group.addTask {
-				do {
-					try await Task.sleep(for: .seconds(5))
-				} catch {
-					return .unavailable
-				}
+				// Ignoring the error here is safe, since this task only marks the timeout, and canceling it
+				// once the other task finishes makes no difference to the outcome.
+				try? await Task.sleep(for: .seconds(timeoutInSeconds))
 				return .unavailable
 			}
 
@@ -73,17 +102,4 @@ enum TshVersionProbe {
 			return outcome
 		}
 	}
-}
-
-// MARK: - Probe Results
-
-private struct ProbeOutput: Sendable {
-	let succeeded: Bool
-	let standardOutput: String
-	let standardError: String
-}
-
-private enum ProbeOutcome: Sendable {
-	case completed(ProbeOutput)
-	case unavailable
 }

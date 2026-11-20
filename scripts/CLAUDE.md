@@ -10,35 +10,52 @@ is organized as two sibling SwiftPM packages:
 
 - `Escape/`: A library for terminal output, colors, and control sequences.
 - `Scripts/`: Executable tools that depend on the local `Escape` package and
-  `swift-subprocess`.
+  `swift-subprocess`. Its `CommandKit` library target is what the tools use to
+  run other commands, either raw through `Subprocess` or through a wrapper like
+  `GitHubCLI` for `gh`.
 
 `Scripts` currently builds `iosd`, `chapter-splitter`, `github-permalink`,
-`notify`, `pr-watch`, `tp`, `ths`, and `is-work-mac`. `ths` publishes The
-Honking Smith blog posts from the Obsidian vault to the website repo. Its post
-states are documented on `PostState`. `is-work-mac` tells the work Mac from
-personal Macs by MDM enrollment, and `$HOME/dotfiles/agent-github/activate.sh`
-relies on its exit codes, so keep them as documented in its help.
+`notify`, `pr-watch`, `tp`, `ths`, `is-work-mac`, and `pr-draft`. `ths`
+publishes The Honking Smith blog posts from the Obsidian vault to the website
+repo. Its post states are documented on `PostState`. `is-work-mac` tells the
+work Mac from personal Macs by MDM enrollment, and
+`$HOME/dotfiles/agent-github/activate.sh` relies on its exit codes, so keep them
+as documented in its help. `pr-draft` opens a pull request from a PR draft in
+the vault, uploading its images and videos with `gh pr create --attach`. The
+vault's submit-pr skill reads the JSON it prints, as its help says, so keep
+the two in step.
 
 There is no root `Package.swift`. Run SwiftPM commands against the relevant
 package directory.
 
 ## Platform and Tooling
 
-- Swift tools version: 6.0 for `Escape`, 6.2 for `Scripts`
+- Toolchain: the newest installed swift.org Swift 6.4.x, pinned in
+  `mise.toml`. A shell with mise activated picks it up in this folder.
+  Elsewhere, run SwiftPM through `mise exec --` from this folder, as the
+  commands below do, or SwiftPM runs on Xcode's Swift instead.
+- Swift tools version: 6.4 for both packages, with the upcoming features
+  `ExistentialAny`, `InferIsolatedConformances`, `MemberImportVisibility`, and
+  `NonisolatedNonsendingByDefault` on in every target
 - Minimum platform: macOS 14
 - Command-line parsing: `swift-argument-parser`
 - Tests use Swift Testing syntax. `tpTests` and `thsTests` cover parts of `tp`
-  and `ths`, and `is-work-macTests` covers the parsing in `is-work-mac`. Run
-  them with `swift test --package-path Scripts`.
-- No formatter or linter is currently configured.
+  and `ths`, `is-work-macTests` covers the parsing in `is-work-mac`,
+  `pr-draftTests` covers `pr-draft` against a throwaway vault and a stand-in
+  `gh`, and `CommandKitTests` covers `GitHubCLI`. Run them with
+  `mise exec -- swift test --package-path Scripts`. `EscapeTests` covers
+  `Escape`'s colored text and loading loops, and runs with
+  `mise exec -- swift test --package-path Escape`.
+- Style: the Swift style guide, enforced by SwiftFormat and SwiftLint as
+  described under Formatting and Linting.
 
 ## Build and Validation
 
 Build the affected package:
 
 ```sh
-swift build --package-path Escape
-swift build --package-path Scripts
+mise exec -- swift build --package-path Escape
+mise exec -- swift build --package-path Scripts
 ```
 
 After changing `Escape`, also build `Scripts` to verify its integration with
@@ -47,15 +64,56 @@ the shared library.
 Do not claim that a change is covered by automated tests. If meaningful tests
 are added, run the relevant test target and report the result.
 
+## Formatting and Linting
+
+Swift here follows the style guide at
+`$HOME/gooseOS/Skills/swift-style-guide/SKILL.md`. Read it before writing or
+reviewing Swift. SwiftFormat and SwiftLint enforce its mechanical rules with
+the shared configs beside it, at the versions that the dotfiles repo's
+`mise/config.toml` pins.
+
+- `.swiftformat` holds only this folder's overrides of the shared
+  `base.swiftformat`. The tools have no `Macrobox` module, so it turns off the
+  rewrite to the `#URL` macro.
+- `.swiftlint.yml` names the shared `swiftlint-base.yml` as its parent and
+  skips the `.build` folders. It also keeps the `CommandKit`, `Darwin`, and
+  `System` imports, which `swiftlint analyze` reports as unused even where a
+  file needs them.
+- `.swiftlint-baseline.json` records the SwiftLint violations that were in the
+  code when SwiftLint was adopted. A baselined violation stays quiet until its
+  line is edited, so new and edited code follows every rule. Fix a new
+  violation in the code instead of writing the baseline again.
+
+Run these from this folder before committing. The first command formats in
+place. The second runs the `lint` task in `mise.toml`, which checks the
+formatting, then runs `swiftlint lint` and `swiftlint analyze`, and stops at
+the first check that finds a problem. It takes about two minutes.
+
+```sh
+mise exec -- swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" .
+mise run lint
+```
+
+`swiftlint analyze` checks for unused imports and declarations. It needs the
+compiler commands for every file, so the task first builds both packages from
+scratch in a temporary folder. It also sets `TOOLCHAIN_DIR` to mise's Swift
+toolchain, because Xcode's SourceKit, which SwiftLint loads otherwise, can't
+load modules that mise's Swift built. Run SwiftLint itself only from this
+folder. The baseline's paths are relative to it, so SwiftLint run from
+anywhere else reports every baselined violation.
+
 ## Development Conventions
 
-- Follow the existing Swift style in the file being edited.
 - Prefer focused changes over unrelated cleanup.
 - Use Swift concurrency for asynchronous process work where appropriate.
 - Keep command-line parsing and help text consistent with
   `swift-argument-parser`.
 - Pass subprocess arguments as separate values to `Subprocess.run`, especially
   when they may contain spaces or user-provided values.
+- Run other commands through `CommandKit`. A command that more than one tool
+  runs gets a wrapper there, like `GitHubCLI`, instead of a copy in each tool.
+  Helpers only one tool needs stay in that tool, as an extension of the
+  wrapper.
 
 ## Dependencies
 
@@ -71,9 +129,10 @@ are added, run the relevant test target and report the result.
 - Do not edit `.build/` contents.
 - Treat `bin/` as generated output; change sources under `Scripts/Sources/`
   instead.
-- Do not run `Scripts/install.fish` unless explicitly requested. It builds
-  release binaries, copies them into `bin/`, and writes fish completions under
-  the user's home directory.
+- Do not run `Scripts/install.fish`, or the dotfiles repo's `scripts` and
+  `scripts:rebuild` mise tasks that run it, unless explicitly requested. It
+  builds release binaries, copies them into `bin/`, and writes fish
+  completions under the user's home directory.
 - Do not run commands that delete user files or development data without
   explicit approval. In particular, `iosd nuke-derived-data` removes Xcode's
   DerivedData directory.
@@ -84,5 +143,7 @@ are added, run the relevant test target and report the result.
 
 1. Build the affected package.
 2. After changing `Escape`, build `Scripts`.
-3. Review the diff for generated files and unrelated changes.
-4. Do not claim test coverage where none exists.
+3. Format with SwiftFormat, and check that `mise run lint` passes, as
+   Formatting and Linting describes.
+4. Review the diff for generated files and unrelated changes.
+5. Do not claim test coverage where none exists.

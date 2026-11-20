@@ -1,0 +1,35 @@
+# The Swift toolchain for both packages here, the newest installed swift.org
+# 6.4.x. `mise upgrade swift`, run in this folder, moves to a newer 6.4
+# release. Outside a shell with mise activated, run SwiftPM through
+# `mise exec --`.
+
+[tools]
+swift = "6.4"
+
+# `swiftlint analyze` needs the compiler commands for every file, so the task
+# builds both packages from scratch in a temporary folder, which it deletes at
+# the end. The verbose builds print thousands of lines, so their output goes to
+# files, and a failed build prints only its errors. SwiftLint loads Xcode's
+# SourceKit unless TOOLCHAIN_DIR names another toolchain, and Xcode's SourceKit
+# can't load modules that the Swift above built. mise isn't on PATH inside a
+# task, so the task runs the mise that's running it.
+[tasks.lint]
+description = "Check both packages with SwiftFormat and SwiftLint, including its analyzer rules"
+run = '''
+set -e
+swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" --lint .
+swiftlint lint --strict --quiet
+BUILD="$(mktemp -d)"
+trap 'rm -rf "$BUILD"' EXIT
+echo "Building both packages from scratch for swiftlint analyze"
+for PACKAGE in Escape Scripts; do
+    if ! swift build --package-path "$PACKAGE" --build-tests -v --scratch-path "$BUILD/$PACKAGE" \
+        >> "$BUILD/build.log" 2>> "$BUILD/build.err"; then
+        grep -h 'error:' "$BUILD/build.log" "$BUILD/build.err" >&2 || true
+        echo "error: $PACKAGE failed to build, so swiftlint analyze didn't run" >&2
+        exit 1
+    fi
+done
+echo "Running swiftlint analyze"
+TOOLCHAIN_DIR="$("{{ mise_bin }}" where swift)" swiftlint analyze --strict --quiet --compiler-log-path "$BUILD/build.log"
+'''

@@ -1,0 +1,29 @@
+# Global mise config, linked to ~/.config/mise/config.toml by linker.pl. It
+# sets the default version of every language except Perl and Swift. It also
+# pins SwiftFormat and SwiftLint. A project overrides any of these in its own
+# mise.toml, or in an untracked mise.local.toml.
+#
+# Perl stays on Homebrew for the local::lib setup in fish/config.fish.
+#
+# Swift defaults to /usr/bin/swift, the xcrun shim for the Xcode that
+# xcode-select points at, since mise adds nothing to PATH for a tool no config
+# lists. A project gets a swift.org toolchain by pinning one, as in
+# `swift = "6.4"`. In that project, `xcrun swift` still runs Xcode's, and
+# `disable_tools = ["swift"]` under `[settings]` in a mise.local.toml switches
+# the whole project back.
+
+[tools]
+go = "latest"
+node = "24"
+python = "3.15"
+rust = "stable"
+# SwiftFormat and SwiftLint are pinned to exact versions, since a new release
+# of either can format or flag the same code differently. The shared configs
+# in the Swift style guide need at least these versions.
+swiftformat = "0.64.6"
+swiftlint = "0.65.1"
+
+[settings]
+# mise selects Rust by setting RUSTUP_TOOLCHAIN, which rustup ranks above a
+# project's rust-toolchain.toml. Reading the file keeps the project's pin.
+idiomatic_version_file_enable_tools = ["rust"]

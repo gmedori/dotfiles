@@ -1,0 +1,14 @@
+parent_config: ${HOME}/gooseOS/Skills/swift-style-guide/swiftlint-base.yml
+baseline: .swiftlint-baseline.json
+
+excluded:
+  - Escape/.build
+  - Scripts/.build
+
+# unused_import credits each symbol to the module that declares it, so it reports these imports as unused in files
+# that need them.
+unused_import:
+  always_keep_imports:
+    - CommandKit # The tools use Escape and Subprocess through its `@_exported` imports.
+    - Darwin # The SDK declares Darwin's C functions, like `isatty`, in its `_DarwinFoundation` modules.
+    - System # A string literal that becomes a `FilePath` uses System without naming anything from it.

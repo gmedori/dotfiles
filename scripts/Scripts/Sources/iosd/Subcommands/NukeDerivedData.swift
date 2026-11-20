@@ -1,41 +1,43 @@
 import ArgumentParser
 import CommandKit
-import Darwin
 import Foundation
 import System
 
 struct NukeDerivedData: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
-		abstract: "Forcefully deletes the derived data directory where Xcode stores many intermediate products.",
+		abstract: "Forcefully deletes the derived data directory where Xcode stores many intermediate products."
 	)
 
 	func run() async throws {
-		let derivedDataDirectory = await getDerivedDataDirectory()
+		let directory = await derivedDataDirectory()
 		print(
-			"Are you sure you want to delete the DerivedData directory?\n\(derivedDataDirectory)\n\nAnything except 'yes' will abort.",
+			"Are you sure you want to delete the DerivedData directory?\n\(directory)\n\nAnything except 'yes' will abort."
 		)
 		guard let input = readLine() else {
 			throw RuntimeError("❌ Failed to read any input")
 		}
-
-		if input.trimmingCharacters(in: .whitespacesAndNewlines) == "yes" {
-			let loadingTask = echoLoadingText(prefix: "🔥 Nuking ", foregroundColor: .red)
-			do {
-				try FileManager.default.removeItem(atPath: derivedDataDirectory.string)
-				loadingTask.cancel()
-				print("\n✅ Successfully nuked \(derivedDataDirectory.string, foreground: .green)")
-			} catch {
-				loadingTask.cancel()
-				throw RuntimeError("❌ Failed to nuke derived data: \(error.localizedDescription)")
-			}
-		} else {
+		guard input.trimmingCharacters(in: .whitespacesAndNewlines) == "yes" else {
 			throw RuntimeError("❌ Aborting...")
 		}
-	}
 
-	private func getDerivedDataDirectory() async -> FilePath {
-		let homeDir = FileManager.default.homeDirectoryForCurrentUser.path()
-		let defaultPath = FilePath(homeDir)
+		let loadingTask = Terminal.echoLoadingText(prefix: "🔥 Nuking ", foreground: .red)
+		do {
+			try await remove(directory)
+			loadingTask.cancel()
+			print("\n✅ Successfully nuked \(directory.string, foreground: .green)")
+		} catch {
+			loadingTask.cancel()
+			throw RuntimeError("❌ Failed to nuke derived data: \(error.localizedDescription)")
+		}
+	}
+}
+
+// MARK: - Private Helpers
+
+extension NukeDerivedData {
+	private func derivedDataDirectory() async -> FilePath {
+		let homeDirectory = FileManager.default.homeDirectoryForCurrentUser.path()
+		let defaultPath = FilePath(homeDirectory)
 			.appending("Library")
 			.appending("Developer")
 			.appending("Xcode")
@@ -57,9 +59,18 @@ struct NukeDerivedData: AsyncParsableCommand {
 			else {
 				return nil
 			}
+
 			return FilePath(output)
 		} catch {
+			// Ignoring the error here means that when `defaults` can't run, Xcode's default location is used.
 			return nil
 		}
+	}
+
+	@concurrent
+	private func remove(_ directory: FilePath) async throws {
+		// `removeItem(atPath:)` blocks until the whole folder is deleted. This function is `async`, without awaiting
+		// anything, so that `@concurrent` can run the call off the caller's actor.
+		try FileManager.default.removeItem(atPath: directory.string)
 	}
 }

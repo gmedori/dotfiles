@@ -1,29 +1,5 @@
 import Foundation
 
-// MARK: - Converted Body
-
-/// A post's body, ready for its bundle's `index.md`, with the images it uses.
-struct ConvertedBody: Equatable, Sendable {
-	/// The text of the leading H1, or `nil` when the body doesn't open with one.
-	let title: String?
-	/// The Markdown for the bundle, without the title and ending in one newline.
-	let markdown: String
-	/// Every image the post uses, in the order they first appear.
-	let images: [BundleImage]
-	/// Everything in the body the site can't show, each with its line in the note.
-	let issues: [PostIssue]
-}
-
-/// An image copied from the vault into a post's bundle.
-struct BundleImage: Equatable, Sendable {
-	/// The image file in the vault.
-	let source: URL
-	/// The file name in the bundle, which the Markdown refers to.
-	let name: String
-}
-
-// MARK: - Body Converter
-
 /// Converts an Obsidian note's body into the Markdown a Hugo page bundle uses.
 ///
 /// The conversion works on lines and rewrites only the constructs below, so the author's text
@@ -44,14 +20,14 @@ struct BundleImage: Equatable, Sendable {
 /// Fenced code blocks and inline code pass through untouched and aren't checked. Everything else is
 /// checked for what the site can't show, like wiki links and raw HTML, and reported as issues.
 struct BodyConverter {
-	static let imageExtensions: Set = ["png", "jpg", "jpeg", "gif", "webp", "avif", "svg"]
-
 	/// The folder the note is in. Images are looked up here and in its `assets/` folder, which is
 	/// where Obsidian saves attachments in this vault.
 	let noteDirectory: URL
 	/// Whether a file exists. Tests swap it out.
 	var fileExists: (URL) -> Bool = { FileManager.default.fileExists(atPath: $0.path(percentEncoded: false)) }
 
+	/// Converts `body`, whose first line is line `startLine` of the note, and finds what the site
+	/// can't show.
 	func convert(_ body: String, startLine: Int) -> ConvertedBody {
 		var state = ConversionState()
 		var lines = Self.removingComments(from: body, startLine: startLine)
@@ -74,24 +50,45 @@ struct BodyConverter {
 
 		return ConvertedBody(title: state.title, markdown: markdown, images: state.images, issues: state.issues)
 	}
+}
 
-	// MARK: Lines
+// MARK: - Supporting Types
 
+extension BodyConverter {
 	/// A line of the body, with its line number in the note.
 	struct Line: Equatable {
 		/// The text of the line, without its newline.
 		var text: String
 		/// The line's number in the note, counting from 1.
-		let number: Int
+		var number: Int
 		/// Whether the line is part of a fenced code block, fences included.
-		let isCode: Bool
+		var isCode: Bool
 	}
+
+	/// What a conversion has found so far.
+	private struct ConversionState {
+		/// The text of the leading H1, once it's found.
+		var title: String? = nil
+		/// The images found so far, in the order they first appear.
+		var images: [BundleImage] = []
+		/// The issues found so far.
+		var issues: [PostIssue] = []
+	}
+}
+
+// MARK: - Static Members
+
+extension BodyConverter {
+	/// The file extensions of the images the site can show.
+	static let imageExtensions: Set = ["png", "jpg", "jpeg", "gif", "webp", "avif", "svg"]
+
+	// MARK: Lines
 
 	/// Splits the body into lines, marks fenced code, and removes `%% comments %%`, which can span
 	/// lines.
 	static func removingComments(from body: String, startLine: Int) -> [Line] {
 		var lines: [Line] = []
-		var fence: Substring?
+		var fence: Substring? = nil
 		var inComment = false
 
 		for (offset, rawLine) in body.split(separator: "\n", omittingEmptySubsequences: false).enumerated() {
@@ -121,6 +118,7 @@ struct BodyConverter {
 					}
 					break
 				}
+
 				hadComment = true
 				if !inComment {
 					text += rest[..<marker.lowerBound]
@@ -154,159 +152,6 @@ struct BodyConverter {
 		}
 		lines.removeSubrange(lines.startIndex ..< end)
 		return String(match.1)
-	}
-
-	// MARK: Line Conversion
-
-	/// What a conversion has found so far.
-	private struct ConversionState {
-		/// The text of the leading H1, once it's found.
-		var title: String?
-		/// The images found so far, in the order they first appear.
-		var images: [BundleImage] = []
-		/// The issues found so far.
-		var issues: [PostIssue] = []
-	}
-
-	private func convertLine(_ text: String, line: Int, state: inout ConversionState) -> String {
-		if let linked = convertLinkedImage(text, line: line, state: &state) {
-			return linked
-		}
-
-		let prose = Self.blankingInlineCode(in: text)
-		check(prose, line: line, state: &state)
-
-		// Markdown images go first. Their pattern never matches an embed, while an embed's output is a
-		// Markdown image that mustn't be converted twice.
-		return Self.replacingOutsideInlineCode(in: text) { segment in
-			var segment = segment
-			segment = segment.replacing(
-				/!\[([^\]]*)\]\(\s*(?:<([^>]+)>|([^\s)]+))(?:\s+"((?:[^"\\]|\\.)*)")?\s*\)/
-			) { match in
-				let destination = String(match.2 ?? match.3 ?? "")
-				return convertImage(
-					alt: String(match.1),
-					destination: destination,
-					title: match.4.map(String.init),
-					line: line,
-					state: &state,
-				)
-			}
-			segment = segment.replacing(/!\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/) { match in
-				convertEmbed(target: String(match.1), alias: match.2.map(String.init), line: line, state: &state)
-			}
-			return segment
-		}
-	}
-
-	/// Checks a line, with its inline code blanked out, for what the site can't show.
-	private func check(_ prose: String, line: Int, state: inout ConversionState) {
-		if prose.wholeMatch(of: /#[ \t]+.*/) != nil {
-			state.issues.append(.extraTitle(line: line))
-		}
-		for match in prose.matches(of: /(?:^|[^!])\[\[([^\]]+)\]\]/) {
-			state.issues.append(.wikiLink(String(match.1), line: line))
-		}
-		if prose.wholeMatch(of: /\s*(?:>\s*)+\[![^\]]+\].*/) != nil {
-			state.issues.append(.callout(line: line))
-		}
-		if prose.contains(/==[^=\s](?:[^=]*[^=\s])?==/) {
-			state.issues.append(.highlight(line: line))
-		}
-		for match in prose.matches(of: /<\/?([A-Za-z][A-Za-z0-9-]*)(?:\s[^>]*)?\/?>/) {
-			state.issues.append(.html(tag: String(match.1).lowercased(), line: line))
-		}
-		if prose.contains(/\bTODO\b/) {
-			state.issues.append(.todo(line: line))
-		}
-	}
-
-	private func convertEmbed(target: String, alias: String?, line: Int, state: inout ConversionState) -> String {
-		let target = target.trimmingCharacters(in: .whitespaces)
-		guard Self.imageExtensions.contains((target as NSString).pathExtension.lowercased()) else {
-			state.issues.append(.wikiLink(target, line: line))
-			return "![[\(target)]]"
-		}
-
-		// After the pipe, Obsidian reads a number or WIDTHxHEIGHT as a display size, not alt text.
-		var alt = alias?.trimmingCharacters(in: .whitespaces) ?? ""
-		if alt.wholeMatch(of: /\d+(x\d+)?/) != nil {
-			alt = ""
-		}
-		guard let name = addImage(target, line: line, state: &state) else {
-			return "![[\(target)]]"
-		}
-		if alt.isEmpty {
-			state.issues.append(.missingAltText(name: target, line: line))
-		}
-		return "![\(alt)](\(name))"
-	}
-
-	private func convertImage(
-		alt: String,
-		destination: String,
-		title: String?,
-		line: Int,
-		state: inout ConversionState,
-	) -> String {
-		let original = "![\(alt)](\(destination)\(title.map { " \"\($0)\"" } ?? ""))"
-		if destination.contains("://") {
-			state.issues.append(.remoteImage(url: destination, line: line))
-			return original
-		}
-
-		let path = destination.removingPercentEncoding ?? destination
-		guard let name = addImage(path, line: line, state: &state) else {
-			return original
-		}
-		if alt.trimmingCharacters(in: .whitespaces).isEmpty {
-			state.issues.append(.missingAltText(name: path, line: line))
-		}
-		return "![\(alt)](\(name)\(title.map { " \"\($0)\"" } ?? ""))"
-	}
-
-	/// Converts `<a href="URL"><img src="…" alt="…"></a>` when it's the whole line. Returns `nil` for
-	/// any other line.
-	private func convertLinkedImage(_ text: String, line: Int, state: inout ConversionState) -> String? {
-		guard let match = text.wholeMatch(of: /\s*<a\s+href="([^"]*)"\s*>\s*<img\s+([^>]*?)\s*\/?>\s*<\/a>\s*/) else {
-			return nil
-		}
-
-		var attributes: [String: String] = [:]
-		for attribute in match.2.matches(of: /([A-Za-z-]+)\s*=\s*"([^"]*)"/) {
-			attributes[String(attribute.1).lowercased()] = String(attribute.2)
-		}
-		guard let source = attributes["src"] else {
-			return nil
-		}
-
-		let image = convertImage(alt: attributes["alt"] ?? "", destination: source, title: nil, line: line, state: &state)
-		return "[\(image)](\(match.1))"
-	}
-
-	/// Finds an image in the vault, records it, and returns its name in the bundle. Returns `nil` and
-	/// records an issue when it can't be found or its name is taken.
-	private func addImage(_ path: String, line: Int, state: inout ConversionState) -> String? {
-		let fileName = (path as NSString).lastPathComponent
-		let candidates = [
-			noteDirectory.appending(path: path),
-			noteDirectory.appending(path: "assets").appending(path: fileName),
-		]
-		guard let source = candidates.first(where: fileExists)?.standardizedFileURL else {
-			state.issues.append(.missingImage(name: path, line: line))
-			return nil
-		}
-
-		let name = Self.bundleName(for: fileName)
-		if let existing = state.images.first(where: { $0.name == name }) {
-			if existing.source != source {
-				state.issues.append(.duplicateImageName(name: name, line: line))
-				return nil
-			}
-			return name
-		}
-		state.images.append(BundleImage(source: source, name: name))
-		return name
 	}
 
 	/// The image's file name in the bundle. It's lowercase, with runs of spaces and underscores turned
@@ -370,5 +215,158 @@ struct BodyConverter {
 			rest = rest[code.range.upperBound...]
 		}
 		return result + transform(String(rest))
+	}
+}
+
+// MARK: - Private Helpers
+
+extension BodyConverter {
+	private func convertLine(_ text: String, line: Int, state: inout ConversionState) -> String {
+		if let linked = convertLinkedImage(text, line: line, state: &state) {
+			return linked
+		}
+
+		let prose = Self.blankingInlineCode(in: text)
+		check(prose, line: line, state: &state)
+
+		// Markdown images go first. Their pattern never matches an embed, while an embed's output is a
+		// Markdown image that mustn't be converted twice.
+		return Self.replacingOutsideInlineCode(in: text) { segment in
+			var segment = segment
+			segment = segment.replacing(
+				/!\[([^\]]*)\]\(\s*(?:<([^>]+)>|([^\s)]+))(?:\s+"((?:[^"\\]|\\.)*)")?\s*\)/
+			) { match in
+				let destination = String(match.2 ?? match.3 ?? "")
+				return convertImage(
+					alt: String(match.1),
+					destination: destination,
+					title: match.4.map(String.init),
+					line: line,
+					state: &state,
+				)
+			}
+			segment = segment.replacing(/!\[\[([^\]|]+)(?:\|([^\]]*))?\]\]/) { match in
+				convertEmbed(target: String(match.1), alias: match.2.map(String.init), line: line, state: &state)
+			}
+			return segment
+		}
+	}
+
+	/// Checks a line, with its inline code blanked out, for what the site can't show.
+	private func check(_ prose: String, line: Int, state: inout ConversionState) {
+		if prose.wholeMatch(of: /#[ \t]+.*/) != nil {
+			state.issues.append(.extraTitle(line: line))
+		}
+		for match in prose.matches(of: /(?:^|[^!])\[\[([^\]]+)\]\]/) {
+			state.issues.append(.wikiLink(String(match.1), line: line))
+		}
+		if prose.wholeMatch(of: /\s*(?:>\s*)+\[![^\]]+\].*/) != nil {
+			state.issues.append(.callout(line: line))
+		}
+		if prose.contains(/==[^=\s](?:[^=]*[^=\s])?==/) {
+			state.issues.append(.highlight(line: line))
+		}
+		for match in prose.matches(of: /<\/?([A-Za-z][A-Za-z0-9-]*)(?:\s[^>]*)?\/?>/) {
+			state.issues.append(.html(tag: String(match.1).lowercased(), line: line))
+		}
+		if prose.contains(/\bTODO\b/) {
+			state.issues.append(.todo(line: line))
+		}
+	}
+
+	private func convertEmbed(target: String, alias: String?, line: Int, state: inout ConversionState) -> String {
+		let target = target.trimmingCharacters(in: .whitespaces)
+		guard Self.imageExtensions.contains(URL(filePath: target).pathExtension.lowercased()) else {
+			state.issues.append(.wikiLink(target, line: line))
+			return "![[\(target)]]"
+		}
+
+		// After the pipe, Obsidian reads a number or WIDTHxHEIGHT as a display size, not alt text.
+		var alt = alias?.trimmingCharacters(in: .whitespaces) ?? ""
+		if alt.wholeMatch(of: /\d+(x\d+)?/) != nil {
+			alt = ""
+		}
+		guard let name = addImage(target, line: line, state: &state) else {
+			return "![[\(target)]]"
+		}
+
+		if alt.isEmpty {
+			state.issues.append(.missingAltText(name: target, line: line))
+		}
+		return "![\(alt)](\(name))"
+	}
+
+	private func convertImage(
+		alt: String,
+		destination: String,
+		title: String?,
+		line: Int,
+		state: inout ConversionState,
+	) -> String {
+		let original = "![\(alt)](\(destination)\(title.map { " \"\($0)\"" } ?? ""))"
+		if destination.contains("://") {
+			state.issues.append(.remoteImage(url: destination, line: line))
+			return original
+		}
+
+		let path = destination.removingPercentEncoding ?? destination
+		guard let name = addImage(path, line: line, state: &state) else {
+			return original
+		}
+
+		if alt.trimmingCharacters(in: .whitespaces).isEmpty {
+			state.issues.append(.missingAltText(name: path, line: line))
+		}
+		return "![\(alt)](\(name)\(title.map { " \"\($0)\"" } ?? ""))"
+	}
+
+	/// Converts `<a href="URL"><img src="…" alt="…"></a>` when it's the whole line. Returns `nil` for
+	/// any other line.
+	private func convertLinkedImage(_ text: String, line: Int, state: inout ConversionState) -> String? {
+		guard let match = text.wholeMatch(of: /\s*<a\s+href="([^"]*)"\s*>\s*<img\s+([^>]*?)\s*\/?>\s*<\/a>\s*/) else {
+			return nil
+		}
+
+		var attributes: [String: String] = [:]
+		for attribute in match.2.matches(of: /([A-Za-z-]+)\s*=\s*"([^"]*)"/) {
+			attributes[String(attribute.1).lowercased()] = String(attribute.2)
+		}
+		guard let source = attributes["src"] else {
+			return nil
+		}
+
+		let image = convertImage(
+			alt: attributes["alt"] ?? "",
+			destination: source,
+			title: nil,
+			line: line,
+			state: &state,
+		)
+		return "[\(image)](\(match.1))"
+	}
+
+	/// Finds an image in the vault, records it, and returns its name in the bundle. Returns `nil` and
+	/// records an issue when it can't be found or its name is taken.
+	private func addImage(_ path: String, line: Int, state: inout ConversionState) -> String? {
+		let fileName = URL(filePath: path).lastPathComponent
+		let candidates = [
+			noteDirectory.appending(path: path),
+			noteDirectory.appending(path: "assets").appending(path: fileName),
+		]
+		guard let source = candidates.first(where: fileExists)?.standardizedFileURL else {
+			state.issues.append(.missingImage(name: path, line: line))
+			return nil
+		}
+
+		let name = Self.bundleName(for: fileName)
+		if let existing = state.images.first(where: { $0.name == name }) {
+			if existing.source != source {
+				state.issues.append(.duplicateImageName(name: name, line: line))
+				return nil
+			}
+			return name
+		}
+		state.images.append(BundleImage(source: source, name: name))
+		return name
 	}
 }

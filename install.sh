@@ -1,24 +1,45 @@
 #!/bin/bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-OLDDIR="$(pwd)"
+# Sets up a Mac from this repo. It runs from a clone, or straight from GitHub
+# on a new Mac:
+#
+#   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/gmedori/dotfiles/master/install.sh)"
+#
+# That form keeps the terminal as stdin, which the prompts in the Homebrew
+# installer and linker.pl read from.
+#
+# Installs Homebrew when it's missing, which also installs the Command Line
+# Tools and with them git. When the script isn't running from a clone, it
+# clones the repo over HTTPS to ~/dotfiles, or uses the clone already there.
+# Then it installs mise when it's missing and runs the `setup` task in
+# mise.toml, which lists every step.
 
-cd $DIR
+set -euo pipefail
 
-git submodule update --init --recursive
+REPO_URL="https://github.com/gmedori/dotfiles.git"
+CLONE_DIR="$HOME/dotfiles"
 
-brew bundle --file=$DIR/Brewfile
+if [ ! -x /opt/homebrew/bin/brew ]; then
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
-# Perl comes from Homebrew (see Brewfile). CPAN modules go to ~/perl5 via
-# local::lib; the matching environment is set statically in fish/config.fish.
-# Run cpanm with Homebrew's perl explicitly, since /usr/bin may still be ahead
-# of Homebrew in this script's PATH.
-BREW_PREFIX="$(brew --prefix)"
-PERL_LOCAL_LIB="$HOME/perl5"
-if ! "$BREW_PREFIX/bin/perl" -I"$PERL_LOCAL_LIB/lib/perl5" -Mlocal::lib -e1 2>/dev/null; then
-    "$BREW_PREFIX/bin/perl" "$BREW_PREFIX/bin/cpanm" --local-lib="$PERL_LOCAL_LIB" local::lib
+# BASH_SOURCE is empty under `bash -c`, so the script only finds the repo
+# beside itself when it runs from a file in a clone.
+DIR=""
+if [ -n "${BASH_SOURCE[0]:-}" ] && [ -f "${BASH_SOURCE[0]}" ]; then
+    DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+fi
+if [ -z "$DIR" ] || [ ! -f "$DIR/mise.toml" ]; then
+    if [ ! -d "$CLONE_DIR/.git" ]; then
+        git clone "$REPO_URL" "$CLONE_DIR"
+    fi
+    DIR="$CLONE_DIR"
 fi
 
-$DIR/linker.pl
+MISE="$(command -v mise || echo "$HOME/.local/bin/mise")"
+if [ ! -x "$MISE" ]; then
+    curl -fsSL https://mise.run | sh
+fi
 
-cd $OLDDIR
+"$MISE" -C "$DIR" run setup

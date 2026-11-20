@@ -1,10 +1,9 @@
 import Testing
 @testable import ths
 
-@Suite("blog post frontmatter")
-struct BlogPostTests {
-	@Test("Reads a published post's properties")
-	func readsPublishedPost() throws {
+struct `blog post frontmatter` {
+	@Test
+	func `Reads a published post's properties`() throws {
 		let post = try #require(BlogPost.parse(
 			"""
 			---
@@ -34,23 +33,23 @@ struct BlogPostTests {
 		#expect(post.issues.isEmpty)
 	}
 
-	@Test("Skips notes that aren't blog posts")
-	func skipsOtherNotes() {
+	@Test
+	func `Skips notes that aren't blog posts`() {
 		#expect(BlogPost.parse("# Just a note", relativePath: "Note.md") == nil)
 		#expect(BlogPost.parse("---\ntype: quest\n---\nBody", relativePath: "Quest.md") == nil)
 		#expect(BlogPost.parse("---\nstatus: published\n---\nBody", relativePath: "Untyped.md") == nil)
 	}
 
-	@Test("Keeps a post without a status in the vault, unchecked")
-	func vaultOnlyPostIsUnchecked() throws {
+	@Test
+	func `Keeps a post without a status in the vault, unchecked`() throws {
 		let post = try #require(BlogPost.parse("---\ntype: blog post\nstatus:\n---\nIdea", relativePath: "Idea.md"))
 
 		#expect(post.status == nil)
 		#expect(post.issues.isEmpty)
 	}
 
-	@Test("Requires a slug on drafts and a date on published posts")
-	func requiresSlugAndDate() throws {
+	@Test
+	func `Requires a slug on drafts and a date on published posts`() throws {
 		let draft = try #require(BlogPost.parse("---\ntype: blog post\nstatus: draft\n---\n", relativePath: "D.md"))
 		let published = try #require(BlogPost.parse(
 			"---\ntype: blog post\nstatus: published\nslug: a-post\n---\n",
@@ -61,16 +60,16 @@ struct BlogPostTests {
 		#expect(published.issues == [.missingDate])
 	}
 
-	@Test("Reads canceled, which doesn't need a slug")
-	func readsCanceled() throws {
+	@Test
+	func `Reads canceled, which doesn't need a slug`() throws {
 		let post = try #require(BlogPost.parse("---\ntype: blog post\nstatus: canceled\n---\n", relativePath: "C.md"))
 
 		#expect(post.status == .canceled)
 		#expect(post.issues.isEmpty)
 	}
 
-	@Test("Rejects bad values")
-	func rejectsBadValues() throws {
+	@Test
+	func `Rejects bad values`() throws {
 		let post = try #require(BlogPost.parse(
 			"""
 			---
@@ -94,8 +93,8 @@ struct BlogPostTests {
 		])
 	}
 
-	@Test("Reports unreadable frontmatter on a note that says it's a blog post")
-	func reportsUnreadableFrontmatter() throws {
+	@Test
+	func `Reports unreadable frontmatter on a note that says it's a blog post`() throws {
 		let post = try #require(BlogPost.parse(
 			"---\ntype: blog post\ndescription: [unclosed\n---\nBody",
 			relativePath: "Broken.md",
@@ -108,8 +107,8 @@ struct BlogPostTests {
 		}
 	}
 
-	@Test("Keeps a quoted date as text")
-	func keepsQuotedDate() throws {
+	@Test
+	func `Keeps a quoted date as text`() throws {
 		let post = try #require(BlogPost.parse(
 			"---\ntype: blog post\nstatus: draft\nslug: a\ndate: '2025-03-03'\n---\n",
 			relativePath: "Q.md",

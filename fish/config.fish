@@ -237,17 +237,22 @@ set -gx PERL_MM_OPT "INSTALL_BASE=$HOME/perl5"
 
 fish_add_path /opt/homebrew/bin #.................... Homebrew
 fish_add_path $HOME/dotfiles/scripts/bin #........... Scripts
-fish_add_path (brew --prefix go@1.24)/bin #.......... Golang binary
 fish_add_path $GOPATH/bin #.......................... GOPATH
-fish_add_path $HOME/.cargo/bin #..................... Rust
 fish_add_path $HOME/perl5/bin #...................... Perl (local::lib)
-fish_add_path $HOME/.local/bin #..................... Misc. local installs (e.g. Claude installs itself here)
+fish_add_path $HOME/.local/bin #..................... Misc. local installs (e.g. Claude and mise install themselves here)
 fish_add_path -a $HOME/.docker/bin #................. Docker Desktop CLI (appended, lowest priority)
 
 ## Work Specific Stuff
 set WORK_SPECIFIC_DIR $HOME/dotfiles/work_specific
 if [ -f $WORK_SPECIFIC_DIR/config.fish ] # Only do this one if the directory exists (i.e. only on a work computer)
     source $WORK_SPECIFIC_DIR/config.fish
+end
+
+## mise
+## Puts the tools from mise/config.toml, or a project's mise.toml, ahead of everything above on PATH.
+## Rust's cargo-installed binaries in ~/.cargo/bin come with it.
+if command -q mise
+    mise activate fish | source
 end
 
 ## Starship
