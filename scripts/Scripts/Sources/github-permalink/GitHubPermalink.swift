@@ -19,7 +19,7 @@ struct GitHubPermalink: AsyncParsableCommand {
 	var startLine: Int
 
 	@Argument(help: "Last selected line (1-based); defaults to the first line")
-	var endLine: Int?
+	var endLine: Int? = nil
 
 	func validate() throws {
 		guard startLine > 0 else {
@@ -48,7 +48,11 @@ struct GitHubPermalink: AsyncParsableCommand {
 
 		print(permalink)
 	}
+}
 
+// MARK: - Private Helpers
+
+extension GitHubPermalink {
 	private func resolvePaths() throws -> (repository: URL, relativePath: String) {
 		let fileManager = FileManager.default
 		let workingDirectory = URL(

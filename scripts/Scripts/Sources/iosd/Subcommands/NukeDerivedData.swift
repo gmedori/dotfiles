@@ -17,22 +17,25 @@ struct NukeDerivedData: AsyncParsableCommand {
 		guard let input = readLine() else {
 			throw RuntimeError("❌ Failed to read any input")
 		}
-
-		if input.trimmingCharacters(in: .whitespacesAndNewlines) == "yes" {
-			let loadingTask = Terminal.echoLoadingText(prefix: "🔥 Nuking ", foreground: .red)
-			do {
-				try FileManager.default.removeItem(atPath: directory.string)
-				loadingTask.cancel()
-				print("\n✅ Successfully nuked \(directory.string, foreground: .green)")
-			} catch {
-				loadingTask.cancel()
-				throw RuntimeError("❌ Failed to nuke derived data: \(error.localizedDescription)")
-			}
-		} else {
+		guard input.trimmingCharacters(in: .whitespacesAndNewlines) == "yes" else {
 			throw RuntimeError("❌ Aborting...")
 		}
-	}
 
+		let loadingTask = Terminal.echoLoadingText(prefix: "🔥 Nuking ", foreground: .red)
+		do {
+			try FileManager.default.removeItem(atPath: directory.string)
+			loadingTask.cancel()
+			print("\n✅ Successfully nuked \(directory.string, foreground: .green)")
+		} catch {
+			loadingTask.cancel()
+			throw RuntimeError("❌ Failed to nuke derived data: \(error.localizedDescription)")
+		}
+	}
+}
+
+// MARK: - Private Helpers
+
+extension NukeDerivedData {
 	private func derivedDataDirectory() async -> FilePath {
 		let homeDirectory = FileManager.default.homeDirectoryForCurrentUser.path()
 		let defaultPath = FilePath(homeDirectory)
@@ -60,6 +63,7 @@ struct NukeDerivedData: AsyncParsableCommand {
 
 			return FilePath(output)
 		} catch {
+			// Ignoring the error here means that when `defaults` can't run, Xcode's default location is used.
 			return nil
 		}
 	}
