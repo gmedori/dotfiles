@@ -1,60 +1,20 @@
-import Darwin
-
-@discardableResult
-public func echoLoadingText(
-	prefix: String? = nil,
-	suffix: String? = nil,
-	loop: LoadingLoop = .weeee,
-	foregroundColor: Color = .reset,
-	backgroundColor: Color = .reset,
-) -> Task<Void, Never> {
-	echoLoadingText(loop: loop) { symbol in
-		colorize(
-			"\(prefix ?? "")\(symbol)\(suffix ?? "")",
-			foreground: foregroundColor,
-			background: backgroundColor,
-		)
-	}
-}
-
-@discardableResult
-public func echoLoadingText(
-	loop: LoadingLoop = .weeee,
-	writesNewlineOnCancellation: Bool = true,
-	content: @escaping @Sendable (_ symbol: String) async -> String,
-) -> Task<Void, Never> {
-	Task {
-		var cursor = loop.symbols.startIndex
-		while true {
-			if Task.isCancelled {
-				if writesNewlineOnCancellation {
-					echo("\n")
-				}
-				break
-			}
-			clearLine()
-			let symbol = loop.symbols[cursor]
-			await echo(content(symbol))
-			fflush(stdout)
-			try? await Task.sleep(for: loop.durationPerSymbol)
-			loop.symbols.formIndex(after: &cursor)
-			if cursor == loop.symbols.endIndex {
-				cursor = loop.symbols.startIndex
-			}
-		}
-	}
-}
-
+/// The frames of a loading animation and how long one pass through them takes.
 public struct LoadingLoop: Sendable {
-	let symbols: [String]
-	let duration: Duration
+	/// The symbols shown one after another, each for `durationPerSymbol`.
+	var symbols: [String]
+	/// How long one pass through every symbol takes.
+	var duration: Duration
 
+	/// How long each symbol is shown.
 	var durationPerSymbol: Duration {
 		duration / symbols.count
 	}
 }
 
+// MARK: - Static Members
+
 extension LoadingLoop {
+	/// Four braille dots that circle their cell once every 0.6 seconds.
 	public static var snake: LoadingLoop {
 		LoadingLoop(
 			symbols: ["\u{280F}", "\u{281B}", "\u{2839}", "\u{283C}", "\u{2836}", "\u{2827}"],
@@ -62,6 +22,8 @@ extension LoadingLoop {
 		)
 	}
 
+	/// Braille dots that fill their cell one at a time and then drain away, starting from a different dot
+	/// in each of six phases, over six seconds.
 	public static var weeee: LoadingLoop {
 		LoadingLoop(
 			symbols: [

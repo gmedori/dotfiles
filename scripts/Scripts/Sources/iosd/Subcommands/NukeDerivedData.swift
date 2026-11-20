@@ -19,7 +19,7 @@ struct NukeDerivedData: AsyncParsableCommand {
 		}
 
 		if input.trimmingCharacters(in: .whitespacesAndNewlines) == "yes" {
-			let loadingTask = echoLoadingText(prefix: "🔥 Nuking ", foregroundColor: .red)
+			let loadingTask = Terminal.echoLoadingText(prefix: "🔥 Nuking ", foreground: .red)
 			do {
 				try FileManager.default.removeItem(atPath: derivedDataDirectory.string)
 				loadingTask.cancel()

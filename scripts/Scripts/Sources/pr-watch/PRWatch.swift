@@ -33,7 +33,7 @@ struct PRWatch: AsyncParsableCommand {
 
 	func run() async throws {
 		let display = PollDisplay()
-		let loadingTask = echoLoadingText(
+		let loadingTask = Terminal.echoLoadingText(
 			loop: .weeee,
 			writesNewlineOnCancellation: false,
 		) { symbol in
@@ -46,14 +46,14 @@ struct PRWatch: AsyncParsableCommand {
 		} catch {
 			loadingTask.cancel()
 			await loadingTask.value
-			clearLine()
+			Terminal.clearLine()
 			throw error
 		}
 
 		loadingTask.cancel()
 		await loadingTask.value
-		clearLine()
-		await echo(display.line(symbol: "✓"), "\n")
+		Terminal.clearLine()
+		await Terminal.echo(display.line(symbol: "✓"), "\n")
 		print(mergedPullRequest.url)
 
 		try await postNotification(
@@ -414,16 +414,10 @@ private actor PollDisplay {
 		} else {
 			"PR: \(state.label)"
 		}
-		let status = colorize(
-			"\(symbol) \(description)",
-			foreground: state.color,
-		)
+		let status = "\(symbol) \(description)".colorized(foreground: state.color)
 
-		let detail: String = if let operationError, let lastPollDate {
-			colorize(
-				"\(operationError.kind) \(formatted(lastPollDate)): \(operationError.message)",
-				foreground: .red,
-			)
+		let detail = if let operationError, let lastPollDate {
+			"\(operationError.kind) \(formatted(lastPollDate)): \(operationError.message)".colorized(foreground: .red)
 		} else if let lastPollDate {
 			"last poll \(formatted(lastPollDate))"
 		} else {

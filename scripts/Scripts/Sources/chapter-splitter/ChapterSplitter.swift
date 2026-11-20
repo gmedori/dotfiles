@@ -89,7 +89,7 @@ struct ChapterSplitter: AsyncParsableCommand {
 					.grouping(.never)
 			)
 			let episodeTitle = outputFileFormat.replacingOccurrences(of: "%n", with: formattedOutputNumber)
-			echo("Renaming \(intermediateTitle) to \(episodeTitle)... ")
+			Terminal.echo("Renaming \(intermediateTitle) to \(episodeTitle)... ")
 			do {
 				try FileManager.default.moveItem(atPath: intermediateTitle, toPath: episodeTitle)
 				print("✅")
