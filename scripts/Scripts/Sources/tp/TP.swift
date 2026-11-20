@@ -1,7 +1,5 @@
 import ArgumentParser
 
-// MARK: - Root Command
-
 @main
 struct TP: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(

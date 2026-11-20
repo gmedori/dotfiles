@@ -2,31 +2,16 @@ import CommandKit
 import Darwin
 import Foundation
 
-// MARK: - Link State
-
-enum TshLinkState: Equatable {
-	case missing
-	case occupied
-	case broken(URL)
-	case linked(URL)
-
-	var targetURL: URL? {
-		switch self {
-			case let .broken(targetURL), let .linked(targetURL):
-				targetURL
-			case .missing, .occupied:
-				nil
-		}
-	}
-}
-
-// MARK: - Link Manager
-
+/// The symbolic link at `~/dotfiles/scripts/bin/tsh` that selects which `tsh` runs.
 struct ManagedTshLink {
+	/// The file manager that reads and changes the link.
 	let fileManager: FileManager
+	/// The home folder that holds `dotfiles`. Tests swap in a temporary folder.
 	let homeDirectory: URL
+	/// The environment whose `PATH` `pathWarning()` checks.
 	let environment: [String: String]
 
+	/// The link's location.
 	var linkURL: URL {
 		homeDirectory.appending(path: "dotfiles/scripts/bin/tsh")
 	}
@@ -41,9 +26,8 @@ struct ManagedTshLink {
 		self.environment = environment
 	}
 
-	// MARK: - State
-
-	func state() -> TshLinkState {
+	/// Whether the link exists and where it points.
+	func state() -> State {
 		let destination: String
 		do {
 			destination = try fileManager.destinationOfSymbolicLink(atPath: linkURL.path)
@@ -61,8 +45,8 @@ struct ManagedTshLink {
 			: .broken(targetURL)
 	}
 
-	// MARK: - Mutation
-
+	/// Points the link at `targetURL`, replacing it atomically. Returns `false` when it already
+	/// pointed there. Throws instead of replacing a file that isn't a symbolic link.
 	@discardableResult
 	func link(to targetURL: URL) throws -> Bool {
 		let targetURL = targetURL.resolvingSymlinksInPath().standardizedFileURL
@@ -94,6 +78,8 @@ struct ManagedTshLink {
 			withDestinationURL: targetURL,
 		)
 		defer {
+			// Ignoring the error here is what lets a successful `rename` through, since it has already
+			// moved the temporary link away. After a failed one, a stray temporary link is harmless.
 			try? fileManager.removeItem(at: temporaryLinkURL)
 		}
 
@@ -106,6 +92,8 @@ struct ManagedTshLink {
 		return true
 	}
 
+	/// Removes the link. Returns `false` when there was none. Throws instead of removing a file that
+	/// isn't a symbolic link.
 	@discardableResult
 	func unlink() throws -> Bool {
 		switch state() {
@@ -121,8 +109,8 @@ struct ManagedTshLink {
 		}
 	}
 
-	// MARK: - PATH Validation
-
+	/// A warning when the linked `tsh` isn't the one `PATH` finds first, or `nil` when it is or
+	/// nothing is linked.
 	func pathWarning() -> String? {
 		guard case .linked = state() else {
 			return nil
@@ -152,5 +140,31 @@ struct ManagedTshLink {
 		}
 
 		return "~/dotfiles/scripts/bin is not in PATH."
+	}
+}
+
+// MARK: - Supporting Types
+
+extension ManagedTshLink {
+	/// What's at the link's location.
+	enum State: Equatable {
+		/// Nothing.
+		case missing
+		/// A file or folder that isn't a symbolic link, which `tp` never replaces.
+		case occupied
+		/// A symbolic link to something that doesn't exist.
+		case broken(URL)
+		/// A symbolic link to an existing file.
+		case linked(URL)
+
+		/// Where the link points, or `nil` when there's no link.
+		var targetURL: URL? {
+			switch self {
+				case let .broken(targetURL), let .linked(targetURL):
+					targetURL
+				case .missing, .occupied:
+					nil
+			}
+		}
 	}
 }

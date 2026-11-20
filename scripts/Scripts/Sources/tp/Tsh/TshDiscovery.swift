@@ -2,14 +2,14 @@ import ArgumentParser
 import CommandKit
 import Foundation
 
-// MARK: - Discovery
-
+/// Finds the `tsh` binaries on this Mac.
 struct TshDiscovery {
+	/// The file manager that reads the folders `tsh` is installed in.
 	let fileManager: FileManager
+	/// The home folder, which holds `Applications`, `.tsh`, and `code`.
 	let homeDirectory: URL
+	/// The environment, for `PATH` and `TELEPORT_HOME`.
 	let environment: [String: String]
-
-	// MARK: - Helpers
 
 	private var workingDirectoryURL: URL {
 		URL(
@@ -28,22 +28,9 @@ struct TshDiscovery {
 		self.environment = environment
 	}
 
-	private static func sortInstallations(
-		_ lhs: TshInstallation,
-		_ rhs: TshInstallation,
-	) -> Bool {
-		let comparison = lhs.version.compare(rhs.version, options: .numeric)
-		if comparison != .orderedSame {
-			return comparison == .orderedDescending
-		}
-		if lhs.source != rhs.source {
-			return lhs.source.rawValue < rhs.source.rawValue
-		}
-		return lhs.url.path < rhs.url.path
-	}
-
-	// MARK: - Public API
-
+	/// Every installation found, newest version first. A binary found in more than one place is listed
+	/// once, with the source of the first place that found it.
+	@concurrent
 	func discover() async -> [TshInstallation] {
 		let candidates = await candidates()
 		let installations = await withTaskGroup(of: TshInstallation?.self) { group in
@@ -68,6 +55,9 @@ struct TshDiscovery {
 		return installations.sorted(by: Self.sortInstallations)
 	}
 
+	/// The installation at `suppliedPath`, which can start with `~`. Throws when it isn't a `tsh`
+	/// binary that reports a Teleport version.
+	@concurrent
 	func installation(at suppliedPath: String) async throws -> TshInstallation {
 		let suppliedURL = url(for: suppliedPath)
 		let managedLinkURL = homeDirectory
@@ -93,13 +83,50 @@ struct TshDiscovery {
 
 		return installation
 	}
+}
 
-	// MARK: - Candidate Collection
+// MARK: - Supporting Types
 
-	private func candidates() async -> [TshCandidate] {
-		var candidatesByURL: [URL: TshCandidate] = [:]
+extension TshDiscovery {
+	/// A binary that looks like `tsh`, before it's run for its version.
+	struct Candidate: Sendable {
+		/// The binary, with symbolic links resolved.
+		var url: URL
+		/// Where the binary came from.
+		var source: TshSource
+	}
+}
 
-		func add(_ urls: [URL], source: TshSource) {
+// MARK: - Private Helpers
+
+extension TshDiscovery {
+	private static func sortInstallations(
+		_ lhs: TshInstallation,
+		_ rhs: TshInstallation,
+	) -> Bool {
+		let comparison = lhs.version.compare(rhs.version, options: .numeric)
+		if comparison != .orderedSame {
+			return comparison == .orderedDescending
+		}
+		if lhs.source != rhs.source {
+			return lhs.source.rawValue < rhs.source.rawValue
+		}
+		return lhs.url.path < rhs.url.path
+	}
+
+	// MARK: Candidate Collection
+
+	private func candidates() async -> [Candidate] {
+		let urlsBySource: [(urls: [URL], source: TshSource)] = await [
+			(applicationURLs(), .standalone),
+			(managedToolsDirectoryURLs().flatMap(recursivelyNamedTshURLs(in:)), .managed),
+			(homebrewURLs(), .homebrew),
+			(pathEnvironmentURLs(), .other),
+			(sourceBuildURLs(), .source),
+		]
+
+		var candidatesByURL: [URL: Candidate] = [:]
+		for (urls, source) in urlsBySource {
 			for url in urls {
 				guard let candidate = candidate(at: url, suggestedSource: source) else {
 					continue
@@ -111,18 +138,10 @@ struct TshDiscovery {
 			}
 		}
 
-		add(applicationURLs(), source: .standalone)
-		for directoryURL in managedToolsDirectoryURLs() {
-			add(recursivelyNamedTshURLs(in: directoryURL), source: .managed)
-		}
-		add(homebrewURLs(), source: .homebrew)
-		add(pathEnvironmentURLs(), source: .other)
-		await add(sourceBuildURLs(), source: .source)
-
 		return Array(candidatesByURL.values)
 	}
 
-	// MARK: - Candidate Sources
+	// MARK: Candidate Sources
 
 	private func applicationURLs() -> [URL] {
 		let applicationDirectoryURLs = [
@@ -158,6 +177,7 @@ struct TshDiscovery {
 		]
 
 		return cellarURLs.flatMap { cellarURL -> [URL] in
+			// Ignoring the error here means a Cellar folder that doesn't exist adds no candidates.
 			guard let versionDirectoryURLs = try? fileManager.contentsOfDirectory(
 				at: cellarURL,
 				includingPropertiesForKeys: [.isDirectoryKey],
@@ -212,10 +232,10 @@ struct TshDiscovery {
 			directoryHint: .isDirectory,
 		)
 		var isDirectory: ObjCBool = false
-		guard fileManager.fileExists(
-			atPath: codeDirectoryURL.path,
-			isDirectory: &isDirectory,
-		), isDirectory.boolValue else {
+		guard
+			fileManager.fileExists(atPath: codeDirectoryURL.path, isDirectory: &isDirectory),
+			isDirectory.boolValue
+		else {
 			return []
 		}
 
@@ -241,13 +261,14 @@ struct TshDiscovery {
 				.split(whereSeparator: \.isNewline)
 				.map { URL(fileURLWithPath: String($0)) }
 		} catch {
+			// Ignoring the error here means a Mac without ripgrep finds no source builds.
 			return []
 		}
 	}
 
-	// MARK: - Candidate Validation
+	// MARK: Candidate Validation
 
-	private func candidate(at url: URL, suggestedSource: TshSource) -> TshCandidate? {
+	private func candidate(at url: URL, suggestedSource: TshSource) -> Candidate? {
 		let managedLinkURL = homeDirectory
 			.appending(path: "dotfiles/scripts/bin/tsh")
 			.standardizedFileURL
@@ -266,13 +287,14 @@ struct TshDiscovery {
 			return nil
 		}
 
-		return TshCandidate(
+		return Candidate(
 			url: resolvedURL,
 			source: source(for: resolvedURL, fallback: suggestedSource),
 		)
 	}
 
 	private func isRegularFile(_ url: URL) -> Bool {
+		// Ignoring the error here means a file whose type can't be read isn't a candidate.
 		guard let values = try? url.resourceValues(forKeys: [
 			.isRegularFileKey,
 			.isSymbolicLinkKey,
@@ -284,6 +306,8 @@ struct TshDiscovery {
 	}
 
 	private func isMachOBinary(_ url: URL) -> Bool {
+		// Ignoring these errors means a file that can't be opened or read isn't a candidate. Closing a
+		// handle that was only read from can't lose anything.
 		guard let handle = try? FileHandle(forReadingFrom: url) else {
 			return false
 		}
@@ -303,14 +327,13 @@ struct TshDiscovery {
 		].contains(magic)
 	}
 
-	// MARK: - Source Classification
+	// MARK: Source Classification
 
 	private func source(for url: URL, fallback: TshSource) -> TshSource {
 		let path = url.path
 		let homePath = homeDirectory.path
-		if managedToolsDirectoryURLs().contains(where: {
-			path.hasPrefix($0.standardizedFileURL.path + "/")
-		}) {
+		let managedDirectoryPaths = managedToolsDirectoryURLs().map { $0.standardizedFileURL.path + "/" }
+		if managedDirectoryPaths.contains(where: { path.hasPrefix($0) }) {
 			return .managed
 		}
 		if path.contains("/Teleport Connect.app/") {
@@ -329,17 +352,9 @@ struct TshDiscovery {
 	}
 
 	private func url(for path: String) -> URL {
-		let expandedPath = (path as NSString).expandingTildeInPath
-		return URL(
-			fileURLWithPath: expandedPath,
+		URL(
+			fileURLWithPath: path.expandingTilde(homeDirectory: homeDirectory),
 			relativeTo: workingDirectoryURL,
 		).standardizedFileURL
 	}
-}
-
-// MARK: - Discovery Candidate
-
-private struct TshCandidate: Sendable {
-	let url: URL
-	let source: TshSource
 }

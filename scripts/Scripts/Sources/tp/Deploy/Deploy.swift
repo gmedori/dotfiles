@@ -4,9 +4,6 @@ import Foundation
 import System
 
 struct Deploy: AsyncParsableCommand {
-	static let defaultBaseImageRepository =
-		"public.ecr.aws/gravitational-staging/teleport-ent-distroless"
-
 	static let configuration = CommandConfiguration(
 		commandName: "deploy",
 		abstract: "Deploy a local Teleport build to a Cloud staging tenant",
@@ -25,13 +22,13 @@ struct Deploy: AsyncParsableCommand {
 		name: .customLong("base-image-tag"),
 		help: "Use an exact base-image tag instead of resolving the newest nightly",
 	)
-	var baseImageTag: String?
+	var baseImageTag: String? = nil
 
 	@Option(
 		name: .long,
 		help: "Linux amd64 C compiler passed to make; otherwise it is discovered automatically",
 	)
-	var cc: String?
+	var cc: String? = nil
 
 	@Option(
 		name: .customLong("teleport-dir"),
@@ -60,7 +57,7 @@ struct Deploy: AsyncParsableCommand {
 
 	func run() async throws {
 		let checkout = try TeleportCheckout(path: teleportDirectory)
-		let compiler = try DeployCompiler.resolve(explicit: cc)
+		let compiler = try Compiler.resolve(explicit: cc)
 
 		print("Checking Cloud deployment access...")
 		try await Make.run(
@@ -118,108 +115,129 @@ struct Deploy: AsyncParsableCommand {
 	}
 }
 
-private enum DeployCompiler {
-	static func resolve(
-		explicit: String?,
-		environment: [String: String] = ProcessInfo.processInfo.environment,
-		fileManager: FileManager = .default,
-	) throws -> String? {
-		if let explicit {
-			return explicit
-		}
-		if let configured = environment["CC"], !configured.isEmpty {
-			return configured
-		}
+// MARK: - Supporting Types
 
-		let compilerName = "x86_64-unknown-linux-gnu-gcc"
-		let knownPaths = [
-			"/opt/homebrew/bin/\(compilerName)",
-			"/usr/local/bin/\(compilerName)",
-		]
-		for path in knownPaths where fileManager.isExecutableFile(atPath: path) {
-			return path
-		}
+extension Deploy {
+	/// Finds the C compiler that cross-compiles Teleport for Linux amd64.
+	enum Compiler {
+		/// The compiler to pass to `make` as `CC`. It's `explicit` when that's given, then `$CC`, then
+		/// the first cross-compiler found in Homebrew's folders or `PATH`. Returns `nil` on an Intel Mac
+		/// that has none, since its own compiler builds for amd64, and throws on Apple silicon.
+		static func resolve(
+			explicit: String?,
+			environment: [String: String] = ProcessInfo.processInfo.environment,
+			fileManager: FileManager = .default,
+		) throws -> String? {
+			if let explicit {
+				return explicit
+			}
+			if let configured = environment["CC"], !configured.isEmpty {
+				return configured
+			}
 
-		for component in (environment["PATH"] ?? "")
-			.split(separator: ":", omittingEmptySubsequences: false)
-		{
-			let directory = component.isEmpty ? "." : String(component)
-			let candidate = URL(fileURLWithPath: directory, isDirectory: true)
-				.appending(path: compilerName)
-			if fileManager.isExecutableFile(atPath: candidate.path) {
-				return candidate.path
+			let compilerName = "x86_64-unknown-linux-gnu-gcc"
+			let knownPaths = [
+				"/opt/homebrew/bin/\(compilerName)",
+				"/usr/local/bin/\(compilerName)",
+			]
+			for path in knownPaths where fileManager.isExecutableFile(atPath: path) {
+				return path
+			}
+
+			for component in (environment["PATH"] ?? "")
+				.split(separator: ":", omittingEmptySubsequences: false)
+			{
+				let directory = component.isEmpty ? "." : String(component)
+				let candidate = URL(fileURLWithPath: directory, isDirectory: true)
+					.appending(path: compilerName)
+				if fileManager.isExecutableFile(atPath: candidate.path) {
+					return candidate.path
+				}
+			}
+
+			#if arch(arm64)
+				throw ValidationError(
+					"Could not find \(compilerName). Install the macOS cross-toolchain or pass --cc."
+				)
+			#else
+				return nil
+			#endif
+		}
+	}
+
+	/// Runs `make` in the Teleport checkout.
+	enum Make {
+		/// Runs `make` with the terminal attached, so its output streams as it builds, and throws
+		/// `failureMessage` when it fails.
+		static func run(
+			arguments: [String],
+			in directory: URL,
+			failureMessage: String,
+		) async throws {
+			let result: ExecutionResult<Void, FileDescriptorOutput, FileDescriptorOutput>
+			do {
+				result = try await Subprocess.run(
+					.name("make"),
+					arguments: Arguments(arguments),
+					workingDirectory: FilePath(directory.path),
+					input: .standardInput,
+					output: .currentStandardOutput,
+					error: .currentStandardError,
+				)
+			} catch {
+				throw RuntimeError("Could not run make: \(error)")
+			}
+
+			guard result.terminationStatus.isSuccess else {
+				throw RuntimeError(failureMessage)
 			}
 		}
 
-		#if arch(arm64)
-			throw ValidationError(
-				"Could not find \(compilerName). Install the macOS cross-toolchain or pass --cc."
-			)
-		#else
-			return nil
-		#endif
+		/// Runs `make` and returns what it printed, trimmed. Throws what it printed to standard error
+		/// when it fails, or `failureMessage` when it printed nothing.
+		static func capture(
+			arguments: [String],
+			in directory: URL,
+			failureMessage: String,
+		) async throws -> String {
+			let result: ExecutionResult<
+				Void,
+				StringOutput<Unicode.UTF8>,
+				StringOutput<Unicode.UTF8>,
+			>
+			do {
+				result = try await Subprocess.run(
+					.name("make"),
+					arguments: Arguments(arguments),
+					workingDirectory: FilePath(directory.path),
+					output: .string(limit: 64 * 1024),
+					error: .string(limit: 64 * 1024),
+				)
+			} catch {
+				throw RuntimeError("Could not run make: \(error)")
+			}
+
+			guard result.terminationStatus.isSuccess else {
+				let error = result.standardError?
+					.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+				throw RuntimeError(error.isEmpty ? failureMessage : error)
+			}
+
+			let output = result.standardOutput?
+				.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+			guard !output.isEmpty else {
+				throw RuntimeError(failureMessage)
+			}
+
+			return output
+		}
 	}
 }
 
-private enum Make {
-	static func run(
-		arguments: [String],
-		in directory: URL,
-		failureMessage: String,
-	) async throws {
-		let result: ExecutionResult<Void, FileDescriptorOutput, FileDescriptorOutput>
-		do {
-			result = try await Subprocess.run(
-				.name("make"),
-				arguments: Arguments(arguments),
-				workingDirectory: FilePath(directory.path),
-				input: .standardInput,
-				output: .currentStandardOutput,
-				error: .currentStandardError,
-			)
-		} catch {
-			throw RuntimeError("Could not run make: \(error)")
-		}
+// MARK: - Static Members
 
-		guard result.terminationStatus.isSuccess else {
-			throw RuntimeError(failureMessage)
-		}
-	}
-
-	static func capture(
-		arguments: [String],
-		in directory: URL,
-		failureMessage: String,
-	) async throws -> String {
-		let result: ExecutionResult<
-			Void,
-			StringOutput<Unicode.UTF8>,
-			StringOutput<Unicode.UTF8>,
-		>
-		do {
-			result = try await Subprocess.run(
-				.name("make"),
-				arguments: Arguments(arguments),
-				workingDirectory: FilePath(directory.path),
-				output: .string(limit: 64 * 1024),
-				error: .string(limit: 64 * 1024),
-			)
-		} catch {
-			throw RuntimeError("Could not run make: \(error)")
-		}
-
-		guard result.terminationStatus.isSuccess else {
-			let error = result.standardError?
-				.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-			throw RuntimeError(error.isEmpty ? failureMessage : error)
-		}
-
-		let output = result.standardOutput?
-			.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-		guard !output.isEmpty else {
-			throw RuntimeError(failureMessage)
-		}
-
-		return output
-	}
+extension Deploy {
+	/// The repository that holds Teleport's staging nightly base images.
+	static let defaultBaseImageRepository =
+		"public.ecr.aws/gravitational-staging/teleport-ent-distroless"
 }
