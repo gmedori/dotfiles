@@ -41,8 +41,8 @@ struct `opening the pull request` {
 		self.prepared = try Staging.prepare(draft: draftFile, altOverrides: [:], stageDirectory: stage)
 	}
 
-	func create(asDraft: Bool = false) async throws -> CreatedPullRequest {
-		try await PullRequestCreator(gh: gh.cli).create(prepared, in: stage, asDraft: asDraft)
+	func create(asDraft: Bool = false, labels: [String] = []) async throws -> CreatedPullRequest {
+		try await PullRequestCreator(gh: gh.cli).create(prepared, in: stage, asDraft: asDraft, labels: labels)
 	}
 
 	@Test
@@ -71,6 +71,20 @@ struct `opening the pull request` {
 
 			""")
 		#expect(!stageExists)
+	}
+
+	@Test
+	func `Adds each label to the pull request`() async throws {
+		let created = try await create(labels: ["no-changelog", "no-test-plan"])
+
+		#expect(created.url == FakeGitHubCLI.url)
+		#expect(try gh.calls().first == [
+			"pr", "create", "-R", "gmedori/example", "--base", "main", "--head", "db+/share-sheet",
+			"--title", "DB+: Share sheet", "--body-file", "body.md",
+			"--label", "no-changelog", "--label", "no-test-plan",
+			"--attach", "./01-pasted-image-1.png#Share sheet",
+			"--attach", "./02-screen-recording.mov",
+		])
 	}
 
 	@Test

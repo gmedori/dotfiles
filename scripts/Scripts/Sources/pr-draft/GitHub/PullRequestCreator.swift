@@ -11,10 +11,15 @@ struct PullRequestCreator {
 	/// The `gh` that opens and edits the pull request. Tests swap in a stand-in.
 	let gh: GitHubCLI
 
-	/// Opens the pull request for `prepared` from `stageDirectory`, as a draft when `asDraft` is
-	/// `true`, and retries the uploads that failed. Deletes the staging folder when every upload
-	/// worked.
-	func create(_ prepared: PreparedDraft, in stageDirectory: URL, asDraft: Bool) async throws -> CreatedPullRequest {
+	/// Opens the pull request for `prepared` from `stageDirectory` with each of `labels`, as a draft
+	/// when `asDraft` is `true`, and retries the uploads that failed. Deletes the staging folder when
+	/// every upload worked.
+	func create(
+		_ prepared: PreparedDraft,
+		in stageDirectory: URL,
+		asDraft: Bool,
+		labels: [String] = [],
+	) async throws -> CreatedPullRequest {
 		guard
 			let repo = prepared.repo, let base = prepared.base, let branch = prepared.branch,
 			let title = prepared.title
@@ -31,6 +36,7 @@ struct PullRequestCreator {
 		if asDraft {
 			arguments.append("--draft")
 		}
+		arguments += labels.flatMap { ["--label", $0] }
 		arguments += prepared.attachments.flatMap { ["--attach", $0.attachArgument] }
 
 		let output = try await gh.run(arguments, in: stageDirectory)

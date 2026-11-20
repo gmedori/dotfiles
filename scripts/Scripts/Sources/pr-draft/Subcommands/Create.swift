@@ -14,6 +14,9 @@ struct Create: AsyncParsableCommand {
 			reference that still points at a staged file means its upload failed, and
 			`create` tries those files once more with `gh pr edit`.
 
+			Each `--label` goes to `gh pr create` too. A label that doesn't exist in the
+			repo makes `gh` stop before it opens the pull request.
+
 			It prints JSON with the pull request's `url`, the number of attachments
 			`uploaded`, and the vault paths of the ones that `failed`. When `gh` doesn't
 			open a pull request, `url` is missing and `error` has what `gh` printed.
@@ -28,6 +31,9 @@ struct Create: AsyncParsableCommand {
 	@Flag(help: "Open the pull request as a draft.")
 	var draft = false
 
+	@Option(name: .customLong("label"), help: "Add this label to the pull request. Repeat it for more labels.")
+	var labels: [String] = []
+
 	func run() async throws {
 		let stageDirectory = URL(filePath: stageDir, directoryHint: .isDirectory, relativeTo: .currentDirectory())
 			.absoluteURL
@@ -37,6 +43,7 @@ struct Create: AsyncParsableCommand {
 			prepared,
 			in: stageDirectory,
 			asDraft: draft,
+			labels: labels,
 		)
 		try print(JSON.encode(created))
 		if created.url == nil || !created.failed.isEmpty {
