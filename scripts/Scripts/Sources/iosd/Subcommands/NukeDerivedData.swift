@@ -22,7 +22,7 @@ struct NukeDerivedData: AsyncParsableCommand {
 
 		let loadingTask = Terminal.echoLoadingText(prefix: "🔥 Nuking ", foreground: .red)
 		do {
-			try FileManager.default.removeItem(atPath: directory.string)
+			try await remove(directory)
 			loadingTask.cancel()
 			print("\n✅ Successfully nuked \(directory.string, foreground: .green)")
 		} catch {
@@ -65,5 +65,12 @@ extension NukeDerivedData {
 			// Ignoring the error here means that when `defaults` can't run, Xcode's default location is used.
 			return nil
 		}
+	}
+
+	@concurrent
+	private func remove(_ directory: FilePath) async throws {
+		// `removeItem(atPath:)` blocks until the whole folder is deleted. This function is `async`, without awaiting
+		// anything, so that `@concurrent` can run the call off the caller's actor.
+		try FileManager.default.removeItem(atPath: directory.string)
 	}
 }
