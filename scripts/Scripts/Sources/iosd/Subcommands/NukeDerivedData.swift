@@ -10,9 +10,9 @@ struct NukeDerivedData: AsyncParsableCommand {
 	)
 
 	func run() async throws {
-		let derivedDataDirectory = await getDerivedDataDirectory()
+		let directory = await derivedDataDirectory()
 		print(
-			"Are you sure you want to delete the DerivedData directory?\n\(derivedDataDirectory)\n\nAnything except 'yes' will abort."
+			"Are you sure you want to delete the DerivedData directory?\n\(directory)\n\nAnything except 'yes' will abort."
 		)
 		guard let input = readLine() else {
 			throw RuntimeError("❌ Failed to read any input")
@@ -21,9 +21,9 @@ struct NukeDerivedData: AsyncParsableCommand {
 		if input.trimmingCharacters(in: .whitespacesAndNewlines) == "yes" {
 			let loadingTask = Terminal.echoLoadingText(prefix: "🔥 Nuking ", foreground: .red)
 			do {
-				try FileManager.default.removeItem(atPath: derivedDataDirectory.string)
+				try FileManager.default.removeItem(atPath: directory.string)
 				loadingTask.cancel()
-				print("\n✅ Successfully nuked \(derivedDataDirectory.string, foreground: .green)")
+				print("\n✅ Successfully nuked \(directory.string, foreground: .green)")
 			} catch {
 				loadingTask.cancel()
 				throw RuntimeError("❌ Failed to nuke derived data: \(error.localizedDescription)")
@@ -33,9 +33,9 @@ struct NukeDerivedData: AsyncParsableCommand {
 		}
 	}
 
-	private func getDerivedDataDirectory() async -> FilePath {
-		let homeDir = FileManager.default.homeDirectoryForCurrentUser.path()
-		let defaultPath = FilePath(homeDir)
+	private func derivedDataDirectory() async -> FilePath {
+		let homeDirectory = FileManager.default.homeDirectoryForCurrentUser.path()
+		let defaultPath = FilePath(homeDirectory)
 			.appending("Library")
 			.appending("Developer")
 			.appending("Xcode")

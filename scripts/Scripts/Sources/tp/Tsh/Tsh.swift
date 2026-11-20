@@ -17,8 +17,8 @@ struct Tsh: AsyncParsableCommand {
 		func run() async {
 			let discovery = TshDiscovery()
 			let installations = await discovery.discover()
-			let linkManager = TshLinkManager()
-			let linkState = linkManager.state()
+			let managedLink = ManagedTshLink()
+			let linkState = managedLink.state()
 
 			guard !installations.isEmpty else {
 				print("No tsh installations found.")
@@ -97,8 +97,8 @@ struct Tsh: AsyncParsableCommand {
 				throw ValidationError("Supply either a version or --path.")
 			}
 
-			let linkManager = TshLinkManager()
-			let changed = try linkManager.link(to: installation.url)
+			let managedLink = ManagedTshLink()
+			let changed = try managedLink.link(to: installation.url)
 			if changed {
 				print("Switched tsh to \(installation.version).")
 			} else {
@@ -106,7 +106,7 @@ struct Tsh: AsyncParsableCommand {
 			}
 			print("~/dotfiles/scripts/bin/tsh -> \(installation.displayPath)")
 
-			if let warning = linkManager.pathWarning() {
+			if let warning = managedLink.pathWarning() {
 				print("Warning: \(warning)")
 			}
 		}
@@ -122,8 +122,8 @@ struct Tsh: AsyncParsableCommand {
 		)
 
 		func run() async throws {
-			let linkManager = TshLinkManager()
-			switch linkManager.state() {
+			let managedLink = ManagedTshLink()
+			switch managedLink.state() {
 				case .missing:
 					print("No tsh installation is selected.")
 				case .occupied:
@@ -143,7 +143,7 @@ struct Tsh: AsyncParsableCommand {
 			)
 			TshEnvironment.printWarningIfNeeded()
 
-			if let warning = linkManager.pathWarning() {
+			if let warning = managedLink.pathWarning() {
 				print("Warning: \(warning)")
 			}
 		}
@@ -159,7 +159,7 @@ struct Tsh: AsyncParsableCommand {
 		)
 
 		func run() throws {
-			let removed = try TshLinkManager().unlink()
+			let removed = try ManagedTshLink().unlink()
 			print(removed ? "Removed ~/dotfiles/scripts/bin/tsh." : "No tsh installation was selected.")
 		}
 	}

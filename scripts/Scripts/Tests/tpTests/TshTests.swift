@@ -85,14 +85,14 @@ struct `tsh symbolic link management` {
 
 		let first = try fixture.makeCandidate(named: "first")
 		let second = try fixture.makeCandidate(named: "second")
-		let manager = fixture.manager()
+		let managedLink = fixture.managedLink()
 
-		#expect(try manager.link(to: first))
-		#expect(manager.state() == .linked(first))
-		#expect(try !manager.link(to: first))
+		#expect(try managedLink.link(to: first))
+		#expect(managedLink.state() == .linked(first))
+		#expect(try !managedLink.link(to: first))
 
-		#expect(try manager.link(to: second))
-		#expect(manager.state() == .linked(second))
+		#expect(try managedLink.link(to: second))
+		#expect(managedLink.state() == .linked(second))
 	}
 
 	@Test
@@ -101,24 +101,24 @@ struct `tsh symbolic link management` {
 		defer { fixture.remove() }
 
 		let candidate = try fixture.makeCandidate(named: "candidate")
-		let manager = fixture.manager()
+		let managedLink = fixture.managedLink()
 		try FileManager.default.createDirectory(
-			at: manager.linkURL.deletingLastPathComponent(),
+			at: managedLink.linkURL.deletingLastPathComponent(),
 			withIntermediateDirectories: true,
 		)
 		#expect(FileManager.default.createFile(
-			atPath: manager.linkURL.path,
+			atPath: managedLink.linkURL.path,
 			contents: Data("keep me".utf8),
 		))
 
 		do {
-			_ = try manager.link(to: candidate)
+			_ = try managedLink.link(to: candidate)
 			Issue.record("Expected a regular file to be preserved")
 		} catch {
 			#expect(String(describing: error).contains("refusing to replace"))
 		}
 
-		let contents = try String(contentsOf: manager.linkURL, encoding: .utf8)
+		let contents = try String(contentsOf: managedLink.linkURL, encoding: .utf8)
 		#expect(contents == "keep me")
 	}
 
@@ -127,20 +127,20 @@ struct `tsh symbolic link management` {
 		let fixture = try Fixture()
 		defer { fixture.remove() }
 
-		let manager = fixture.manager()
+		let managedLink = fixture.managedLink()
 		try FileManager.default.createDirectory(
-			at: manager.linkURL.deletingLastPathComponent(),
+			at: managedLink.linkURL.deletingLastPathComponent(),
 			withIntermediateDirectories: true,
 		)
 		let missing = fixture.root.appending(path: "missing")
 		try FileManager.default.createSymbolicLink(
-			at: manager.linkURL,
+			at: managedLink.linkURL,
 			withDestinationURL: missing,
 		)
 
-		#expect(manager.state() == .broken(missing))
-		#expect(try manager.unlink())
-		#expect(manager.state() == .missing)
+		#expect(managedLink.state() == .broken(missing))
+		#expect(try managedLink.unlink())
+		#expect(managedLink.state() == .missing)
 	}
 }
 
@@ -177,8 +177,8 @@ private struct Fixture {
 		try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
 	}
 
-	func manager() -> TshLinkManager {
-		TshLinkManager(
+	func managedLink() -> ManagedTshLink {
+		ManagedTshLink(
 			homeDirectory: root,
 			environment: ["PATH": root.appending(path: "dotfiles/scripts/bin").path],
 		)

@@ -33,10 +33,10 @@ struct Reporter: Sendable {
 	static let labelWidth = PostState.allCases.map(\.label.count).max()!
 
 	let siteDirectory: URL
-	var useColor = isatty(STDOUT_FILENO) != 0 && ProcessInfo.processInfo.environment["NO_COLOR"] == nil
+	var usesColor = isatty(STDOUT_FILENO) != 0 && ProcessInfo.processInfo.environment["NO_COLOR"] == nil
 
 	func paint(_ text: String, _ color: Color) -> String {
-		useColor ? text.colorized(foreground: color) : text
+		usesColor ? text.colorized(foreground: color) : text
 	}
 
 	/// A line in the list of posts, with a colored word, the slug, and a detail like where the post is.

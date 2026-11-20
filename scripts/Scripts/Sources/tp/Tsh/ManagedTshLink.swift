@@ -22,7 +22,7 @@ enum TshLinkState: Equatable {
 
 // MARK: - Link Manager
 
-struct TshLinkManager {
+struct ManagedTshLink {
 	let fileManager: FileManager
 	let homeDirectory: URL
 	let environment: [String: String]
