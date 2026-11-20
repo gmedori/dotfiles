@@ -17,7 +17,7 @@ struct PRWatch: AsyncParsableCommand {
 		name: [.customShort("R"), .long],
 		help: "Select another repository using the [HOST/]OWNER/REPO format",
 	)
-	var repo: String?
+	var repo: String? = nil
 
 	@Option(
 		name: [.customShort("i"), .customLong("interval")],
@@ -60,10 +60,14 @@ struct PRWatch: AsyncParsableCommand {
 			message: "PR \(mergedPullRequest.number) has merged"
 		)
 	}
+}
 
+// MARK: - Private Helpers
+
+extension PRWatch {
 	private func waitForMerge(display: PollDisplay) async throws -> PullRequest {
-		var reference: PullRequestReference?
-		var previousPullRequest: PullRequest?
+		var reference: PullRequestReference? = nil
+		var previousPullRequest: PullRequest? = nil
 
 		while true {
 			let pollDate = Date()
@@ -205,240 +209,4 @@ struct PRWatch: AsyncParsableCommand {
 			throw RuntimeError(error.isEmpty ? "osascript failed." : error)
 		}
 	}
-}
-
-private struct PullRequestReference: Decodable, Sendable {
-	let id: String
-	let url: String
-
-	var host: String {
-		URL(string: url)?.host ?? "github.com"
-	}
-}
-
-private struct PullRequest: Decodable, Sendable {
-	let number: Int
-	let state: String
-	let mergedAt: String?
-	let url: String
-	let isInMergeQueue: Bool
-	let mergeQueueEntry: MergeQueueEntry?
-	let latestQueueRemoval: QueueRemovalConnection
-
-	var displayState: PullRequestState {
-		if mergedAt != nil || state.uppercased() == "MERGED" {
-			return .merged
-		}
-		if isInMergeQueue {
-			return .queued(mergeQueueEntry)
-		}
-		if let removal = latestRemoval {
-			return .removedFromQueue(removal.reason)
-		}
-
-		switch state.uppercased() {
-			case "OPEN": return .open
-			case "CLOSED": return .closed
-			default: return .unknown
-		}
-	}
-
-	var isMerged: Bool {
-		mergedAt != nil || state.uppercased() == "MERGED"
-	}
-
-	var latestRemoval: QueueRemoval? {
-		latestQueueRemoval.nodes.compactMap(\.self).last
-	}
-
-	func queueRemovalNotification(after previous: PullRequest) -> String? {
-		guard !isMerged, !isInMergeQueue else {
-			return nil
-		}
-
-		let newRemoval = latestRemoval?.id != previous.latestRemoval?.id
-			? latestRemoval
-			: nil
-		guard previous.isInMergeQueue || newRemoval != nil else {
-			return nil
-		}
-
-		let prefix = "PR \(number) left the merge queue"
-		guard
-			let reason = newRemoval?.reason,
-			!reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-		else {
-			return prefix
-		}
-
-		return "\(prefix): \(singleLine(reason, limit: 180))"
-	}
-}
-
-private struct MergeQueueEntry: Decodable, Sendable {
-	let state: String
-	let position: Int
-	let estimatedTimeToMerge: Int?
-}
-
-private struct QueueRemovalConnection: Decodable, Sendable {
-	let nodes: [QueueRemoval?]
-}
-
-private struct QueueRemoval: Decodable, Sendable {
-	let id: String
-	let reason: String?
-}
-
-private enum PullRequestState: Sendable {
-	case open
-	case closed
-	case merged
-	case queued(MergeQueueEntry?)
-	case removedFromQueue(String?)
-	case unknown
-
-	var label: String {
-		switch self {
-			case .open: "open"
-			case .closed: "closed"
-			case .merged: "merged"
-			case let .queued(entry): queueLabel(entry: entry)
-			case let .removedFromQueue(reason): removalLabel(reason: reason)
-			case .unknown: "unknown"
-		}
-	}
-
-	var color: Color {
-		switch self {
-			case .open: .green
-			case .closed: .red
-			case .merged: .magenta
-			case .queued: .cyan
-			case .removedFromQueue: .red
-			case .unknown: .yellow
-		}
-	}
-
-	private func queueLabel(entry: MergeQueueEntry?) -> String {
-		guard let entry else {
-			return "queued"
-		}
-
-		var details = [
-			"position \(entry.position)",
-			queueStateLabel(entry.state),
-		]
-		if let estimatedTimeToMerge = entry.estimatedTimeToMerge {
-			details.append("~\(formattedDuration(estimatedTimeToMerge))")
-		}
-		return "queued (\(details.joined(separator: ", ")))"
-	}
-
-	private func queueStateLabel(_ state: String) -> String {
-		if state.uppercased() == "AWAITING_CHECKS" {
-			return "checks in progress"
-		}
-		return state.lowercased().replacingOccurrences(of: "_", with: " ")
-	}
-
-	private func formattedDuration(_ totalSeconds: Int) -> String {
-		let totalSeconds = max(0, totalSeconds)
-		let hours = totalSeconds / 3600
-		let minutes = totalSeconds % 3600 / 60
-		let seconds = totalSeconds % 60
-
-		if hours > 0 {
-			return "\(hours)h \(minutes)m \(seconds)s"
-		}
-		if minutes > 0 {
-			return "\(minutes)m \(seconds)s"
-		}
-		return "\(seconds)s"
-	}
-
-	private func removalLabel(reason: String?) -> String {
-		guard
-			let reason,
-			!reason.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-		else {
-			return "removed from merge queue"
-		}
-
-		return "removed from merge queue: \(singleLine(reason, limit: 120))"
-	}
-}
-
-private actor PollDisplay {
-	private var pullRequest: PullRequest? = nil
-	private var lastPollDate: Date? = nil
-	private var operationError: (kind: String, message: String)? = nil
-	private let dateFormatter: DateFormatter = {
-		let formatter = DateFormatter()
-		formatter.locale = Locale(identifier: "en_US_POSIX")
-		formatter.dateFormat = "yyyy-MM-dd HH:mm:ss zzz"
-		return formatter
-	}()
-
-	func pollStarted(at date: Date) {
-		lastPollDate = date
-		operationError = nil
-	}
-
-	func pollSucceeded(with pullRequest: PullRequest, at date: Date) {
-		self.pullRequest = pullRequest
-		lastPollDate = date
-		operationError = nil
-	}
-
-	func pollFailed(with error: any Error, at date: Date) {
-		lastPollDate = date
-		operationError = (
-			kind: "poll error",
-			message: singleLine(String(describing: error), limit: 160),
-		)
-	}
-
-	func notificationFailed(with error: any Error, at date: Date) {
-		lastPollDate = date
-		operationError = (
-			kind: "notification error",
-			message: singleLine(String(describing: error), limit: 160),
-		)
-	}
-
-	func line(symbol: String) -> String {
-		let state = pullRequest?.displayState ?? .unknown
-		let description = if let pullRequest {
-			"PR #\(pullRequest.number): \(state.label)"
-		} else {
-			"PR: \(state.label)"
-		}
-		let status = "\(symbol) \(description)".colorized(foreground: state.color)
-
-		let detail = if let operationError, let lastPollDate {
-			"\(operationError.kind) \(formatted(lastPollDate)): \(operationError.message)".colorized(foreground: .red)
-		} else if let lastPollDate {
-			"last poll \(formatted(lastPollDate))"
-		} else {
-			"waiting for first poll"
-		}
-
-		return "\(status) - \(detail)"
-	}
-
-	private func formatted(_ date: Date) -> String {
-		dateFormatter.string(from: date)
-	}
-}
-
-private func singleLine(_ text: String, limit: Int) -> String {
-	let text = text
-		.split(whereSeparator: \.isWhitespace)
-		.joined(separator: " ")
-	guard text.count > limit else {
-		return text
-	}
-
-	return "\(text.prefix(limit))…"
 }
