@@ -199,6 +199,7 @@ private struct Fixture {
 	}
 
 	func remove() {
+		// Ignoring the error here leaves the folder in the temp folder, which doesn't change any result.
 		try? FileManager.default.removeItem(at: root)
 	}
 }

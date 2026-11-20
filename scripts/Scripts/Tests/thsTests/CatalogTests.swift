@@ -46,7 +46,6 @@ struct `post states` {
 		}
 		return ExistingBundle(
 			slug: slug,
-			directory: URL(filePath: "/site/content/blog/\(slug)"),
 			bundle: PageBundle(files: files),
 			vaultSource: vaultSource,
 			storedHash: hash,
@@ -196,7 +195,8 @@ struct `post states` {
 		#expect(SyncAction(entry).kind == .delete)
 		#expect(messages.map(\.kind) == [.warning])
 		#expect(messages.first?.headline.contains("/blog/a/") == true)
-		#expect(!catalog.hasProblems)
+		let hasProblems = catalog.entries.contains { $0.state.isProblem }
+		#expect(!hasProblems)
 	}
 
 	@Test

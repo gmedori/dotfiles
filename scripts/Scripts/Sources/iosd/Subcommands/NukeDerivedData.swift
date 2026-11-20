@@ -1,6 +1,5 @@
 import ArgumentParser
 import CommandKit
-import Darwin
 import Foundation
 import System
 

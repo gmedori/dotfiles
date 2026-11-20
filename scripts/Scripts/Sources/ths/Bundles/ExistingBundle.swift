@@ -6,8 +6,6 @@ import Yams
 struct ExistingBundle: Equatable, Sendable {
 	/// The slug, which is the name of the bundle's folder.
 	var slug: String
-	/// The bundle's folder in the site repo.
-	var directory: URL
 	/// The files in the folder, as they are on disk.
 	var bundle: PageBundle
 	/// `params.vaultSource`, or `nil` when `ths` didn't generate the bundle.
@@ -84,7 +82,6 @@ extension ExistingBundle {
 		let params = frontmatter?.properties["params"]?.mapping
 		return ExistingBundle(
 			slug: directory.lastPathComponent,
-			directory: directory,
 			bundle: PageBundle(files: files),
 			vaultSource: params?["vaultSource"]?.string,
 			storedHash: params?["generatedHash"]?.string,

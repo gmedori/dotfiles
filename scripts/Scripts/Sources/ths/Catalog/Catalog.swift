@@ -5,11 +5,6 @@ import Foundation
 struct Catalog: Sendable {
 	/// The posts in path order, followed by the bundles no post claims in slug order.
 	var entries: [CatalogEntry]
-
-	/// Whether any entry is in a state that's a problem.
-	var hasProblems: Bool {
-		entries.contains { $0.state.isProblem }
-	}
 }
 
 // MARK: - Static Members

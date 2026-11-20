@@ -122,6 +122,7 @@ struct `Teleport checkout` {
 			.temporaryDirectory
 			.appending(path: "tp-checkout-tests-\(UUID().uuidString)")
 		try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+		// Ignoring the error here leaves the folder in the temp folder, which doesn't change any result.
 		defer { try? FileManager.default.removeItem(at: root) }
 		#expect(FileManager.default.createFile(
 			atPath: root.appending(path: "Makefile").path,
@@ -155,6 +156,7 @@ private struct TeleportCheckoutFixture {
 	}
 
 	func remove() {
+		// Ignoring the error here leaves the folder in the temp folder, which doesn't change any result.
 		try? FileManager.default.removeItem(at: root)
 	}
 }
