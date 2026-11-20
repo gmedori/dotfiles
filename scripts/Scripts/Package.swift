@@ -1,7 +1,13 @@
-// swift-tools-version: 6.2
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version: 6.4
 
 import PackageDescription
+
+let swiftSettings: [SwiftSetting] = [
+	.enableUpcomingFeature("ExistentialAny"),
+	.enableUpcomingFeature("InferIsolatedConformances"),
+	.enableUpcomingFeature("MemberImportVisibility"),
+	.enableUpcomingFeature("NonisolatedNonsendingByDefault"),
+]
 
 let package = Package(
 	name: "Scripts",
@@ -30,6 +36,7 @@ let package = Package(
 				.product(name: "Subprocess", package: "swift-subprocess"),
 				"Escape",
 			],
+			swiftSettings: swiftSettings,
 		),
 		.executableTarget(
 			name: "iosd",
@@ -37,6 +44,7 @@ let package = Package(
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				"CommandKit",
 			],
+			swiftSettings: swiftSettings,
 		),
 		.executableTarget(
 			name: "chapter-splitter",
@@ -45,6 +53,7 @@ let package = Package(
 				.product(name: "Subprocess", package: "swift-subprocess"),
 				"Escape",
 			],
+			swiftSettings: swiftSettings,
 		),
 		.executableTarget(
 			name: "github-permalink",
@@ -52,12 +61,14 @@ let package = Package(
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				"CommandKit",
 			],
+			swiftSettings: swiftSettings,
 		),
 		.executableTarget(
 			name: "notify",
 			dependencies: [
 				.product(name: "ArgumentParser", package: "swift-argument-parser")
 			],
+			swiftSettings: swiftSettings,
 		),
 		.executableTarget(
 			name: "pr-watch",
@@ -65,6 +76,7 @@ let package = Package(
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				"CommandKit",
 			],
+			swiftSettings: swiftSettings,
 		),
 		.executableTarget(
 			name: "tp",
@@ -72,6 +84,7 @@ let package = Package(
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				"CommandKit",
 			],
+			swiftSettings: swiftSettings,
 		),
 		.executableTarget(
 			name: "ths",
@@ -80,6 +93,7 @@ let package = Package(
 				"CommandKit",
 				"Yams",
 			],
+			swiftSettings: swiftSettings,
 		),
 		.executableTarget(
 			name: "is-work-mac",
@@ -87,6 +101,7 @@ let package = Package(
 				.product(name: "ArgumentParser", package: "swift-argument-parser"),
 				"CommandKit",
 			],
+			swiftSettings: swiftSettings,
 		),
 		.executableTarget(
 			name: "pr-draft",
@@ -95,26 +110,32 @@ let package = Package(
 				"CommandKit",
 				"Yams",
 			],
+			swiftSettings: swiftSettings,
 		),
 		.testTarget(
 			name: "tpTests",
 			dependencies: ["tp"],
+			swiftSettings: swiftSettings,
 		),
 		.testTarget(
 			name: "thsTests",
 			dependencies: ["ths"],
+			swiftSettings: swiftSettings,
 		),
 		.testTarget(
 			name: "is-work-macTests",
 			dependencies: ["is-work-mac"],
+			swiftSettings: swiftSettings,
 		),
 		.testTarget(
 			name: "pr-draftTests",
 			dependencies: ["pr-draft", "CommandKit"],
+			swiftSettings: swiftSettings,
 		),
 		.testTarget(
 			name: "CommandKitTests",
 			dependencies: ["CommandKit"],
+			swiftSettings: swiftSettings,
 		),
 	],
 )

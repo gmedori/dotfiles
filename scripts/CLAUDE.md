@@ -34,7 +34,9 @@ package directory.
   `mise.toml`. A shell with mise activated picks it up in this folder.
   Elsewhere, run SwiftPM through `mise exec --` from this folder, as the
   commands below do, or SwiftPM runs on Xcode's Swift instead.
-- Swift tools version: 6.0 for `Escape`, 6.2 for `Scripts`
+- Swift tools version: 6.4 for both packages, with the upcoming features
+  `ExistentialAny`, `InferIsolatedConformances`, `MemberImportVisibility`, and
+  `NonisolatedNonsendingByDefault` on in every target
 - Minimum platform: macOS 14
 - Command-line parsing: `swift-argument-parser`
 - Tests use Swift Testing syntax. `tpTests` and `thsTests` cover parts of `tp`
