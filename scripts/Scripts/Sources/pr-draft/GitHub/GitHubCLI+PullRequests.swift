@@ -1,7 +1,5 @@
 import CommandKit
 
-// MARK: - GitHub CLI + Pull Requests
-
 extension GitHubCLI {
 	/// Whether this `gh` can upload files with `--attach`. It's `false` when `gh` can't be run.
 	func supportsAttach() async -> Bool {

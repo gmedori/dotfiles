@@ -2,8 +2,6 @@ import ArgumentParser
 import CommandKit
 import Foundation
 
-// MARK: - Create
-
 /// Opens the pull request for a draft that `prepare` staged.
 struct Create: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(

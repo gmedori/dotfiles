@@ -1,22 +1,6 @@
 import CommandKit
 import Foundation
 
-// MARK: - Created Pull Request
-
-/// What `create` did, printed as JSON.
-struct CreatedPullRequest: Codable, Equatable, Sendable {
-	/// The pull request's URL, or `nil` when `gh` didn't open one.
-	let url: String?
-	/// How many attachments uploaded.
-	let uploaded: Int
-	/// The vault paths of the attachments that didn't upload.
-	let failed: [String]
-	/// What `gh` printed to standard error when it didn't open a pull request.
-	let error: String?
-}
-
-// MARK: - Pull Request Creator
-
 /// Opens a staged draft's pull request and checks that its attachments uploaded.
 ///
 /// `gh pr create --attach` keeps going when an upload fails, so the pull request opens with that
@@ -24,20 +8,12 @@ struct CreatedPullRequest: Codable, Equatable, Sendable {
 /// back, and any staged path still in it means that upload failed. Those files get one more try with
 /// `gh pr edit`, against the body as it is then, so the uploads that worked keep their URLs.
 struct PullRequestCreator {
-	static let retryBodyFileName = "body-retry.md"
-
+	/// The `gh` that opens and edits the pull request. Tests swap in a stand-in.
 	let gh: GitHubCLI
 
-	/// The last pull request URL in `gh` output.
-	static func pullRequestURL(in output: String) -> String? {
-		output.matches(of: #/https://github\.com/[^\s]+/pull/\d+/#).last.map { String($0.output) }
-	}
-
-	/// The attachments whose staged path is still in `body`, which means they didn't upload.
-	static func stillStaged(_ attachments: [Attachment], in body: String) -> [Attachment] {
-		attachments.filter { body.contains($0.staged) }
-	}
-
+	/// Opens the pull request for `prepared` from `stageDirectory`, as a draft when `asDraft` is
+	/// `true`, and retries the uploads that failed. Deletes the staging folder when every upload
+	/// worked.
 	func create(_ prepared: PreparedDraft, in stageDirectory: URL, asDraft: Bool) async throws -> CreatedPullRequest {
 		guard
 			let repo = prepared.repo, let base = prepared.base, let branch = prepared.branch,
@@ -85,6 +61,8 @@ struct PullRequestCreator {
 		}
 
 		if failed.isEmpty {
+			// Ignoring the error here leaves the staging folder in the system temp folder, which macOS
+			// clears on its own, and the pull request is already open.
 			try? FileManager.default.removeItem(at: stageDirectory)
 		}
 		return CreatedPullRequest(
@@ -94,7 +72,28 @@ struct PullRequestCreator {
 			error: nil,
 		)
 	}
+}
 
+// MARK: - Static Members
+
+extension PullRequestCreator {
+	/// The file in the staging folder that holds the body for a retry.
+	static let retryBodyFileName = "body-retry.md"
+
+	/// The last pull request URL in `gh` output.
+	static func pullRequestURL(in output: String) -> String? {
+		output.matches(of: #/https://github\.com/[^\s]+/pull/\d+/#).last.map { String($0.output) }
+	}
+
+	/// The attachments whose staged path is still in `body`, which means they didn't upload.
+	static func stillStaged(_ attachments: [Attachment], in body: String) -> [Attachment] {
+		attachments.filter { body.contains($0.staged) }
+	}
+}
+
+// MARK: - Private Helpers
+
+extension PullRequestCreator {
 	/// The pull request's body, or an empty one when there are no attachments to check.
 	private func bodyIfNeeded(_ prepared: PreparedDraft, url: String) async throws -> String {
 		prepared.attachments.isEmpty ? "" : try await gh.pullRequestBody(url)

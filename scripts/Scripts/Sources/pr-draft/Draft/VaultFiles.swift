@@ -1,6 +1,5 @@
 import Foundation
-
-// MARK: - Vault Files
+import System
 
 /// Finds the files that a note's links point at, the way Obsidian resolves them.
 ///
@@ -13,48 +12,17 @@ import Foundation
 ///
 /// Every URL is resolved through symlinks, so paths compare equal however they were reached.
 final class VaultFiles {
-	/// What a link points at.
-	enum Resolution: Equatable {
-		case found(URL)
-		/// No file matches the link.
-		case missing
-		/// More than one file in the vault matches the link, sorted by path.
-		case ambiguous([URL])
-	}
-
 	/// The vault's root, the folder that holds `.obsidian`.
 	let root: URL
 
 	/// Every file in the vault by file name, built the first time a link needs it.
-	private var filesByName: [String: [URL]]? = nil
+	private lazy var filesByName: [String: [URL]] = Self.fileIndex(in: root)
 
 	init(root: URL) {
 		self.root = root.resolvingSymlinksInPath()
 	}
 
-	/// The vault that holds `file`, or `nil` when no folder above it has an `.obsidian` folder.
-	static func containing(_ file: URL) -> VaultFiles? {
-		var directory = file.resolvingSymlinksInPath().deletingLastPathComponent().path(percentEncoded: false)
-		while true {
-			var isDirectory: ObjCBool = false
-			let marker = (directory as NSString).appendingPathComponent(".obsidian")
-			if FileManager.default.fileExists(atPath: marker, isDirectory: &isDirectory), isDirectory.boolValue {
-				return VaultFiles(root: URL(filePath: directory, directoryHint: .isDirectory))
-			}
-			let parent = (directory as NSString).deletingLastPathComponent
-			if parent == directory || parent.isEmpty {
-				return nil
-			}
-			directory = parent
-		}
-	}
-
-	private static func isFile(_ url: URL) -> Bool {
-		var isDirectory: ObjCBool = false
-		return FileManager.default.fileExists(atPath: url.path(percentEncoded: false), isDirectory: &isDirectory)
-			&& !isDirectory.boolValue
-	}
-
+	/// The file `link` points at, from a note in `noteDirectory`.
 	func resolve(_ link: String, from noteDirectory: URL) -> Resolution {
 		let noteDirectory = noteDirectory.resolvingSymlinksInPath()
 		let isPath = link.hasPrefix("./") || link.hasPrefix("../") || link.hasPrefix("/")
@@ -72,8 +40,8 @@ final class VaultFiles {
 			return .missing
 		}
 
-		let name = (link as NSString).lastPathComponent
-		var matches = files(named: name)
+		let name = URL(filePath: link).lastPathComponent
+		var matches = filesByName[name] ?? []
 		if link.contains("/") {
 			matches = matches.filter { $0.path(percentEncoded: false).hasSuffix("/" + link) }
 		}
@@ -103,24 +71,67 @@ final class VaultFiles {
 		}
 		return path.hasPrefix(rootPath) ? String(path.dropFirst(rootPath.count)) : path
 	}
+}
 
-	private func files(named name: String) -> [URL] {
-		if filesByName == nil {
-			var index: [String: [URL]] = [:]
-			let enumerator = FileManager.default.enumerator(
-				at: root,
-				includingPropertiesForKeys: [.isRegularFileKey],
-				options: [.skipsHiddenFiles],
-			)
-			while let url = enumerator?.nextObject() as? URL {
-				guard (try? url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true else {
-					continue
-				}
+// MARK: - Supporting Types
 
-				index[url.lastPathComponent, default: []].append(url.resolvingSymlinksInPath())
+extension VaultFiles {
+	/// What a link points at.
+	enum Resolution: Equatable {
+		/// The one file that matches the link.
+		case found(URL)
+		/// No file matches the link.
+		case missing
+		/// More than one file in the vault matches the link, sorted by path.
+		case ambiguous([URL])
+	}
+}
+
+// MARK: - Static Members
+
+extension VaultFiles {
+	/// The vault that holds `file`, or `nil` when no folder above it has an `.obsidian` folder.
+	static func containing(_ file: URL) -> VaultFiles? {
+		var directory = FilePath(file.resolvingSymlinksInPath().path(percentEncoded: false)).removingLastComponent()
+		while true {
+			var isDirectory: ObjCBool = false
+			let marker = directory.appending(".obsidian")
+			if FileManager.default.fileExists(atPath: marker.string, isDirectory: &isDirectory), isDirectory.boolValue {
+				return VaultFiles(root: URL(filePath: directory.string, directoryHint: .isDirectory))
 			}
-			filesByName = index
+			let parent = directory.removingLastComponent()
+			if parent == directory || parent.isEmpty {
+				return nil
+			}
+			directory = parent
 		}
-		return filesByName?[name] ?? []
+	}
+}
+
+// MARK: - Private Helpers
+
+extension VaultFiles {
+	private static func isFile(_ url: URL) -> Bool {
+		var isDirectory: ObjCBool = false
+		return FileManager.default.fileExists(atPath: url.path(percentEncoded: false), isDirectory: &isDirectory)
+			&& !isDirectory.boolValue
+	}
+
+	private static func fileIndex(in root: URL) -> [String: [URL]] {
+		var index: [String: [URL]] = [:]
+		let enumerator = FileManager.default.enumerator(
+			at: root,
+			includingPropertiesForKeys: [.isRegularFileKey],
+			options: [.skipsHiddenFiles],
+		)
+		while let url = enumerator?.nextObject() as? URL {
+			// Ignoring the error here means a file whose type can't be read isn't matched by name.
+			guard (try? url.resourceValues(forKeys: [.isRegularFileKey]).isRegularFile) == true else {
+				continue
+			}
+
+			index[url.lastPathComponent, default: []].append(url.resolvingSymlinksInPath())
+		}
+		return index
 	}
 }

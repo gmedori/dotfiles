@@ -2,8 +2,6 @@ import ArgumentParser
 import CommandKit
 import Foundation
 
-// MARK: - Prepare
-
 /// Stages a draft for `create` and prints what it found.
 struct Prepare: AsyncParsableCommand {
 	static let configuration = CommandConfiguration(
@@ -71,7 +69,11 @@ struct Prepare: AsyncParsableCommand {
 		try Staging.saveManifest(prepared)
 		try print(JSON.encode(prepared))
 	}
+}
 
+// MARK: - Private Helpers
+
+extension Prepare {
 	/// The `--alt` values by attachment number, with their text cleaned the way alt text from the
 	/// draft is.
 	private func altOverrides() throws -> [Int: String] {

@@ -1,45 +1,5 @@
 import Foundation
 
-// MARK: - Attachment
-
-/// An image or video that a draft's body embeds, staged for `gh pr create --attach`.
-struct Attachment: Codable, Equatable, Sendable {
-	enum Kind: String, Codable, Sendable {
-		case image
-		case video
-	}
-
-	/// Where an image's alt text came from.
-	enum AltSource: String, Codable, Sendable {
-		/// The `--alt` option of `prepare`.
-		case option = "--alt"
-		/// The embed, after the `|` in `![[shot.png|Alt text]]` or in the brackets of a Markdown image.
-		case embed
-		/// The bold label line directly above the embed.
-		case label
-	}
-
-	/// The attachment's number, counting from 1 in the order the files first appear in the body.
-	let number: Int
-	let kind: Kind
-	/// The file's path from the vault root.
-	let source: String
-	/// The staged copy's path from the staging folder, like `./01-share-sheet.png`. The body refers
-	/// to the file by this path, and `gh` replaces it with the upload's URL.
-	let staged: String
-	/// The image's alt text. Videos have none.
-	var alt: String?
-	/// Where `alt` came from.
-	var altFrom: AltSource?
-
-	/// The value for `gh --attach`, which is the staged path with the alt text after a `#`.
-	var attachArgument: String {
-		alt.map { "\(staged)#\($0)" } ?? staged
-	}
-}
-
-// MARK: - Body Rewriter
-
 /// Rewrites the images and videos a draft's body embeds as Markdown images that point at staged
 /// copies.
 ///
@@ -57,35 +17,103 @@ struct Attachment: Codable, Equatable, Sendable {
 /// line, it's a plain link. So when a video's embed is alone on its line, the rewriter puts blank
 /// lines around it. Images show either way.
 struct BodyRewriter {
+	/// The folder the draft is in.
+	let noteDirectory: URL
+	/// The vault the draft is in, which resolves its links.
+	let vault: VaultFiles
+	/// Alt text from the `--alt` option, by attachment number.
+	var altOverrides: [Int: String] = [:]
+
+	/// Rewrites `lines`, the first of which is line `startLine` of the draft. Error messages use
+	/// line numbers in the draft.
+	func rewrite(_ lines: [String], startLine: Int) -> Result {
+		var state = State()
+		var output: [String] = []
+		var fence: Substring? = nil
+		var needsBlankLine = false
+
+		for (offset, line) in lines.enumerated() {
+			if needsBlankLine, !Self.isBlank(line) {
+				output.append("")
+			}
+			needsBlankLine = false
+
+			if let open = fence {
+				if
+					let close = line.wholeMatch(of: /[ ]{0,3}(`{3,}|~{3,})\s*/),
+					close.1.first == open.first, close.1.count >= open.count
+				{
+					fence = nil
+				}
+				output.append(line)
+				continue
+			}
+			if let match = line.prefixMatch(of: /[ ]{0,3}(`{3,}|~{3,})/) {
+				fence = match.1
+				output.append(line)
+				continue
+			}
+
+			let label = Self.label(above: offset, in: lines)
+			for match in line.matches(of: /<!--\s*TODO:(.*?)-->/) {
+				state.placeholders.append(label ?? match.1.trimmingCharacters(in: .whitespaces))
+			}
+			let rewritten = rewriteLine(line, number: startLine + offset, label: label, state: &state)
+			let isVideo = state.attachments.contains { attachment in
+				attachment.kind == .video && rewritten.trimmingCharacters(in: .whitespaces) == "![](\(attachment.staged))"
+			}
+			if isVideo, let previous = output.last, !Self.isBlank(previous) {
+				output.append("")
+			}
+			output.append(rewritten)
+			needsBlankLine = isVideo
+		}
+
+		let body = output.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines) + "\n"
+		return Result(
+			body: body,
+			attachments: state.attachments,
+			sources: state.sources,
+			errors: state.errors,
+			placeholders: state.placeholders,
+		)
+	}
+}
+
+// MARK: - Supporting Types
+
+extension BodyRewriter {
+	/// What `rewrite(_:startLine:)` found and made.
 	struct Result {
 		/// The body without leading or trailing blank lines, ending in one newline.
-		let body: String
+		var body: String
 		/// Every file the body embeds, in the order they first appear.
-		let attachments: [Attachment]
+		var attachments: [Attachment]
 		/// The vault file behind each attachment, in the same order.
-		let sources: [URL]
+		var sources: [URL]
 		/// A sentence for each embed that can't be staged. Those embeds stay in the body as written.
-		let errors: [String]
+		var errors: [String]
 		/// The label of each `<!-- TODO: … -->` placeholder, from the bold line above it or else from
 		/// the comment.
-		let placeholders: [String]
+		var placeholders: [String]
 	}
 
+	/// What a rewrite has found so far.
 	private struct State {
 		var attachments: [Attachment] = []
 		var sources: [URL] = []
 		var errors: [String] = []
 		var placeholders: [String] = []
 	}
+}
 
+// MARK: - Static Members
+
+extension BodyRewriter {
+	/// The file extensions of the images GitHub accepts.
 	static let imageExtensions: Set = ["png", "jpg", "jpeg", "gif", "svg"]
+	/// The file extensions of the videos GitHub accepts.
 	static let videoExtensions: Set = ["mp4", "mov", "webm"]
-
-	/// The folder the draft is in.
-	let noteDirectory: URL
-	let vault: VaultFiles
-	/// Alt text from the `--alt` option, by attachment number.
-	var altOverrides: [Int: String] = [:]
 
 	/// The text of the bold line above `index`, skipping blank lines, or `nil` when the first line
 	/// with text above it isn't entirely bold.
@@ -118,69 +146,14 @@ struct BodyRewriter {
 		let result = String(trimmed.reversed().drop { hyphens.contains($0) }.reversed())
 		return result.isEmpty ? "file" : result
 	}
+}
 
-	// MARK: Text
+// MARK: - Private Helpers
 
+extension BodyRewriter {
 	private static func isBlank(_ line: String) -> Bool {
 		line.allSatisfy(\.isWhitespace)
 	}
-
-	/// Rewrites `lines`, the first of which is line `startLine` of the draft. Error messages use
-	/// line numbers in the draft.
-	func rewrite(_ lines: [String], startLine: Int) -> Result {
-		var state = State()
-		var output: [String] = []
-		var fence: Substring?
-		var needsBlankLine = false
-
-		for (offset, line) in lines.enumerated() {
-			if needsBlankLine, !Self.isBlank(line) {
-				output.append("")
-			}
-			needsBlankLine = false
-
-			if let open = fence {
-				if
-					let close = line.wholeMatch(of: /[ ]{0,3}(`{3,}|~{3,})\s*/),
-					close.1.first == open.first, close.1.count >= open.count
-				{
-					fence = nil
-				}
-				output.append(line)
-				continue
-			}
-			if let match = line.prefixMatch(of: /[ ]{0,3}(`{3,}|~{3,})/) {
-				fence = match.1
-				output.append(line)
-				continue
-			}
-
-			let label = Self.label(above: offset, in: lines)
-			for match in line.matches(of: /<!--\s*TODO:(.*?)-->/) {
-				state.placeholders.append(label ?? match.1.trimmingCharacters(in: .whitespaces))
-			}
-			let rewritten = rewriteLine(line, number: startLine + offset, label: label, state: &state)
-			let isVideo = state.attachments.contains {
-				$0.kind == .video && rewritten.trimmingCharacters(in: .whitespaces) == "![](\($0.staged))"
-			}
-			if isVideo, let previous = output.last, !Self.isBlank(previous) {
-				output.append("")
-			}
-			output.append(rewritten)
-			needsBlankLine = isVideo
-		}
-
-		let body = output.joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines) + "\n"
-		return Result(
-			body: body,
-			attachments: state.attachments,
-			sources: state.sources,
-			errors: state.errors,
-			placeholders: state.placeholders,
-		)
-	}
-
-	// MARK: Lines
 
 	private func rewriteLine(_ line: String, number: Int, label: String?, state: inout State) -> String {
 		// Inline code and HTML comments are matched so they're skipped whole, and an embed inside one
@@ -236,7 +209,7 @@ struct BodyRewriter {
 	/// Finds the file an embed points at and returns its index in `state.attachments`, adding it the
 	/// first time it's embedded. Returns `nil` and records an error when it can't be staged.
 	private func attachmentIndex(for target: String, original: String, line: Int, state: inout State) -> Int? {
-		let fileExtension = (target as NSString).pathExtension.lowercased()
+		let fileExtension = URL(filePath: target).pathExtension.lowercased()
 		let isVideo = Self.videoExtensions.contains(fileExtension)
 		guard isVideo || Self.imageExtensions.contains(fileExtension) else {
 			state.errors.append(

@@ -19,6 +19,7 @@ final class TemporaryVault {
 	}
 
 	deinit {
+		// Ignoring the error here leaves the vault in the temp folder, which doesn't change any result.
 		try? FileManager.default.removeItem(at: root)
 	}
 

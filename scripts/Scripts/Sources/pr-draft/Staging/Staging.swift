@@ -1,40 +1,17 @@
 import CommandKit
 import Foundation
 
-// MARK: - Prepared Draft
-
-/// What `prepare` found in a draft. `prepare` prints it as JSON and saves it in the staging folder
-/// as `manifest.json`, which `create` reads.
-struct PreparedDraft: Codable, Equatable, Sendable {
-	/// Whether `errors` is empty.
-	let ok: Bool
-	/// Missing frontmatter, a missing title, and every embed that can't be staged, as sentences.
-	let errors: [String]
-	/// Files over GitHub's size limits, as sentences.
-	let warnings: [String]
-	/// The label of each `<!-- TODO: … -->` placeholder in the body.
-	let placeholders: [String]
-	/// The numbers of the images that have no alt text.
-	let needsAlt: [Int]
-	let repo: String?
-	let base: String?
-	let branch: String?
-	let title: String?
-	let attachments: [Attachment]
-	/// The staging folder, which holds the copies, `body.md`, and `manifest.json`.
-	let stageDir: String
-	/// The staged body, which is the draft's body with each embed pointing at its copy.
-	let bodyFile: String
-	/// Whether the installed `gh` has `--attach`. It's only checked when there are attachments.
-	var ghSupportsAttach: Bool?
-}
-
-// MARK: - Staging
-
+/// Stages a draft's attachments and body for `create`, in a folder of their own.
 enum Staging {
+	/// GitHub's size limit for an image, in bytes.
 	static let imageSizeLimit = 10 * 1024 * 1024
+	/// GitHub's size limit for a video, in bytes.
 	static let videoSizeLimit = 100 * 1024 * 1024
+	/// The bytes in a megabyte, for the warnings about size limits.
+	static let bytesPerMegabyte = 1_048_576
+	/// The staged body's file name.
 	static let bodyFileName = "body.md"
+	/// The file name `prepare` saves what it found as, which `create` reads.
 	static let manifestFileName = "manifest.json"
 
 	/// The default staging folder for a draft, under the system temp folder.
@@ -78,10 +55,8 @@ enum Staging {
 		errors += result.errors
 		let unknown = Set(altOverrides.keys).subtracting(result.attachments.map(\.number)).sorted()
 		if !unknown.isEmpty {
-			errors
-				.append(
-					"`--alt` gives alt text for \(list(unknown.map { "\($0)" })), but the body has no attachment with that number."
-				)
+			let numbers = list(unknown.map { "\($0)" })
+			errors.append("`--alt` gives alt text for \(numbers), but the body has no attachment with that number.")
 		}
 
 		let fileManager = FileManager.default
@@ -96,16 +71,16 @@ enum Staging {
 				at: source,
 				to: stageDirectory.appending(path: String(attachment.staged.dropFirst(2))),
 			)
-			let size = try (fileManager.attributesOfItem(atPath: source.path(percentEncoded: false))[.size] as? Int) ??
-				0
+			let attributes = try fileManager.attributesOfItem(atPath: source.path(percentEncoded: false))
+			let size = attributes[.size] as? Int ?? 0
 			let limit = attachment.kind == .video ? videoSizeLimit : imageSizeLimit
 			if size > limit {
-				let megabytes = String(format: "%.1f", Double(size) / 1_048_576)
+				let megabytes = String(format: "%.1f", Double(size) / Double(bytesPerMegabyte))
+				let limitInMegabytes = limit / bytesPerMegabyte
 				let kind = attachment.kind == .video ? "a video" : "an image"
-				warnings
-					.append(
-						"`\(attachment.source)` is \(megabytes) MB, over GitHub's \(limit / 1_048_576) MB limit for \(kind)."
-					)
+				warnings.append(
+					"`\(attachment.source)` is \(megabytes) MB, over GitHub's \(limitInMegabytes) MB limit for \(kind)."
+				)
 			}
 		}
 
@@ -128,11 +103,13 @@ enum Staging {
 		)
 	}
 
+	/// Saves `prepared` as the manifest in its staging folder.
 	static func saveManifest(_ prepared: PreparedDraft) throws {
 		let file = URL(filePath: prepared.stageDir, directoryHint: .isDirectory).appending(path: manifestFileName)
 		try JSON.encode(prepared).write(to: file, atomically: true, encoding: .utf8)
 	}
 
+	/// Reads the manifest that `prepare` saved in `stageDirectory`.
 	static func loadManifest(from stageDirectory: URL) throws -> PreparedDraft {
 		let file = stageDirectory.appending(path: manifestFileName)
 		guard let data = FileManager.default.contents(atPath: file.path(percentEncoded: false)) else {
@@ -152,23 +129,5 @@ enum Staging {
 			case 2: "\(items[0]) and \(items[1])"
 			default: items.dropLast().joined(separator: ", ") + ", and " + items[items.count - 1]
 		}
-	}
-}
-
-// MARK: - JSON
-
-/// The JSON that `prepare` and `create` print, with snake_case keys.
-enum JSON {
-	static func encode(_ value: some Encodable) throws -> String {
-		let encoder = JSONEncoder()
-		encoder.keyEncodingStrategy = .convertToSnakeCase
-		encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
-		return try String(decoding: encoder.encode(value), as: UTF8.self)
-	}
-
-	static func decoder() -> JSONDecoder {
-		let decoder = JSONDecoder()
-		decoder.keyDecodingStrategy = .convertFromSnakeCase
-		return decoder
 	}
 }
