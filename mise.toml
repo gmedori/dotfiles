@@ -46,7 +46,7 @@ run = "./linker.pl"
 # on PATH inside a task, so the task runs the mise that's running it. Running
 # it in scripts/ also installs the Swift that scripts/mise.toml pins.
 [tasks.tools]
-description = "Install the languages in mise/config.toml and scripts/mise.toml"
+description = "Install the tools in mise/config.toml and scripts/mise.toml"
 dir = "scripts"
 run = '"{{ mise_bin }}" install'
 

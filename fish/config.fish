@@ -249,7 +249,7 @@ if [ -f $WORK_SPECIFIC_DIR/config.fish ] # Only do this one if the directory exi
 end
 
 ## mise
-## Puts the languages from mise/config.toml, or a project's mise.toml, ahead of everything above on PATH.
+## Puts the tools from mise/config.toml, or a project's mise.toml, ahead of everything above on PATH.
 ## Rust's cargo-installed binaries in ~/.cargo/bin come with it.
 if command -q mise
     mise activate fish | source

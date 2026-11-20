@@ -25,7 +25,8 @@ Main areas:
 - `mise/config.toml`: the global mise config, linked to
   `~/.config/mise/config.toml`. It sets the default version of every language
   except Perl, which stays in the Brewfile, and Swift, which defaults to
-  Xcode's. Its comments say how a project opts into a swift.org toolchain.
+  Xcode's. It also pins SwiftFormat and SwiftLint. Its comments say how a
+  project opts into a swift.org toolchain.
 - `install.sh`: bootstrap that installs Homebrew and mise if they're missing,
   clones the repo to `~/dotfiles` when run straight from GitHub, and runs
   `setup`. Its header comment has the one-liner that runs it on a new Mac, so
