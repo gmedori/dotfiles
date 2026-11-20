@@ -43,7 +43,9 @@ package directory.
   and `ths`, `is-work-macTests` covers the parsing in `is-work-mac`,
   `pr-draftTests` covers `pr-draft` against a throwaway vault and a stand-in
   `gh`, and `CommandKitTests` covers `GitHubCLI`. Run them with
-  `mise exec -- swift test --package-path Scripts`.
+  `mise exec -- swift test --package-path Scripts`. `EscapeTests` covers
+  `Escape`'s colored text and loading loops, and runs with
+  `mise exec -- swift test --package-path Escape`.
 - Style: the Swift style guide, enforced by SwiftFormat and SwiftLint as
   described under Formatting and Linting.
 
