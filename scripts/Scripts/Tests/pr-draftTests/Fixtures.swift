@@ -1,7 +1,6 @@
 import CommandKit
 import Foundation
 import System
-@testable import pr_draft
 
 /// A throwaway vault in the temp folder, deleted when the fixture goes away.
 final class TemporaryVault {

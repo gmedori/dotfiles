@@ -76,7 +76,9 @@ the shared configs beside it, at the versions that the dotfiles repo's
   `base.swiftformat`. The tools have no `Macrobox` module, so it turns off the
   rewrite to the `#URL` macro.
 - `.swiftlint.yml` names the shared `swiftlint-base.yml` as its parent and
-  skips the `.build` folders.
+  skips the `.build` folders. It also keeps the `CommandKit`, `Darwin`, and
+  `System` imports, which `swiftlint analyze` reports as unused even where a
+  file needs them.
 - `.swiftlint-baseline.json` records the SwiftLint violations that were in the
   code when SwiftLint was adopted. A baselined violation stays quiet until its
   line is edited, so new and edited code follows every rule. Fix a new
@@ -91,6 +93,20 @@ anything left to fix.
 mise exec -- swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" .
 mise exec -- swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" --lint .
 mise exec -- swiftlint lint
+```
+
+`swiftlint analyze` checks for unused imports and declarations. It needs the
+compiler commands from a clean, verbose build of both packages. It also needs
+`TOOLCHAIN_DIR` set to mise's Swift toolchain, because Xcode's SourceKit can't
+load modules that mise's Swift built. Run these from this folder before
+committing too. The two builds take under a minute, and the analysis takes
+about a minute and a half.
+
+```sh
+rm -rf "$TMPDIR/scripts-analyze"
+mise exec -- swift build --package-path Escape --build-tests -v --scratch-path "$TMPDIR/scripts-analyze/Escape" > "$TMPDIR/scripts-analyze.log"
+mise exec -- swift build --package-path Scripts --build-tests -v --scratch-path "$TMPDIR/scripts-analyze/Scripts" >> "$TMPDIR/scripts-analyze.log"
+TOOLCHAIN_DIR="$(mise where swift)" mise exec -- swiftlint analyze --compiler-log-path "$TMPDIR/scripts-analyze.log"
 ```
 
 ## Development Conventions
@@ -134,7 +150,8 @@ mise exec -- swiftlint lint
 
 1. Build the affected package.
 2. After changing `Escape`, build `Scripts`.
-3. Format with SwiftFormat, and check that `swiftformat --lint` and
-   `swiftlint lint` report nothing, as Formatting and Linting describes.
+3. Format with SwiftFormat, and check that `swiftformat --lint`,
+   `swiftlint lint`, and `swiftlint analyze` report nothing, as Formatting and
+   Linting describes.
 4. Review the diff for generated files and unrelated changes.
 5. Do not claim test coverage where none exists.
