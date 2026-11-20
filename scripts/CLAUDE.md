@@ -78,8 +78,10 @@ the shared configs beside it, at the versions that the dotfiles repo's
   line is edited, so new and edited code follows every rule. Fix a new
   violation in the code instead of writing the baseline again.
 
-Run these from this folder before committing. The first formats in place, and
-the other two report anything left to fix.
+Run these from this folder before committing. The baseline's paths are
+relative to it, so SwiftLint run from anywhere else reports every baselined
+violation. The first command formats in place, and the other two report
+anything left to fix.
 
 ```sh
 mise exec -- swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" .
