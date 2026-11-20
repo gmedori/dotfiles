@@ -48,6 +48,7 @@ struct `GitHub CLI` {
 	func `Runs gh from the given folder`() async throws {
 		let directory = FileManager.default.temporaryDirectory.appending(path: "commandkit-\(UUID().uuidString)")
 		try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+		// Ignoring the error here leaves the folder in the temp folder, which doesn't change the result.
 		defer { try? FileManager.default.removeItem(at: directory) }
 
 		let path = try await shell.output(["-c", "pwd -P"], in: directory)
