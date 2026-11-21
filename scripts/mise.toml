@@ -6,6 +6,17 @@
 [tools]
 swift = "6.4"
 
+# `lint` runs the quick checks, SwiftFormat and SwiftLint's lint rules.
+# `lint:analyze` runs `lint` first, then SwiftLint's analyzer rules, which take
+# longer because they need a build of both packages from scratch.
+[tasks.lint]
+description = "Check both packages with SwiftFormat and SwiftLint's lint rules"
+run = '''
+set -e
+swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" --lint .
+swiftlint lint --strict --quiet
+'''
+
 # `swiftlint analyze` needs the compiler commands for every file, so the task
 # builds both packages from scratch in a temporary folder, which it deletes at
 # the end. The verbose builds print thousands of lines, so their output goes to
@@ -17,17 +28,16 @@ swift = "6.4"
 # The builds use SwiftPM's native build system. When the default build system
 # recognizes the Swift above as a swift.org toolchain, it logs Swift Testing's
 # macro plugin as `-external-plugin-path <path>\#<server>`, and SwiftLint keeps
-# the backslash when it reads the log. SourceKit then can't find the plugin, so every test
-# looks unused. The native build system logs a plain `-plugin-path`. Its log
-# also passes `-v` to each compiler, which makes SourceKit print the compiler's
-# version and target for every file, so the task drops those two lines from
-# SwiftLint's standard error and keeps the rest.
-[tasks.lint]
-description = "Check both packages with SwiftFormat and SwiftLint, including its analyzer rules"
+# the backslash when it reads the log. SourceKit then can't find the plugin, so
+# every test looks unused. The native build system logs a plain `-plugin-path`.
+# Its log also passes `-v` to each compiler, which makes SourceKit print the
+# compiler's version and target for every file, so the task drops those two
+# lines from SwiftLint's standard error and keeps the rest.
+[tasks."lint:analyze"]
+description = "Run `lint`, then SwiftLint's analyzer rules on a fresh build of both packages"
+depends = ["lint"]
 run = '''
 set -e
-swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" --lint .
-swiftlint lint --strict --quiet
 BUILD="$(mktemp -d)"
 trap 'rm -rf "$BUILD"' EXIT
 echo "Building both packages from scratch for swiftlint analyze"

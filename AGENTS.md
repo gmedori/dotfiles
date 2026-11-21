@@ -39,8 +39,9 @@ Main areas:
   changed, and SwiftPM rebuilds only what a change affects.
   `mise run scripts:rebuild` runs `swift package clean` first and rebuilds
   everything. `scripts/mise.toml` pins its toolchain to the newest installed
-  swift.org Swift 6.4.x, and its `lint` task checks both packages with
-  SwiftFormat and SwiftLint.
+  swift.org Swift 6.4.x. Its `lint` task checks both packages with
+  SwiftFormat and SwiftLint's lint rules, and `lint:analyze` adds SwiftLint's
+  analyzer rules, which need a build of both packages from scratch.
 
 ## Safety Rules
 
@@ -83,7 +84,8 @@ Use the narrowest relevant checks after changes:
 - Swift tools: `mise -C scripts exec -- swift build --package-path Scripts`
   and `mise -C scripts exec -- swift test --package-path Scripts`, which use
   the toolchain `scripts/mise.toml` pins
-- Swift style: `mise -C scripts run lint`, which takes about two minutes
+- Swift style: `mise -C scripts run lint`, and before pushing
+  `mise -C scripts run lint:analyze`, which takes about a minute
 - Git sanity: `git diff --check`
 
 Some checks may read the live config location or start local helper processes.

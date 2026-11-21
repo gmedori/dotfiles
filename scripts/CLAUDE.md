@@ -86,17 +86,19 @@ the shared configs beside it, at the versions that the dotfiles repo's
 
 Run these from this folder before committing. The first command formats in
 place. The second runs the `lint` task in `mise.toml`, which checks the
-formatting, then runs `swiftlint lint` and `swiftlint analyze`, and stops at
-the first check that finds a problem. It takes about two minutes.
+formatting and then runs `swiftlint lint`, and stops at the first check that
+finds a problem.
 
 ```sh
 mise exec -- swiftformat --base-config "$HOME/gooseOS/Skills/swift-style-guide/base.swiftformat" .
 mise run lint
 ```
 
-`swiftlint analyze` checks for unused imports and declarations. It needs the
-compiler commands for every file, so the task first builds both packages from
-scratch in a temporary folder. It builds them with SwiftPM's native build
+Before pushing, also run `mise run lint:analyze`. It runs `lint` first, then
+`swiftlint analyze`, which checks for unused imports and declarations and
+takes about a minute. `swiftlint analyze` needs the compiler commands for
+every file, so the task first builds both packages from scratch in a
+temporary folder. It builds them with SwiftPM's native build
 system, because the default one can log Swift Testing's macro plugin with an
 escaped `#` that SwiftLint doesn't unescape, which makes every test look
 unused. It also sets `TOOLCHAIN_DIR` to mise's Swift
@@ -147,6 +149,7 @@ anywhere else reports every baselined violation.
 1. Build the affected package.
 2. After changing `Escape`, build `Scripts`.
 3. Format with SwiftFormat, and check that `mise run lint` passes, as
-   Formatting and Linting describes.
+   Formatting and Linting describes. Before pushing, check that
+   `mise run lint:analyze` passes too.
 4. Review the diff for generated files and unrelated changes.
 5. Do not claim test coverage where none exists.
