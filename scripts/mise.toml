@@ -13,6 +13,15 @@ swift = "6.4"
 # SourceKit unless TOOLCHAIN_DIR names another toolchain, and Xcode's SourceKit
 # can't load modules that the Swift above built. mise isn't on PATH inside a
 # task, so the task runs the mise that's running it.
+#
+# The builds use SwiftPM's native build system. When the default build system
+# recognizes the Swift above as a swift.org toolchain, it logs Swift Testing's
+# macro plugin as `-external-plugin-path <path>\#<server>`, and SwiftLint keeps
+# the backslash when it reads the log. SourceKit then can't find the plugin, so every test
+# looks unused. The native build system logs a plain `-plugin-path`. Its log
+# also passes `-v` to each compiler, which makes SourceKit print the compiler's
+# version and target for every file, so the task drops those two lines from
+# SwiftLint's standard error and keeps the rest.
 [tasks.lint]
 description = "Check both packages with SwiftFormat and SwiftLint, including its analyzer rules"
 run = '''
@@ -23,7 +32,7 @@ BUILD="$(mktemp -d)"
 trap 'rm -rf "$BUILD"' EXIT
 echo "Building both packages from scratch for swiftlint analyze"
 for PACKAGE in Escape Scripts; do
-    if ! swift build --package-path "$PACKAGE" --build-tests -v --scratch-path "$BUILD/$PACKAGE" \
+    if ! swift build --build-system native --package-path "$PACKAGE" --build-tests -v --scratch-path "$BUILD/$PACKAGE" \
         >> "$BUILD/build.log" 2>> "$BUILD/build.err"; then
         grep -h 'error:' "$BUILD/build.log" "$BUILD/build.err" >&2 || true
         echo "error: $PACKAGE failed to build, so swiftlint analyze didn't run" >&2
@@ -31,5 +40,9 @@ for PACKAGE in Escape Scripts; do
     fi
 done
 echo "Running swiftlint analyze"
-TOOLCHAIN_DIR="$("{{ mise_bin }}" where swift)" swiftlint analyze --strict --quiet --compiler-log-path "$BUILD/build.log"
+STATUS=0
+TOOLCHAIN_DIR="$("{{ mise_bin }}" where swift)" swiftlint analyze --strict --quiet --compiler-log-path "$BUILD/build.log" \
+    2> "$BUILD/analyze.err" || STATUS=$?
+grep -v -e '^Apple Swift version ' -e '^Target: ' "$BUILD/analyze.err" >&2 || true
+exit "$STATUS"
 '''

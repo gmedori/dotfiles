@@ -96,7 +96,10 @@ mise run lint
 
 `swiftlint analyze` checks for unused imports and declarations. It needs the
 compiler commands for every file, so the task first builds both packages from
-scratch in a temporary folder. It also sets `TOOLCHAIN_DIR` to mise's Swift
+scratch in a temporary folder. It builds them with SwiftPM's native build
+system, because the default one can log Swift Testing's macro plugin with an
+escaped `#` that SwiftLint doesn't unescape, which makes every test look
+unused. It also sets `TOOLCHAIN_DIR` to mise's Swift
 toolchain, because Xcode's SourceKit, which SwiftLint loads otherwise, can't
 load modules that mise's Swift built. Run SwiftLint itself only from this
 folder. The baseline's paths are relative to it, so SwiftLint run from
